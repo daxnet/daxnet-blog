@@ -1,14 +1,10 @@
 ﻿using DaxnetBlog.Common;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace DaxnetBlog.Domain.Model
 {
-    public class Account : IAggregateRoot<Guid>
+    public class Account : IEntity<int>
     {
-        public Guid Id { get; set; }
 
         public string UserName { get; set; }
 
@@ -18,5 +14,10 @@ namespace DaxnetBlog.Domain.Model
 
         public string EmailAddress { get; set; }
 
+        public DateTime DateRegistered { get; set; }
+
+        public DateTime? DateLastLogin { get; set; }
+
+        public int Id { get; set; }
     }
 }
