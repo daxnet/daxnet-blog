@@ -13,19 +13,26 @@ namespace DaxnetBlog.Common.Storage
         where TEntity : class, IEntity<TKey>, new()
     {
         private readonly IStoreMapping mapping;
+        private readonly StorageDialectSettings dialectSettings;
 
-        protected EntityStore(IStoreMapping mapping)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EntityStore{TEntity, TKey}"/> class.
+        /// </summary>
+        /// <param name="mapping">The instance for providing the mappings for tableName/entityName and columnName/PropertyName. It can also
+        /// provide the escaped names of mapped tabelName and columnName, based on the given <paramref name="dialectSettings"/>.</param>
+        /// <param name="dialectSettings">The storage dialect settings to be used by the <paramref name="mapping"/> instance.</param>
+        protected EntityStore(IStoreMapping mapping, StorageDialectSettings dialectSettings)
         {
             this.mapping = mapping;
+            this.dialectSettings = dialectSettings;
         }
 
-        public IEnumerable<TEntity> Select(DialectSettings storageProperty, 
-            IDbConnection connection, 
+        public IEnumerable<TEntity> Select(IDbConnection connection, 
             Expression<Func<TEntity, bool>> expression = null, 
             Sort<TKey, TEntity> sorting = null, 
             IDbTransaction transaction = null)
         {
-            var sql = $"SELECT * FROM {GetEscapedTableName(storageProperty)}";
+            var sql = $"SELECT * FROM {mapping.GetEscapedTableName<TEntity, TKey>(dialectSettings)}";
             var entities = new List<TEntity>();
             using (var command = connection.CreateCommand())
             {
@@ -46,7 +53,12 @@ namespace DaxnetBlog.Common.Storage
                             .ToList()
                             .ForEach(x =>
                             {
-                                x.SetValue(entity, reader[mapping.GetColumnName<TEntity, TKey>(x)]);
+                                var value = reader[mapping.GetColumnName<TEntity, TKey>(x)];
+                                if (value == DBNull.Value)
+                                {
+                                    value = null;
+                                }
+                                x.SetValue(entity, value);
                             });
                         entities.Add(entity);
                     }
@@ -55,11 +67,5 @@ namespace DaxnetBlog.Common.Storage
             }
             return entities;
         }
-
-        protected string GetEscapedTableName(DialectSettings dialectSettings) => $"{dialectSettings.LeadingEscape}{mapping.GetTableName<TEntity, TKey>()}{dialectSettings.TailingEscape}";
-
-        protected string GetEscapedColumnName<TProperty>(DialectSettings dialectSettings, Expression<Func<TEntity, TProperty>> property) => $"{dialectSettings.LeadingEscape}{mapping.GetColumnName<TEntity, TKey, TProperty>(property)}{dialectSettings.TailingEscape}";
-
-        protected string GetEscapedColumnName(DialectSettings dialectSettings, PropertyInfo propertyInfo) => $"{dialectSettings.LeadingEscape}{mapping.GetColumnName<TEntity, TKey>(propertyInfo)}{dialectSettings.TailingEscape}";
     }
 }

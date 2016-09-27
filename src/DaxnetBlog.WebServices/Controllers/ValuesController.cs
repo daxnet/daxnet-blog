@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using DaxnetBlog.Common.Storage;
+using DaxnetBlog.Domain.EntityStore;
+using DaxnetBlog.Domain.Model;
 
 namespace DaxnetBlog.WebServices.Controllers
 {
@@ -11,17 +13,25 @@ namespace DaxnetBlog.WebServices.Controllers
     public class ValuesController : Controller
     {
         private readonly IStorage storage;
+        private readonly IAccountStore accountStore;
 
-        public ValuesController(IStorage storage)
+        public ValuesController(IStorage storage, IAccountStore accountStore)
         {
             this.storage = storage;
+            this.accountStore = accountStore;
         }
 
         // GET api/values
         [HttpGet]
         public IEnumerable<string> Get()
         {
-            return new string[] { "value1", "value2" };
+            Account account = null;
+            storage.Execute(connection =>
+            {
+                account = accountStore.GetAccountByUserName("brian", connection);
+            });
+
+            return new[] { account.NickName };
         }
 
         // GET api/values/5

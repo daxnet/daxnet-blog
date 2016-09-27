@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DaxnetBlog.Storage.SqlServer
 {
-    internal sealed class SqlServerDialectSettings : DialectSettings
+    internal sealed class SqlServerDialectSettings : StorageDialectSettings
     {
         public override string Name => "Microsoft SQL Server";
 

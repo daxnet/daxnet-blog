@@ -11,8 +11,7 @@ namespace DaxnetBlog.Common.Storage
         where TKey : IEquatable<TKey>
         where TEntity : class, IEntity<TKey>, new()
     {
-        IEnumerable<TEntity> Select(DialectSettings storageProperty, 
-            IDbConnection connection, 
+        IEnumerable<TEntity> Select(IDbConnection connection, 
             Expression<Func<TEntity, bool>> expression = null,
             Sort<TKey, TEntity> sorting = null,
             IDbTransaction transaction = null);

@@ -8,10 +8,10 @@ namespace DaxnetBlog.Common.Storage
 {
     public interface IStorage
     {
-        void Execute(Action<DialectSettings, IDbConnection> callback);
+        void Execute(Action<IDbConnection> callback);
 
-        void Execute(Action<DialectSettings, IDbConnection, IDbTransaction> callback, IsolationLevel iso = IsolationLevel.ReadCommitted);
+        void Execute(Action<IDbConnection, IDbTransaction> callback, IsolationLevel iso = IsolationLevel.ReadCommitted);
 
-        DialectSettings Settings { get; }
+        StorageDialectSettings DialectSettings { get; }
     }
 }

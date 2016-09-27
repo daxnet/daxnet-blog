@@ -18,7 +18,8 @@
       "type": "platform"
     },
     "Autofac": "4.1.1",
-    "Autofac.Extensions.DependencyInjection": "4.0.0"
+    "Autofac.Extensions.DependencyInjection": "4.0.0",
+    "DaxnetBlog.Domain.EntityStore": "1.0.0-*"
   },
 
   "tools": {

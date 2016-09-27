@@ -20,18 +20,18 @@ namespace DaxnetBlog.Common.Storage
 
         public Guid Id => id;
 
-        public abstract DialectSettings Settings { get; }
+        public abstract StorageDialectSettings DialectSettings { get; }
 
-        public void Execute(Action<DialectSettings, IDbConnection> callback)
+        public void Execute(Action<IDbConnection> callback)
         {
             using (var connection = this.CreateConnection())
             {
                 connection.Open();
-                callback(this.Settings, connection);
+                callback(connection);
             }
         }
 
-        public void Execute(Action<DialectSettings, IDbConnection, IDbTransaction> callback, IsolationLevel iso = IsolationLevel.ReadCommitted)
+        public void Execute(Action<IDbConnection, IDbTransaction> callback, IsolationLevel iso = IsolationLevel.ReadCommitted)
         {
             using (var connection = this.CreateConnection())
             {
@@ -40,7 +40,7 @@ namespace DaxnetBlog.Common.Storage
                 {
                     try
                     {
-                        callback(this.Settings, connection, transaction);
+                        callback(connection, transaction);
                         transaction.Commit();
                     }
                     catch

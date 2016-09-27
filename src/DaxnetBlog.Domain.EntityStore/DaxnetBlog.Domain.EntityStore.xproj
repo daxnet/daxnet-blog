@@ -7,8 +7,8 @@
 
   <Import Project="$(VSToolsPath)\DotNet\Microsoft.DotNet.Props" Condition="'$(VSToolsPath)' != ''" />
   <PropertyGroup Label="Globals">
-    <ProjectGuid>70b295dc-cbe3-4393-8fd1-d2346a4b93f0</ProjectGuid>
-    <RootNamespace>DaxnetBlog.DataAccess</RootNamespace>
+    <ProjectGuid>d6323ec6-0c6f-42b3-9ffa-5a3ecd604329</ProjectGuid>
+    <RootNamespace>DaxnetBlog.Domain.EntityStore</RootNamespace>
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">.\obj</BaseIntermediateOutputPath>
     <OutputPath Condition="'$(OutputPath)'=='' ">.\bin\</OutputPath>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>

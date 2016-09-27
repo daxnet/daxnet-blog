@@ -10,13 +10,13 @@ namespace DaxnetBlog.Storage.SqlServer
 {
     public sealed class SqlServerStorage : Common.Storage.Storage
     {
-        private static readonly DialectSettings settings = new SqlServerDialectSettings();
+        private static readonly StorageDialectSettings settings = new SqlServerDialectSettings();
 
         public SqlServerStorage(string connectionString) : base(connectionString)
         {
         }
 
-        public override DialectSettings Settings => settings;
+        public override StorageDialectSettings DialectSettings => settings;
 
         protected override IDbConnection CreateConnection() => new SqlConnection(ConnectionString);
     }

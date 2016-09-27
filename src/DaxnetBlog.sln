@@ -11,6 +11,8 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DaxnetBlog.Storage.SqlServe
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DaxnetBlog.WebServices", "DaxnetBlog.WebServices\DaxnetBlog.WebServices.xproj", "{20D33F01-7E8D-4500-96F5-4ADA8D93F9AC}"
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DaxnetBlog.Domain.EntityStore", "DaxnetBlog.Domain.EntityStore\DaxnetBlog.Domain.EntityStore.xproj", "{D6323EC6-0C6F-42B3-9FFA-5A3ECD604329}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{20D33F01-7E8D-4500-96F5-4ADA8D93F9AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{20D33F01-7E8D-4500-96F5-4ADA8D93F9AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{20D33F01-7E8D-4500-96F5-4ADA8D93F9AC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D6323EC6-0C6F-42B3-9FFA-5A3ECD604329}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6323EC6-0C6F-42B3-9FFA-5A3ECD604329}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6323EC6-0C6F-42B3-9FFA-5A3ECD604329}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6323EC6-0C6F-42B3-9FFA-5A3ECD604329}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

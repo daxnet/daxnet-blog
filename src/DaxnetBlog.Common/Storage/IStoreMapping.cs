@@ -20,5 +20,17 @@ namespace DaxnetBlog.Common.Storage
         string GetColumnName<TEntity, TKey>(PropertyInfo propertyInfo)
             where TKey : IEquatable<TKey>
             where TEntity : class, IEntity<TKey>, new();
+
+        string GetEscapedTableName<TEntity, TKey>(StorageDialectSettings dialectSettings)
+            where TKey : IEquatable<TKey>
+            where TEntity : class, IEntity<TKey>, new();
+
+        string GetEscapedColumnName<TEntity, TKey, TProperty>(StorageDialectSettings dialectSettings, Expression<Func<TEntity, TProperty>> property)
+            where TKey : IEquatable<TKey>
+            where TEntity : class, IEntity<TKey>, new();
+
+        string GetEscapedColumnName<TEntity, TKey>(StorageDialectSettings dialectSettings, PropertyInfo propertyInfo)
+            where TKey : IEquatable<TKey>
+            where TEntity : class, IEntity<TKey>, new();
     }
 }

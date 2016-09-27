@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("DaxnetBlog.DataAccess")]
+[assembly: AssemblyProduct("DaxnetBlog.Domain.EntityStore")]
 [assembly: AssemblyTrademark("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible
@@ -16,4 +16,4 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("70b295dc-cbe3-4393-8fd1-d2346a4b93f0")]
+[assembly: Guid("d6323ec6-0c6f-42b3-9ffa-5a3ecd604329")]
