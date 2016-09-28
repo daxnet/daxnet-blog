@@ -25,13 +25,13 @@ namespace DaxnetBlog.WebServices.Controllers
         [HttpGet]
         public IEnumerable<string> Get()
         {
-            Account account = null;
+            IEnumerable<Account> accounts = null;
             storage.Execute(connection =>
             {
-                account = accountStore.GetAccountByUserName("brian", connection);
+                accounts = accountStore.Select(connection, x => x.PasswordHash == "123", new Sort<Account, int> { { x => x.UserName, SortOrder.Ascending } });
             });
 
-            return new[] { account.NickName };
+            return accounts.Select(x => x.UserName);
         }
 
         // GET api/values/5

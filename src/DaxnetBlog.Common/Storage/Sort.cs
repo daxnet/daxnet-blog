@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace DaxnetBlog.Common.Storage
 {
-    public sealed class Sort<TKey, TAggregateRoot> : IDictionary<string, SortOrder>
+    public sealed class Sort<TEntity, TKey> : IDictionary<string, SortOrder>
         where TKey : IEquatable<TKey>
-        where TAggregateRoot : class, IEntity<TKey>
+        where TEntity : class, IEntity<TKey>
     {
         #region Nested Internal Classes
         private sealed class DumpMemberAccessNameVisitor : ExpressionVisitor
@@ -31,7 +31,7 @@ namespace DaxnetBlog.Common.Storage
 
         private readonly Dictionary<string, SortOrder> sortSpecifications = new Dictionary<string, SortOrder>();
 
-        public static readonly Sort<TKey, TAggregateRoot> None = new Sort<TKey, TAggregateRoot>() { { x => x.Id, SortOrder.Unspecified } };
+        public static readonly Sort<TEntity, TKey> None = new Sort<TEntity, TKey>() { { x => x.Id, SortOrder.Unspecified } };
 
         public SortOrder this[string key]
         {
@@ -78,15 +78,15 @@ namespace DaxnetBlog.Common.Storage
             }
         }
 
-        private static Expression<Func<TAggregateRoot, object>> CreateLambdaExpression(string propertyName)
+        private static Expression<Func<TEntity, object>> CreateLambdaExpression(string propertyName)
         {
-            var param = Expression.Parameter(typeof(TAggregateRoot), "x");
+            var param = Expression.Parameter(typeof(TEntity), "x");
             Expression body = param;
             foreach (var member in propertyName.Split('.'))
             {
                 body = Expression.Property(body, member);
             }
-            return Expression.Lambda<Func<TAggregateRoot, object>>(Expression.Convert(body, typeof(object)), param);
+            return Expression.Lambda<Func<TEntity, object>>(Expression.Convert(body, typeof(object)), param);
         }
 
         public void Add(KeyValuePair<string, SortOrder> item)
@@ -99,7 +99,7 @@ namespace DaxnetBlog.Common.Storage
             sortSpecifications.Add(key, value);
         }
 
-        public void Add(Expression<Func<TAggregateRoot, object>> sortExpression, SortOrder sortOrder)
+        public void Add(Expression<Func<TEntity, object>> sortExpression, SortOrder sortOrder)
         {
             var visitor = new DumpMemberAccessNameVisitor();
             visitor.Visit(sortExpression);
@@ -110,13 +110,13 @@ namespace DaxnetBlog.Common.Storage
             }
         }
 
-        public IEnumerable<Tuple<Expression<Func<TAggregateRoot, object>>, SortOrder>> Specifications
+        public IEnumerable<Tuple<Expression<Func<TEntity, object>>, SortOrder>> Specifications
         {
             get
             {
                 foreach(var kvp in sortSpecifications)
                 {
-                    yield return new Tuple<Expression<Func<TAggregateRoot, object>>, SortOrder>(CreateLambdaExpression(kvp.Key), kvp.Value);
+                    yield return new Tuple<Expression<Func<TEntity, object>>, SortOrder>(CreateLambdaExpression(kvp.Key), kvp.Value);
                 }
             }
         }

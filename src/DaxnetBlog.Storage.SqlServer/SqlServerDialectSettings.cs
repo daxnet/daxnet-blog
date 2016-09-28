@@ -12,8 +12,8 @@ namespace DaxnetBlog.Storage.SqlServer
 
         public override char ParameterChar => '@';
 
-        public override string LeadingEscape => "[";
+        public override string SqlLeadingEscape => "[";
 
-        public override string TailingEscape => "]";
+        public override string SqlTailingEscape => "]";
     }
 }

@@ -13,7 +13,7 @@ namespace DaxnetBlog.Common.Storage
     {
         IEnumerable<TEntity> Select(IDbConnection connection, 
             Expression<Func<TEntity, bool>> expression = null,
-            Sort<TKey, TEntity> sorting = null,
+            Sort<TEntity, TKey> sorting = null,
             IDbTransaction transaction = null);
     }
 }
