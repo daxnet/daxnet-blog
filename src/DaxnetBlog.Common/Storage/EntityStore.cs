@@ -5,6 +5,8 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace DaxnetBlog.Common.Storage
 {
@@ -12,8 +14,8 @@ namespace DaxnetBlog.Common.Storage
         where TKey : IEquatable<TKey>
         where TEntity : class, IEntity<TKey>, new()
     {
-        private readonly IStoreMapping mapping;
-        private readonly StorageDialectSettings dialectSettings;
+        protected readonly IStoreMapping mapping;
+        protected readonly StorageDialectSettings dialectSettings;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityStore{TEntity, TKey}"/> class.
@@ -27,7 +29,7 @@ namespace DaxnetBlog.Common.Storage
             this.dialectSettings = dialectSettings;
         }
 
-        public IEnumerable<TEntity> Select(IDbConnection connection, 
+        public virtual IEnumerable<TEntity> Select(IDbConnection connection, 
             Expression<Func<TEntity, bool>> expression = null, 
             Sort<TEntity, TKey> sorting = null, 
             IDbTransaction transaction = null)
@@ -81,8 +83,64 @@ namespace DaxnetBlog.Common.Storage
             return entities;
         }
 
+        public virtual async Task<IEnumerable<TEntity>> SelectAsync(IDbConnection connection, 
+            Expression<Func<TEntity, bool>> expression = null, 
+            Sort<TEntity, TKey> sorting = null, 
+            IDbTransaction transaction = null, 
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            return await Task.FromResult(this.Select(connection, expression, sorting, transaction));
+        }
 
-        private string ConstructSelectStatement(out IEnumerable<KeyValuePair<string, object>> parameters,
+        public virtual int Insert(TEntity entity, 
+            IDbConnection connection, 
+            IEnumerable<Expression<Func<TEntity, object>>> autoIncrementFields = null, 
+            IDbTransaction transaction = null)
+        {
+            var sqlBuildResult = ConstructInsertStatement(entity, autoIncrementFields);
+
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = sqlBuildResult.Item1;
+                if (transaction != null)
+                {
+                    command.Transaction = transaction;
+                }
+                command.Parameters.Clear();
+                foreach (var c in sqlBuildResult.Item2)
+                {
+                    var param = command.CreateParameter();
+                    param.ParameterName = c.Item2;
+                    param.Value = c.Item3;
+                    command.Parameters.Add(param);
+                }
+                return command.ExecuteNonQuery();
+            }
+        }
+
+        public virtual async Task<int> InsertAsync(TEntity entity, 
+            IDbConnection connection, 
+            IEnumerable<Expression<Func<TEntity, object>>> autoIncrementFields = null, 
+            IDbTransaction transaction = null, 
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            return await Task.FromResult(this.Insert(entity, connection, autoIncrementFields, transaction));
+        }
+
+        protected static LambdaExpression StripConvert<T>(Expression<Func<T, object>> source)
+        {
+            Expression result = source.Body;
+            // use a loop in case there are nested Convert expressions for some crazy reason
+            while (((result.NodeType == ExpressionType.Convert)
+                       || (result.NodeType == ExpressionType.ConvertChecked))
+                   && (result.Type == typeof(object)))
+            {
+                result = ((UnaryExpression)result).Operand;
+            }
+            return Expression.Lambda(result, source.Parameters);
+        }
+
+        protected string ConstructSelectStatement(out IEnumerable<KeyValuePair<string, object>> parameters,
             Expression<Func<TEntity, bool>> expression = null,
             Sort<TEntity, TKey> sorting = null)
         {
@@ -115,6 +173,41 @@ namespace DaxnetBlog.Common.Storage
             }
 
             return sqlBuilder.ToString();
+        }
+
+        protected Tuple<string, IEnumerable<Tuple<string, string, object>>> ConstructInsertStatement(TEntity entity,
+            IEnumerable<Expression<Func<TEntity, object>>> autoIncrementFields)
+        {
+            var sqlBuilder = new StringBuilder($"INSERT INTO {mapping.GetEscapedTableName<TEntity, TKey>(dialectSettings)}");
+            var columnNames = new List<Tuple<string, string, object>>();
+            var propertySelection = typeof(TEntity)
+                .GetTypeInfo()
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(p => p.CanRead);
+
+            if (autoIncrementFields != null)
+            {
+                propertySelection = propertySelection.Where(p => !autoIncrementFields.Any(expr =>
+                    ((MemberExpression)StripConvert(expr).Body).Member.Name == p.Name));
+            }
+            propertySelection
+                .ToList()
+                .ForEach(ps =>
+                {
+                    columnNames.Add(new Tuple<string, string, object>(mapping.GetEscapedColumnName<TEntity, TKey>(dialectSettings, ps),
+                        $"{this.dialectSettings.ParameterChar}{ps.Name}", ps.GetValue(entity) ?? DBNull.Value));
+                });
+            if (autoIncrementFields != null)
+            {
+                sqlBuilder.Append(" (");
+                sqlBuilder.Append(string.Join(", ", columnNames.Select(x => x.Item1).ToArray()));
+                sqlBuilder.Append(")");
+            }
+            sqlBuilder.Append(" VALUES (");
+            sqlBuilder.Append(string.Join(", ", columnNames.Select(x => x.Item2).ToArray()));
+            sqlBuilder.Append(")");
+
+            return new Tuple<string, IEnumerable<Tuple<string, string, object>>>(sqlBuilder.ToString(), columnNames);
         }
     }
 }

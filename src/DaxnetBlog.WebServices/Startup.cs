@@ -11,6 +11,7 @@ using DaxnetBlog.Common.Storage;
 using DaxnetBlog.Storage.SqlServer;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using DaxnetBlog.WebServices.Middlewares;
 
 namespace DaxnetBlog.WebServices
 {
@@ -46,6 +47,8 @@ namespace DaxnetBlog.WebServices
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
+
+            app.UseMiddleware<CustomExceptionHandlingMiddleware>();
 
             app.UseMvc();
         }

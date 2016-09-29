@@ -6,32 +6,23 @@ using Microsoft.AspNetCore.Mvc;
 using DaxnetBlog.Common.Storage;
 using DaxnetBlog.Domain.EntityStore;
 using DaxnetBlog.Domain.Model;
+using System.Linq.Expressions;
 
 namespace DaxnetBlog.WebServices.Controllers
 {
     [Route("api/[controller]")]
     public class ValuesController : Controller
     {
-        private readonly IStorage storage;
-        private readonly IAccountStore accountStore;
 
-        public ValuesController(IStorage storage, IAccountStore accountStore)
+        public ValuesController()
         {
-            this.storage = storage;
-            this.accountStore = accountStore;
         }
 
         // GET api/values
         [HttpGet]
         public IEnumerable<string> Get()
         {
-            IEnumerable<Account> accounts = null;
-            storage.Execute(connection =>
-            {
-                accounts = accountStore.Select(connection, x => x.PasswordHash == "123", new Sort<Account, int> { { x => x.UserName, SortOrder.Ascending } });
-            });
-
-            return accounts.Select(x => x.UserName);
+            return new[] { "test" };
         }
 
         // GET api/values/5

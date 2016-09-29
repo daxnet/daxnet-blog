@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using DaxnetBlog.Common.Storage;
 using DaxnetBlog.Domain.EntityStore;
+using DaxnetBlog.Domain.Model;
 using DaxnetBlog.Storage.SqlServer;
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,7 @@ namespace DaxnetBlog.WebServices
         protected override void Load(ContainerBuilder builder)
         {
             builder.RegisterType<PluralTableNameStoreMapping>().As<IStoreMapping>();
-            builder.Register(x => new AccountStore(x.Resolve<IStoreMapping>(), x.Resolve<IStorage>().DialectSettings)).As<IAccountStore>();
+            builder.Register(x => new SqlServerEntityStore<Account, int>(x.Resolve<IStoreMapping>(), x.Resolve<IStorage>().DialectSettings)).As<IEntityStore<Account, int>>();
             builder.RegisterType<SqlServerStorage>()
                 .As<IStorage>()
                 .WithParameter("connectionString", @"Server=localhost; Database=DaxnetBlogDB; Integrated Security=SSPI;");
