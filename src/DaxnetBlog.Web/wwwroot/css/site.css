@@ -1,6 +1,12 @@
 ﻿body {
     padding-top: 50px;
     padding-bottom: 20px;
+    font-family: 'Microsoft YaHei UI'
+}
+
+footer{
+    color: silver;
+    font-size:small;
 }
 
 /* Wrapping element */

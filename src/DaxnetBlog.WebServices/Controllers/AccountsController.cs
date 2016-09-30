@@ -99,12 +99,72 @@ namespace DaxnetBlog.WebServices.Controllers
             }
 
             return Ok(new {
+                account.Id,
                 account.UserName,
                 account.NickName,
                 account.EmailAddress,
                 account.DateRegistered,
                 account.DateLastLogin
             });
+        }
+
+        [HttpGet]
+        [Route("name/{name}")]
+        public async Task<IActionResult> GetByUserName(string name)
+        {
+            var account = (await storage.ExecuteAsync(async (connection, cancellationToken) =>
+                await accountStore.SelectAsync(connection, x => x.UserName == name, cancellationToken: cancellationToken))).FirstOrDefault();
+
+            if (account == null)
+            {
+                throw new ServiceException(HttpStatusCode.NotFound, $"No account was found with the userName of {name}.");
+            }
+
+            return Ok(new
+            {
+                account.Id,
+                account.UserName,
+                account.NickName,
+                account.EmailAddress,
+                account.DateRegistered,
+                account.DateLastLogin
+            });
+        }
+
+        [HttpGet]
+        [Route("pwd/{id}")]
+        public async Task<IActionResult> GetPasswordHash(int id)
+        {
+            var account = (await storage.ExecuteAsync(async (connection, cancellationToken) =>
+                await accountStore.SelectAsync(connection, x => x.Id == id, cancellationToken: cancellationToken))).FirstOrDefault();
+
+            if (account == null)
+            {
+                throw new ServiceException(HttpStatusCode.NotFound, $"No account was found with the id of {id}.");
+            }
+
+            return Ok(account.PasswordHash);
+        }
+
+        [HttpPost]
+        [Route("authenticate/{id}")]
+        public async Task<IActionResult> Authenticate(int id, [FromBody] dynamic passwordModel)
+        {
+            var password = (string)passwordModel.Password;
+            if (string.IsNullOrEmpty(password))
+            {
+                throw new ServiceException(HttpStatusCode.BadRequest, "The password argument cannot be null.");
+            }
+
+            var account = (await storage.ExecuteAsync(async (connection, cancellationToken) =>
+                await accountStore.SelectAsync(connection, x => x.Id == id, cancellationToken: cancellationToken))).FirstOrDefault();
+
+            if (account == null)
+            {
+                throw new ServiceException(HttpStatusCode.NotFound, $"No account was found with the id of {id}.");
+            }
+
+            return Ok(account.ValidatePassword(password));
         }
     }
 }

@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using DaxnetBlog.Web.Security;
+using System.Net.Http;
 
 namespace DaxnetBlog.Web
 {
@@ -31,10 +32,17 @@ namespace DaxnetBlog.Web
             // Add framework services.
             services.AddMvc();
 
+            services.AddTransient<HttpClient, ServiceProxy>();
+
+            // Build the configuration from configuration file.
+            services.AddOptions();
+            services.Configure<WebsiteSettings>(Configuration);
+
             services
                 .AddIdentity<User, Role>()
                 .AddUserStore<ApplicationUserStore>()
                 .AddRoleStore<ApplicationRoleStore>()
+                .AddUserManager<ApplicationUserManager>()
                 ;
         }
 

@@ -21,7 +21,7 @@ namespace DaxnetBlog.Web.Security
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            // throw new NotImplementedException();
         }
 
         public Task<Role> FindByIdAsync(string roleId, CancellationToken cancellationToken)

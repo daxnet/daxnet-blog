@@ -10,14 +10,16 @@ namespace DaxnetBlog.Web.Models
     {
         [Required]
         [StringLength(16)]
+        [Display(Name = "用户名")]
         public string UserName { get; set; }
 
         [Required]
         [StringLength(16)]
         [DataType(DataType.Password)]
+        [Display(Name = "密码")]
         public string Password { get; set; }
 
-        [Display(Name = "Remember me?")]
+        [Display(Name = "记住本次登录")]
         public bool RememberMe { get; set; }
     }
 }
