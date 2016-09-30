@@ -49,6 +49,7 @@ namespace DaxnetBlog.WebServices
             loggerFactory.AddDebug();
 
             app.UseMiddleware<CustomExceptionHandlingMiddleware>();
+            app.UseMiddleware<CustomServiceResponseTimeMiddleware>();
 
             app.UseMvc();
         }

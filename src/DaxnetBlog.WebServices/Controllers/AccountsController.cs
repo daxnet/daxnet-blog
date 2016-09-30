@@ -1,8 +1,8 @@
-﻿using DaxnetBlog.Common.Storage;
+﻿using DaxnetBlog.Common;
+using DaxnetBlog.Common.Storage;
 using DaxnetBlog.Domain.Model;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
@@ -36,6 +36,9 @@ namespace DaxnetBlog.WebServices.Controllers
             {
                 throw new ServiceException(HttpStatusCode.BadRequest, "password cannot be null.");
             }
+
+            var passwordHash = Crypto.ComputeHash(password, userName);
+
             var email = (string)accountObject.Email;
             if (string.IsNullOrEmpty(email))
             {
@@ -53,7 +56,7 @@ namespace DaxnetBlog.WebServices.Controllers
                    new Account
                    {
                        UserName = userName,
-                       PasswordHash = password,
+                       PasswordHash = passwordHash,
                        EmailAddress = email,
                        NickName = nickName,
                        DateRegistered = DateTime.UtcNow
@@ -65,7 +68,8 @@ namespace DaxnetBlog.WebServices.Controllers
                 if (rowsAffected > 0)
                 {
                     var insertedAccount = (await accountStore.SelectAsync(connection, 
-                        x => x.UserName == userName, 
+                        x => x.UserName == userName,
+                        new Sort<Account, int> { { x=>x.DateRegistered, SortOrder.Descending } }, // Gets the last record inserted, if any duplicates
                         transaction: transaction, 
                         cancellationToken: cancellationToken)).FirstOrDefault();
 
@@ -78,7 +82,7 @@ namespace DaxnetBlog.WebServices.Controllers
                 return 0;
             });
 
-            var uri = Url.Action("GetById", "Accounts", new { id = result });
+            var uri = Url.Action("GetById", new { id = result });
             return Created(uri, result);
         }
 

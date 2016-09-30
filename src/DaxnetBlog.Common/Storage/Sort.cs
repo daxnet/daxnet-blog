@@ -1,13 +1,56 @@
-﻿using System;
+﻿// ===========================================================================================================
+//      _                                 _              _       _                 
+//     | |                               | |            | |     | |                
+//   __| |   __ _  __  __  _ __     ___  | |_   ______  | |__   | |   ___     __ _ 
+//  / _` |  / _` | \ \/ / | '_ \   / _ \ | __| |______| | '_ \  | |  / _ \   / _` |
+// | (_| | | (_| |  >  <  | | | | |  __/ | |_           | |_) | | | | (_) | | (_| |
+//  \__,_|  \__,_| /_/\_\ |_| |_|  \___|  \__|          |_.__/  |_|  \___/   \__, |
+//                                                                            __/ |
+//                                                                           |___/ 
+//
+// 
+// Daxnet Personal Blog
+// Copyright © 2016 by daxnet (Sunny Chen)
+//
+// https://github.com/daxnet/daxnet-blog
+//
+// MIT License
+// 
+// Copyright(c) 2016 Sunny Chen
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+// ===========================================================================================================
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DaxnetBlog.Common.Storage
 {
+    /// <summary>
+    /// Represents the sort specification in a query statement.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entity.</typeparam>
+    /// <typeparam name="TKey">The type of the key.</typeparam>
+    /// <seealso cref="System.Collections.Generic.IDictionary{System.String, DaxnetBlog.Common.Storage.SortOrder}" />
     public sealed class Sort<TEntity, TKey> : IDictionary<string, SortOrder>
         where TKey : IEquatable<TKey>
         where TEntity : class, IEntity<TKey>
@@ -46,6 +89,9 @@ namespace DaxnetBlog.Common.Storage
             }
         }
 
+        /// <summary>
+        /// Gets the number of elements contained in the <see cref="T:System.Collections.Generic.ICollection`1" />.
+        /// </summary>
         public int Count
         {
             get
@@ -54,6 +100,9 @@ namespace DaxnetBlog.Common.Storage
             }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the <see cref="T:System.Collections.Generic.ICollection`1" /> is read-only.
+        /// </summary>
         public bool IsReadOnly
         {
             get
@@ -62,6 +111,9 @@ namespace DaxnetBlog.Common.Storage
             }
         }
 
+        /// <summary>
+        /// Gets an <see cref="T:System.Collections.Generic.ICollection`1" /> containing the keys of the <see cref="T:System.Collections.Generic.IDictionary`2" />.
+        /// </summary>
         public ICollection<string> Keys
         {
             get
