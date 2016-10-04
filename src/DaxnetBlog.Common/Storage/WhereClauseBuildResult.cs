@@ -8,7 +8,7 @@ namespace DaxnetBlog.Common.Storage
     /// <summary>
     /// Represents the where clause build result.
     /// </summary>
-    internal sealed class WhereClauseBuildResult
+    public sealed class WhereClauseBuildResult
     {
         #region Public Properties
         /// <summary>

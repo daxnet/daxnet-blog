@@ -17,6 +17,12 @@ namespace DaxnetBlog.Common.Storage
             Sort<TEntity, TKey> sorting = null,
             IDbTransaction transaction = null);
 
+        PagedResult<TEntity, TKey> Select(int pageNumber, int pageSize,
+            IDbConnection connection,
+            Sort<TEntity, TKey> sorting,
+            Expression<Func<TEntity, bool>> expression = null,
+            IDbTransaction transaction = null);
+
         Task<IEnumerable<TEntity>> SelectAsync(IDbConnection connection,
             Expression<Func<TEntity, bool>> expression = null,
             Sort<TEntity, TKey> sorting = null,

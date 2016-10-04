@@ -13,15 +13,24 @@ namespace DaxnetBlog.WebServices.Controllers
     [Route("api/[controller]")]
     public class ValuesController : Controller
     {
+        private readonly IStorage storage;
+        private readonly IEntityStore<Account, int> accountStore;
 
-        public ValuesController()
+        public ValuesController(IStorage storage, IEntityStore<Account, int> accountStore)
         {
+            this.storage = storage;
+            this.accountStore = accountStore;
         }
 
         // GET api/values
         [HttpGet]
         public IEnumerable<string> Get()
         {
+            //PagedResult<Account, int> paged = null;
+            //this.storage.Execute(connection =>
+            //{
+            //    paged = accountStore.Select(4, 3, connection, new Sort<Account, int> { { x => x.DateRegistered, SortOrder.Descending } });
+            //});
             return new[] { "test" };
         }
 

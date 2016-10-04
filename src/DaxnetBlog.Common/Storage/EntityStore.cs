@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace DaxnetBlog.Common.Storage
 {
-    public class EntityStore<TEntity, TKey> : IEntityStore<TEntity, TKey>
+    public abstract class EntityStore<TEntity, TKey> : IEntityStore<TEntity, TKey>
         where TKey : IEquatable<TKey>
         where TEntity : class, IEntity<TKey>, new()
     {
@@ -83,6 +83,12 @@ namespace DaxnetBlog.Common.Storage
             return entities;
         }
 
+        public abstract PagedResult<TEntity, TKey> Select(int pageNumber, int pageSize, 
+            IDbConnection connection,
+            Sort<TEntity, TKey> sorting,
+            Expression<Func<TEntity, bool>> expression = null, 
+            IDbTransaction transaction = null);
+
         public virtual async Task<IEnumerable<TEntity>> SelectAsync(IDbConnection connection, 
             Expression<Func<TEntity, bool>> expression = null, 
             Sort<TEntity, TKey> sorting = null, 
@@ -151,8 +157,7 @@ namespace DaxnetBlog.Common.Storage
 
             if (expression != null)
             {
-                var whereClauseBuilder = new WhereClauseBuilder<TEntity, TKey>(this.mapping, this.dialectSettings);
-                var whereClauseBuildResult = whereClauseBuilder.BuildWhereClause(expression);
+                var whereClauseBuildResult = this.BuildWhereClause(expression);
                 sqlBuilder.AppendLine($"WHERE {whereClauseBuildResult.WhereClause} ");
                 parameters = new Dictionary<string, object>(whereClauseBuildResult.ParameterValues);
             }
@@ -160,19 +165,29 @@ namespace DaxnetBlog.Common.Storage
             if (sorting != null && sorting.Count > 0)
             {
                 sqlBuilder.Append("ORDER BY ");
-                for (var i = 0; i < sorting.Count; i++)
-                {
-                    var sort = sorting.ElementAt(i);
-                    sqlBuilder.AppendFormat("{0} {1}", this.mapping.GetEscapedColumnName<TEntity, TKey>(this.dialectSettings, sort.Key),
-                        sort.Value == SortOrder.Descending ? "DESC" : "ASC");
-                    if (i < sorting.Count - 1)
-                    {
-                        sqlBuilder.Append(", ");
-                    }
-                }
+                sqlBuilder.Append(BuildOrderByClause(sorting));
             }
 
             return sqlBuilder.ToString();
+        }
+
+        protected WhereClauseBuildResult BuildWhereClause(Expression<Func<TEntity, bool>> expression) =>
+            new WhereClauseBuilder<TEntity, TKey>(this.mapping, this.dialectSettings).BuildWhereClause(expression);
+
+        protected string BuildOrderByClause(Sort<TEntity, TKey> sorting)
+        {
+            var stringBuilder = new StringBuilder();
+            for (var i = 0; i < sorting.Count; i++)
+            {
+                var sort = sorting.ElementAt(i);
+                stringBuilder.AppendFormat("{0} {1}", this.mapping.GetEscapedColumnName<TEntity, TKey>(this.dialectSettings, sort.Key),
+                    sort.Value == SortOrder.Descending ? "DESC" : "ASC");
+                if (i < sorting.Count - 1)
+                {
+                    stringBuilder.Append(", ");
+                }
+            }
+            return stringBuilder.ToString();
         }
 
         protected Tuple<string, IEnumerable<Tuple<string, string, object>>> ConstructInsertStatement(TEntity entity,
@@ -209,5 +224,7 @@ namespace DaxnetBlog.Common.Storage
 
             return new Tuple<string, IEnumerable<Tuple<string, string, object>>>(sqlBuilder.ToString(), columnNames);
         }
+
+        
     }
 }
