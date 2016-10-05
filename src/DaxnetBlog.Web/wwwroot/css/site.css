@@ -1,7 +1,7 @@
 ﻿body {
     padding-top: 50px;
     padding-bottom: 20px;
-    font-family: 'Microsoft YaHei UI'
+    font-family: 'Microsoft YaHei', 'Microsoft YaHei UI', 'Segoe UI'
 }
 
 footer{
@@ -9,11 +9,125 @@ footer{
     font-size:small;
 }
 
+.main {
+    border-right: 1px dotted silver;
+}
+
 /* Wrapping element */
 /* Set some basic padding to keep content from hitting the edges */
 .body-content {
-    padding-left: 15px;
-    padding-right: 15px;
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-top: 15px;
+}
+
+/* Pager */
+.pager span {
+    color: #157ab5;
+    padding: 5px;
+    margin-left: 3px;
+    margin-right: 3px;
+    border: 1px solid #157ab5;
+}
+
+.pager span.current {
+    color: white;
+    background: #157ab5;
+    padding: 5px;
+    margin-left: 3px;
+    margin-right: 3px;
+    border: 1px solid black;
+}
+
+.pager .quick-nav {
+    color: #157ab5;
+    padding: 5px;
+    margin-left: 3px;
+    margin-right: 3px;
+    border: 1px solid #157ab5;
+}
+
+.pager .quick-nav-disabled {
+    color: gray;
+    padding: 5px;
+    margin-left: 3px;
+    margin-right: 3px;
+    border: 1px solid darkgray;
+}
+
+/* article list page */
+ul.article-list{
+    
+}
+
+ul.article-list li {
+    list-style-type: none;
+    margin-left: -25px;
+    padding-bottom: 25px;
+}
+
+ul.article-list h4 {
+    margin-bottom: 5px;
+}
+
+ul.article-list div.summary {
+    color: grey;
+    font-size: small;
+}
+
+/* article*/
+
+article header {
+    font-family: "Microsoft YaHei", "微软雅黑", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+   font-size: 26px !important;
+   font-weight:bold;
+   text-align:center;
+   padding-bottom: 12px;
+}
+
+article p {
+    font-family: "Microsoft YaHei", "微软雅黑", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 16px !important;
+    text-indent: 32px;
+    padding-bottom: 2pt;
+}
+
+article a {
+    color:#4F81BD;
+    text-decoration: none;
+}
+
+article h1 {
+	font-size: 24px !important;
+	color: #365F91;
+	font-family: "Microsoft YaHei", "微软雅黑", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+	font-weight: bold;
+	padding-top: 6pt;
+}
+
+article h2 {
+	font-size: 20px !important;
+	color: #4F81BD;
+	font-family: "Microsoft YaHei", "微软雅黑", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+	font-weight: bold;
+	padding-top: 6pt;
+}
+
+article h3 {
+	font-size: 16px !important;
+	color: #4F81BD;
+	font-family: "Microsoft YaHei", "微软雅黑", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+	font-weight: bold;
+	padding-top: 6pt;
+}
+
+article h4 {
+	font-size: 14px !important;
+	color: #4F81BD;
+	font-family: "Microsoft YaHei", "微软雅黑", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+	padding-top: 6pt;
+	font-weight: bold;
+	font-style: italic;
 }
 
 /* Set widths on the form inputs since otherwise they're 100% wide */

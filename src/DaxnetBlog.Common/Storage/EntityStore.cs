@@ -89,6 +89,13 @@ namespace DaxnetBlog.Common.Storage
             Expression<Func<TEntity, bool>> expression = null, 
             IDbTransaction transaction = null);
 
+        public abstract Task<PagedResult<TEntity, TKey>> SelectAsync(int pageNumber, int pageSize,
+            IDbConnection connection,
+            Sort<TEntity, TKey> sorting,
+            Expression<Func<TEntity, bool>> expression = null,
+            IDbTransaction transaction = null,
+            CancellationToken cancellationToken = default(CancellationToken));
+
         public virtual async Task<IEnumerable<TEntity>> SelectAsync(IDbConnection connection, 
             Expression<Func<TEntity, bool>> expression = null, 
             Sort<TEntity, TKey> sorting = null, 

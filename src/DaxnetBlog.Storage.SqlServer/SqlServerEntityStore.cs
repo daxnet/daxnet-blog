@@ -102,6 +102,82 @@ namespace DaxnetBlog.Storage.SqlServer
             return pagedResult;
         }
 
+        public override async Task<PagedResult<TEntity, TKey>> SelectAsync(int pageNumber, int pageSize, IDbConnection connection, Sort<TEntity, TKey> sorting, Expression<Func<TEntity, bool>> expression = null, IDbTransaction transaction = null, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            WhereClauseBuildResult whereClauseBuildResult = expression != null ? this.BuildWhereClause(expression) : null;
+            var sqlBuilder = new StringBuilder();
+            sqlBuilder.Append($"SELECT (SELECT COUNT(*) FROM {this.mapping.GetEscapedTableName<TEntity, TKey>(this.dialectSettings)}");
+            if (whereClauseBuildResult != null)
+            {
+                sqlBuilder.Append($" WHERE {whereClauseBuildResult.WhereClause} ");
+            }
+            sqlBuilder.AppendLine(") AS _TotalNumberOfRecords,");
+            sqlBuilder.AppendLine($" * FROM (SELECT ROW_NUMBER() OVER (ORDER BY {this.BuildOrderByClause(sorting)}) AS _RowNumber, * FROM {this.mapping.GetEscapedTableName<TEntity, TKey>(this.dialectSettings)}");
+            if (whereClauseBuildResult != null)
+            {
+                sqlBuilder.AppendLine($" WHERE {whereClauseBuildResult.WhereClause} ");
+            }
+            sqlBuilder.AppendLine($") AS PagedResult WHERE _RowNumber >= {(pageNumber - 1) * pageSize + 1} AND _RowNumber < {pageNumber * pageSize + 1} ORDER BY _RowNumber");
+            var sql = sqlBuilder.ToString();
+
+            var pagedResult = new PagedResult<TEntity, TKey>
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+
+            using (var command = (SqlCommand)connection.CreateCommand())
+            {
+                command.CommandText = sql;
+                if (transaction != null)
+                {
+                    command.Transaction = (SqlTransaction)transaction;
+                }
+                if (whereClauseBuildResult != null)
+                {
+                    command.Parameters.Clear();
+                    foreach (var kvp in whereClauseBuildResult.ParameterValues)
+                    {
+                        var param = command.CreateParameter();
+                        param.ParameterName = kvp.Key;
+                        param.Value = kvp.Value;
+                        command.Parameters.Add(param);
+                    }
+                }
+                using (var reader = await command.ExecuteReaderAsync(cancellationToken))
+                {
+                    var totalNumOfRecordsRead = false;
+                    while (await reader.ReadAsync(cancellationToken))
+                    {
+                        if (!totalNumOfRecordsRead)
+                        {
+                            pagedResult.TotalRecords = Convert.ToInt32(reader["_TotalNumberOfRecords"]);
+                            pagedResult.TotalPages = (pagedResult.TotalRecords - 1) / pageSize + 1;
+                            totalNumOfRecordsRead = true;
+                        }
+                        var entity = new TEntity();
+                        typeof(TEntity)
+                            .GetTypeInfo()
+                            .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                            .Where(p => p.CanWrite)
+                            .ToList()
+                            .ForEach(x =>
+                            {
+                                var value = reader[mapping.GetColumnName<TEntity, TKey>(x)];
+                                if (value == DBNull.Value)
+                                {
+                                    value = null;
+                                }
+                                x.SetValue(entity, value);
+                            });
+                        pagedResult.Add(entity);
+                    }
+                }
+            }
+
+            return pagedResult;
+        }
+
         public override async Task<IEnumerable<TEntity>> SelectAsync(IDbConnection connection, 
             Expression<Func<TEntity, bool>> expression = null, 
             Sort<TEntity, TKey> sorting = null, IDbTransaction transaction = null, 

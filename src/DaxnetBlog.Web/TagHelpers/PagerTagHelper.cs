@@ -29,6 +29,7 @@ namespace DaxnetBlog.Web.TagHelpers
         {
             this.UrlHelperFactory = urlHelperFactory;
             this.VisibleNumbers = 5;
+            this.ParameterName = "page";
         }
 
         /// <summary>
@@ -127,7 +128,7 @@ namespace DaxnetBlog.Web.TagHelpers
                 prevPageTagBuilder = new TagBuilder("a");
                 prevPageTagBuilder.InnerHtml.Append("上一页");
                 prevPageTagBuilder.AddCssClass("quick-nav");
-                routeValues["page"] = CurrentPage - 1;
+                routeValues[ParameterName] = CurrentPage - 1;
                 prevPageTagBuilder.Attributes.Add("href",
                     string.IsNullOrEmpty(AnchorTagName)
                         ? urlHelper.Action(new UrlActionContext { Action = this.Action, Controller = this.Controller, Values = routeValues })
@@ -193,7 +194,7 @@ namespace DaxnetBlog.Web.TagHelpers
 
                     var linkBuilder = new TagBuilder("a");
 
-                    routeValues["page"] = i;
+                    routeValues[ParameterName] = i;
                     linkBuilder.Attributes.Add("href",
                         string.IsNullOrEmpty(AnchorTagName)
                             ? urlHelper.Action(new UrlActionContext { Action = this.Action, Controller = this.Controller, Values = routeValues })
@@ -218,7 +219,7 @@ namespace DaxnetBlog.Web.TagHelpers
                 nextPageTagBuilder = new TagBuilder("a");
                 nextPageTagBuilder.InnerHtml.Append("下一页");
                 nextPageTagBuilder.AddCssClass("quick-nav");
-                routeValues["page"] = CurrentPage + 1;
+                routeValues[ParameterName] = CurrentPage + 1;
                 nextPageTagBuilder.Attributes.Add("href",
                     string.IsNullOrEmpty(AnchorTagName)
                         ? urlHelper.Action(new UrlActionContext { Action = this.Action, Controller = this.Controller, Values = routeValues })
@@ -229,7 +230,7 @@ namespace DaxnetBlog.Web.TagHelpers
                 lastPageTagBuilder = new TagBuilder("a");
                 lastPageTagBuilder.InnerHtml.Append("末页");
                 lastPageTagBuilder.AddCssClass("quick-nav");
-                routeValues["page"] = TotalPages;
+                routeValues[ParameterName] = TotalPages;
                 lastPageTagBuilder.Attributes.Add("href",
                     string.IsNullOrEmpty(AnchorTagName)
                         ? urlHelper.Action(new UrlActionContext { Action = this.Action, Controller = this.Controller, Values = routeValues })

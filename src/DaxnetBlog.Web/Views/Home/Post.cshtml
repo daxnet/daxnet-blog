@@ -1,0 +1,22 @@
+﻿@model dynamic
+
+@{
+    ViewData["Title"] = $"{(string)Model.title} - daxnet.me";
+}
+
+
+<div class="row">
+    <div class="col-md-10 main">
+        <article>
+            <header>
+                @Model.title
+            </header>
+            <content>
+                @Html.Raw(Model.content)
+            </content>
+        </article>
+    </div>
+    <div class="col-md-2">
+        @await Html.PartialAsync("_BulletinBoardPartial")
+    </div>
+</div>

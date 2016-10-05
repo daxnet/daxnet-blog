@@ -15,6 +15,12 @@ namespace DaxnetBlog.Domain.Model
 
         public int AccountId { get; set; }
 
+        public int? UpVote { get; set; }
+
+        public int? DownVote { get; set; }
+
+        public int? Visits { get; set; }
+
         public override string ToString() => Title;
     }
 }

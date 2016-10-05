@@ -29,6 +29,13 @@ namespace DaxnetBlog.Common.Storage
             IDbTransaction transaction = null,
             CancellationToken cancellationToken = default(CancellationToken));
 
+        Task<PagedResult<TEntity, TKey>> SelectAsync(int pageNumber, int pageSize,
+            IDbConnection connection,
+            Sort<TEntity, TKey> sorting,
+            Expression<Func<TEntity, bool>> expression = null,
+            IDbTransaction transaction = null,
+            CancellationToken cancellationToken = default(CancellationToken));
+
         int Insert(TEntity entity, 
             IDbConnection connection, 
             IEnumerable<Expression<Func<TEntity, object>>> autoIncrementFields = null, 
