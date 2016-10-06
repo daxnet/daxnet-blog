@@ -19,7 +19,12 @@ namespace DaxnetBlog.Web
             : base(new HttpClientHandler(), true)
         {
             this.config = config;
-            this.BaseAddress = new Uri(config.Value.BaseUri);
+            var baseUrl = Environment.GetEnvironmentVariable("DAXNETBLOG_SVC_BASEURL");
+            if (string.IsNullOrEmpty(baseUrl))
+            {
+                baseUrl = config.Value.BaseUri;
+            }
+            this.BaseAddress = new Uri(baseUrl);
             this.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
     }
