@@ -100,7 +100,7 @@ namespace DaxnetBlog.DbMigration
             {
                 const string DefaultConnectionString = @"Server=localhost; Database=DaxnetBlogDB; Integrated Security=SSPI;";
                 var crypto = Crypto.Create(CryptoTypes.EncTypeTripleDes);
-                var connectionString = Environment.GetEnvironmentVariable("DAXNETBLOG_SQL_STR");
+                var connectionString = "3Bs0gCU8Jb/jmrTkCe6jOSUAlYMnQfy5HQaS8DTh/j5mh/9GcJ8Fgb365guKQ1YlbE80JB/yv/1YCJYMj6bXq41shVQnQBhNIruwQ0HY1bdzNMVMRSev2s+aewd5UxXihmh0zNfJ5nKhNn1VUGgepXF2hC3qO8U3Z+e+2wA54mugmWpwyj5BjWjfFRawy597w8ejQgPS6Nj36HpWpTgUNItDOZqI5hobh7n+5gBD2Rsa08yeFoBC8zoNghD+l751ednS0SkZjAbkyARBwz190i6yFaQzCSZJCs4QOnsuvKXc9XZoWh6LM8K6pr7GYG7Hx+EX0HF36iA=";// Environment.GetEnvironmentVariable("DAXNETBLOG_SQL_STR");
                 if (string.IsNullOrEmpty(connectionString))
                 {
                     connectionString = DefaultConnectionString;

@@ -41,7 +41,7 @@ GO
 CREATE TABLE [BlogPosts](
 	[Id] [int] IDENTITY(1,1) NOT NULL,
 	[Title] [nvarchar](64) NOT NULL,
-	[Content] [text] NOT NULL,
+	[Content] [ntext] NOT NULL,
 	[DatePublished] [datetime] NOT NULL,
 	[AccountId] [int] NOT NULL,
 	[UpVote] [int] NULL,
