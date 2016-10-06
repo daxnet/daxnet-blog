@@ -7,4 +7,4 @@ COPY . ./
  
 EXPOSE 5000
 
-CMD ["dotnet", "DaxnetBlog.WebServices.dll"]
+CMD ["dotnet", "DaxnetBlog.Web.dll"]
