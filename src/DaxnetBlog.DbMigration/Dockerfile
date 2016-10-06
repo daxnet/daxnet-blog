@@ -3,7 +3,7 @@ RUN cd /usr/local/src
 RUN mkdir app
 WORKDIR /usr/local/src/app
  
-COPY *.* ./
+COPY . ./
  
 # 执行dotnet DockerWebAPI.dll命令
 CMD ["dotnet", "DaxnetBlog.DbMigration.dll"]
