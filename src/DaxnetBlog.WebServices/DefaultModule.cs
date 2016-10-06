@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using DaxnetBlog.Common;
 using DaxnetBlog.Common.Storage;
 using DaxnetBlog.Domain.EntityStore;
 using DaxnetBlog.Domain.Model;
@@ -12,6 +13,7 @@ namespace DaxnetBlog.WebServices
 {
     public class DefaultModule : Module
     {
+        const string DefaultConnectionString = @"Server=localhost; Database=DaxnetBlogDB; Integrated Security=SSPI;";
         /// <summary>
         /// Override to add registrations to the container.
         /// </summary>
@@ -22,6 +24,24 @@ namespace DaxnetBlog.WebServices
         /// </remarks>
         protected override void Load(ContainerBuilder builder)
         {
+            var connectionString = Environment.GetEnvironmentVariable("DAXNETBLOG_SQL_STR");
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                connectionString = DefaultConnectionString;
+            }
+            else
+            {
+                try
+                {
+                    var c = Crypto.Create(CryptoTypes.EncTypeTripleDes);
+                    connectionString = c.Decrypt(connectionString, "DaxnetBlog");
+                }
+                catch
+                {
+                    connectionString = DefaultConnectionString;
+                }
+            }
+
             // Registers the store mapping instance.
             builder.RegisterType<PluralTableNameStoreMapping>()
                 .As<IStoreMapping>();
@@ -39,7 +59,7 @@ namespace DaxnetBlog.WebServices
             // Registers the SQL Server storage.
             builder.RegisterType<SqlServerStorage>()
                 .As<IStorage>()
-                .WithParameter("connectionString", @"Server=localhost; Database=DaxnetBlogDB; Integrated Security=SSPI;");
+                .WithParameter("connectionString", connectionString);
         }
     }
 }

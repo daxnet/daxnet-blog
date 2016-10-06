@@ -1,0 +1,26 @@
+{
+  "version": "1.0.0-*",
+  "buildOptions": {
+    "emitEntryPoint": true,
+    "copyToOutput": [ "scripts/*.sql" ]
+  },
+
+  "publishOptions": {
+    "include": ["scripts/*.sql"]
+  },
+
+  "dependencies": {
+    "DaxnetBlog.Common": "1.0.0-*",
+    "Microsoft.NETCore.App": {
+      "type": "platform",
+      "version": "1.0.1"
+    },
+    "System.Data.SqlClient": "4.1.0"
+  },
+
+  "frameworks": {
+    "netcoreapp1.0": {
+      "imports": "dnxcore50"
+    }
+  }
+}

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace DaxnetBlog.Common
 {
     //types of symmetric encyption
-    internal enum CryptoTypes
+    public enum CryptoTypes
     {
         EncAes = 0,
         EncTypeTripleDes
@@ -335,6 +335,11 @@ namespace DaxnetBlog.Common
         {
             // TODO: Need change when releasing CloudNotes
             return new Crypto(CryptoTypes.EncAes);
+        }
+
+        public static Crypto Create(CryptoTypes type)
+        {
+            return new Crypto(type);
         }
         #endregion
     }
