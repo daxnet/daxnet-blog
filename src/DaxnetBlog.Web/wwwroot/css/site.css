@@ -16,8 +16,8 @@ footer{
 /* Wrapping element */
 /* Set some basic padding to keep content from hitting the edges */
 .body-content {
-    padding-left: 30px;
-    padding-right: 30px;
+    padding-left: 15px;
+    padding-right: 15px;
     padding-top: 15px;
 }
 
@@ -56,9 +56,6 @@ footer{
 }
 
 /* article list page */
-ul.article-list{
-    
-}
 
 ul.article-list li {
     list-style-type: none;
@@ -72,6 +69,11 @@ ul.article-list h4 {
 
 ul.article-list div.summary {
     color: grey;
+    font-size: small;
+}
+
+ul.article-list div.auth{
+    color: lightblue;
     font-size: small;
 }
 
