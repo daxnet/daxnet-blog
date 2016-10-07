@@ -1,4 +1,6 @@
 ﻿@using Microsoft.Extensions.Options
+@using Humanizer
+
 @{
     ViewData["Title"] = "首页";
 }
@@ -6,25 +8,25 @@
 @inject IOptions<WebsiteSettings> config
 
 <div class="row">
-    
+
     <div class="col-md-10 main">
         <ul class="article-list">
             @foreach (dynamic m in Model.data)
             {
                 var title = (string)m.title;
                 var content = (string)m.content;
+                var datePublished = (DateTime)m.datePublished;
                 <li>
                     <h4>@Html.ActionLink(title, "Post", new { id = m.id })</h4>
                     <div class="summary">@content.Summary(config.Value.TruncateSummaryLength)</div>
+                    <div class="pull-right auth">@datePublished</div>
                 </li>
             }
         </ul>
-        <div class="pull-right">
-            <pager pager-total-pages="@(int)Model.totalPages"
-                   pager-current-page="@(int)Model.pageNumber"
-                   asp-controller="home"
-                   asp-action="index" />
-        </div>
+        <pager pager-total-pages="@(int)Model.totalPages"
+               pager-current-page="@(int)Model.pageNumber"
+               asp-controller="home"
+               asp-action="index" />
     </div>
     <div class="col-md-2">
         @await Html.PartialAsync("_BulletinBoardPartial")
