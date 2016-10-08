@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using DaxnetBlog.Web.Security;
 using DaxnetBlog.Web.Models;
+using System.Text;
 
 // For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -43,6 +44,13 @@ namespace DaxnetBlog.Web.Controllers
             ViewData["ReturnUrl"] = returnUrl;
             if (ModelState.IsValid)
             {
+                var captchaString = this.Request.Form["__captcha_image"];
+                var encryptedString = Convert.ToBase64String(UTF32Encoding.Unicode.GetBytes(model.Captcha.ToLower()));
+                if (captchaString != encryptedString)
+                {
+                    ModelState.AddModelError("", "验证码不正确。");
+                    return View("Login");
+                }
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
                 var result = await signInManager.PasswordSignInAsync(model.UserName, model.Password, model.RememberMe, lockoutOnFailure: false);
@@ -67,6 +75,27 @@ namespace DaxnetBlog.Web.Controllers
         {
             await signInManager.SignOutAsync();
             return RedirectToAction(nameof(HomeController.Index), "Home");
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult Register(string returnUrl = null)
+        {
+            ViewData["ReturnUrl"] = returnUrl;
+            return View();
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(RegisterViewModel model, string returnUrl = null)
+        {
+            ViewData["ReturnUrl"] = returnUrl;
+            if (ModelState.IsValid)
+            {
+            }
+            await Task.CompletedTask;
+            return View(model);
         }
 
         private IActionResult RedirectToLocal(string returnUrl)

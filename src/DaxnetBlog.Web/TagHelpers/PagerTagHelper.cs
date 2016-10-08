@@ -16,6 +16,7 @@ namespace DaxnetBlog.Web.TagHelpers
     [HtmlTargetElement("pager", TagStructure = TagStructure.WithoutEndTag)]
     public class PagerTagHelper : TagHelper
     {
+        [HtmlAttributeNotBound]
         [ViewContext]
         public ViewContext ViewContext { get; set; }
 
@@ -108,45 +109,58 @@ namespace DaxnetBlog.Web.TagHelpers
             var routeValues = new RouteValueDictionary();
 
             var divBuilder = new TagBuilder("div");
-            divBuilder.AddCssClass("pager");
-            var pageNumberStringBuilder = new StringBuilder();
+            divBuilder.AddCssClass("text-center");
+            //var pageNumberStringBuilder = new StringBuilder();
             var urlHelper = this.UrlHelperFactory.GetUrlHelper(this.ViewContext);
+
+            var ulTag = new TagBuilder("ul");
+            ulTag.AddCssClass("pagination");
+            ulTag.AddCssClass("pagination-sm");
+            TagBuilder liTag = null;
+            
             TagBuilder firstPageTagBuilder;
             TagBuilder prevPageTagBuilder;
             if (this.CurrentPage > 1)
             {
                 firstPageTagBuilder = new TagBuilder("a");
                 firstPageTagBuilder.InnerHtml.Append("首页");
-                firstPageTagBuilder.AddCssClass("quick-nav");
                 firstPageTagBuilder.Attributes.Add("href",
                     string.IsNullOrEmpty(AnchorTagName)
                         ? urlHelper.Action(new UrlActionContext { Action = this.Action, Controller = this.Controller })
                         : string.Format("{0}#{1}", urlHelper.Action(new UrlActionContext { Action = this.Action, Controller = this.Controller }), AnchorTagName));
-
-                pageNumberStringBuilder.Append(firstPageTagBuilder.ToHtmlString());
+                liTag = new TagBuilder("li");
+                liTag.InnerHtml.AppendHtml(firstPageTagBuilder.ToHtmlString());
+                ulTag.InnerHtml.AppendHtml(liTag.ToHtmlString());
+                
 
                 prevPageTagBuilder = new TagBuilder("a");
                 prevPageTagBuilder.InnerHtml.Append("上一页");
-                prevPageTagBuilder.AddCssClass("quick-nav");
                 routeValues[ParameterName] = CurrentPage - 1;
                 prevPageTagBuilder.Attributes.Add("href",
                     string.IsNullOrEmpty(AnchorTagName)
                         ? urlHelper.Action(new UrlActionContext { Action = this.Action, Controller = this.Controller, Values = routeValues })
                         : string.Format("{0}#{1}", urlHelper.Action(new UrlActionContext { Action = this.Action, Controller = this.Controller, Values = routeValues }), AnchorTagName));
+                liTag = new TagBuilder("li");
+                liTag.InnerHtml.AppendHtml(prevPageTagBuilder.ToHtmlString());
+                ulTag.InnerHtml.AppendHtml(liTag.ToHtmlString());
 
-                pageNumberStringBuilder.Append(prevPageTagBuilder.ToHtmlString());
             }
             else
             {
-                firstPageTagBuilder = new TagBuilder("span");
+                firstPageTagBuilder = new TagBuilder("a");
                 firstPageTagBuilder.InnerHtml.Append("首页");
-                firstPageTagBuilder.AddCssClass("quick-nav-disabled");
-                pageNumberStringBuilder.Append(firstPageTagBuilder.ToHtmlString());
+                liTag = new TagBuilder("li");
+                liTag.AddCssClass("disabled");
+                liTag.InnerHtml.AppendHtml(firstPageTagBuilder.ToHtmlString());
+                ulTag.InnerHtml.AppendHtml(liTag.ToHtmlString());
 
-                prevPageTagBuilder = new TagBuilder("span");
+
+                prevPageTagBuilder = new TagBuilder("a");
                 prevPageTagBuilder.InnerHtml.Append("上一页");
-                prevPageTagBuilder.AddCssClass("quick-nav-disabled");
-                pageNumberStringBuilder.Append(prevPageTagBuilder.ToHtmlString());
+                liTag = new TagBuilder("li");
+                liTag.AddCssClass("disabled");
+                liTag.InnerHtml.AppendHtml(prevPageTagBuilder.ToHtmlString());
+                ulTag.InnerHtml.AppendHtml(liTag.ToHtmlString());
             }
 
             var pagerSegments = new List<PagerSegment>();
@@ -185,13 +199,13 @@ namespace DaxnetBlog.Web.TagHelpers
                 var pagerSegment = pagerSegments[idx];
                 for (var i = pagerSegment.StartPageIndex; i <= pagerSegment.EndPageIndex; i++)
                 {
-                    var spanTagBuilder = new TagBuilder("span");
+                    //var spanTagBuilder = new TagBuilder("span");
+                    liTag = new TagBuilder("li");
                     if (i == CurrentPage)
                     {
-                        spanTagBuilder.AddCssClass("current");
+                        liTag.AddCssClass("active");
                     }
-                    spanTagBuilder.InnerHtml.Append(i.ToString());
-
+                    liTag.AddCssClass("pn");
                     var linkBuilder = new TagBuilder("a");
 
                     routeValues[ParameterName] = i;
@@ -200,15 +214,20 @@ namespace DaxnetBlog.Web.TagHelpers
                             ? urlHelper.Action(new UrlActionContext { Action = this.Action, Controller = this.Controller, Values = routeValues })
                             : string.Format("{0}#{1}", urlHelper.Action(new UrlActionContext { Action = this.Action, Controller = this.Controller, Values = routeValues }),
                                 AnchorTagName));
-
-                    linkBuilder.InnerHtml.AppendHtml(spanTagBuilder.ToHtmlString());
-
-                    pageNumberStringBuilder.Append(linkBuilder.ToHtmlString());
+                    linkBuilder.InnerHtml.Append(i.ToString());
+                    liTag.InnerHtml.AppendHtml(linkBuilder.ToHtmlString());
+                    ulTag.InnerHtml.AppendHtml(liTag.ToHtmlString());
                 }
                 if (idx != pagerSegments.Count - 1 &&
                     (pagerSegments[idx].EndPageIndex + 1 != pagerSegments[idx + 1].StartPageIndex))
                 {
-                    pageNumberStringBuilder.Append("......");
+                    liTag = new TagBuilder("li");
+                    liTag.AddCssClass("pn");
+                    var aTag = new TagBuilder("a");
+                    aTag.InnerHtml.Append("......");
+                    liTag.AddCssClass("disabled");
+                    liTag.InnerHtml.AppendHtml(aTag.ToHtmlString());
+                    ulTag.InnerHtml.AppendHtml(liTag.ToHtmlString());
                 }
             }
 
@@ -218,41 +237,45 @@ namespace DaxnetBlog.Web.TagHelpers
             {
                 nextPageTagBuilder = new TagBuilder("a");
                 nextPageTagBuilder.InnerHtml.Append("下一页");
-                nextPageTagBuilder.AddCssClass("quick-nav");
                 routeValues[ParameterName] = CurrentPage + 1;
                 nextPageTagBuilder.Attributes.Add("href",
                     string.IsNullOrEmpty(AnchorTagName)
                         ? urlHelper.Action(new UrlActionContext { Action = this.Action, Controller = this.Controller, Values = routeValues })
                         : string.Format("{0}#{1}", urlHelper.Action(new UrlActionContext { Action = this.Action, Controller = this.Controller, Values = routeValues }), AnchorTagName));
 
-                pageNumberStringBuilder.Append(nextPageTagBuilder.ToHtmlString());
+                liTag = new TagBuilder("li");
+                liTag.InnerHtml.AppendHtml(nextPageTagBuilder.ToHtmlString());
+                ulTag.InnerHtml.AppendHtml(liTag.ToHtmlString());
 
                 lastPageTagBuilder = new TagBuilder("a");
                 lastPageTagBuilder.InnerHtml.Append("末页");
-                lastPageTagBuilder.AddCssClass("quick-nav");
                 routeValues[ParameterName] = TotalPages;
                 lastPageTagBuilder.Attributes.Add("href",
                     string.IsNullOrEmpty(AnchorTagName)
                         ? urlHelper.Action(new UrlActionContext { Action = this.Action, Controller = this.Controller, Values = routeValues })
                         : string.Format("{0}#{1}", urlHelper.Action(new UrlActionContext { Action = this.Action, Controller = this.Controller, Values = routeValues }), AnchorTagName));
-                pageNumberStringBuilder.Append(lastPageTagBuilder.ToHtmlString());
+                liTag = new TagBuilder("li");
+                liTag.InnerHtml.AppendHtml(lastPageTagBuilder.ToHtmlString());
+                ulTag.InnerHtml.AppendHtml(liTag.ToHtmlString());
             }
             else
             {
-                nextPageTagBuilder = new TagBuilder("span");
+                nextPageTagBuilder = new TagBuilder("a");
                 nextPageTagBuilder.InnerHtml.Append("下一页");
-                nextPageTagBuilder.AddCssClass("quick-nav-disabled");
-                pageNumberStringBuilder.Append(nextPageTagBuilder.ToHtmlString());
+                liTag = new TagBuilder("li");
+                liTag.AddCssClass("disabled");
+                liTag.InnerHtml.AppendHtml(nextPageTagBuilder.ToHtmlString());
+                ulTag.InnerHtml.AppendHtml(liTag.ToHtmlString());
 
-                lastPageTagBuilder = new TagBuilder("span");
+                lastPageTagBuilder = new TagBuilder("a");
                 lastPageTagBuilder.InnerHtml.Append("末页");
-                lastPageTagBuilder.AddCssClass("quick-nav-disabled");
-                pageNumberStringBuilder.Append(lastPageTagBuilder.ToHtmlString());
+                liTag = new TagBuilder("li");
+                liTag.AddCssClass("disabled");
+                liTag.InnerHtml.AppendHtml(lastPageTagBuilder.ToHtmlString());
+                ulTag.InnerHtml.AppendHtml(liTag.ToHtmlString());
             }
 
-
-
-            divBuilder.InnerHtml.AppendHtml(pageNumberStringBuilder.ToString());
+            divBuilder.InnerHtml.AppendHtml(ulTag.ToHtmlString());
             output.TagMode = TagMode.StartTagAndEndTag;
             output.Content.AppendHtml(divBuilder.ToHtmlString());
         }

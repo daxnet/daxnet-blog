@@ -25,7 +25,8 @@
     "Microsoft.AspNet.WebApi.Client": "5.2.3",
     "System.Runtime.Serialization.Xml": "4.1.1",
     "Humanizer.Core": "2.1.0",
-    "Microsoft.AspNetCore.Mvc.ViewFeatures": "1.0.1"
+    "Microsoft.AspNetCore.Mvc.ViewFeatures": "1.0.1",
+    "CoreCompat.System.Drawing": "1.0.0-beta006"
   },
 
   "tools": {

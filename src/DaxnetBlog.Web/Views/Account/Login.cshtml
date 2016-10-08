@@ -4,21 +4,18 @@
 @using Microsoft.AspNetCore.Http.Authentication
 @using DaxnetBlog.Web.Models
 @using DaxnetBlog.Web.Security
-
 @model LoginViewModel
 @inject SignInManager<User> SignInManager
-
 @{
     ViewData["Title"] = "登录本站";
 }
-
 <h2>@ViewData["Title"]</h2>
+<hr />
 <div class="row">
     <div class="col-md-8">
         <section>
             <form asp-controller="Account" asp-action="Login" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" class="form-horizontal">
-                <hr />
-                <div asp-validation-summary="All" class="text-danger"></div>
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <div class="form-group">
                     <label asp-for="UserName" class="col-md-2 control-label"></label>
                     <div class="col-md-10">
@@ -31,6 +28,19 @@
                     <div class="col-md-10">
                         <input asp-for="Password" class="form-control" />
                         <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Captcha" class="col-md-2 control-label"></label>
+                    <div class="col-md-10">
+                            <input asp-for="Captcha" class="form-control" />
+                        <span asp-validation-for="Captcha" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10" />
+                    <div>
+                        <img asp-captcha="true" />
                     </div>
                 </div>
                 <div class="form-group">
@@ -48,24 +58,23 @@
                         <button type="submit" class="btn btn-primary">登录</button>
                     </div>
                 </div>
-                
+
                 @*<p>
-                    <a asp-action="Register" asp-route-returnurl="@ViewData["ReturnUrl"]">Register as a new user?</a>
-                </p>
-                <p>
-                    <a asp-action="ForgotPassword">Forgot your password?</a>
-                </p>*@
+                        <a asp-action="Register" asp-route-returnurl="@ViewData["ReturnUrl"]">Register as a new user?</a>
+                    </p>
+                    <p>
+                        <a asp-action="ForgotPassword">Forgot your password?</a>
+                    </p>*@
             </form>
         </section>
     </div>
     <div class="col-md-4">
         <section>
             <h4>Logo.</h4>
-            
+
         </section>
     </div>
 </div>
-
 @section Scripts {
     @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
 }
