@@ -19,6 +19,12 @@ namespace DaxnetBlog.Web.Models
         [Display(Name = "密码")]
         public string Password { get; set; }
 
+        [Required(ErrorMessage = "验证码字段是必填项")]
+        [StringLength(10)]
+        [DataType(DataType.Password)]
+        [Display(Name = "验证码", Prompt = "请输入下方的验证码")]
+        public string Captcha { get; set; }
+
         [Display(Name = "记住本次登录")]
         public bool RememberMe { get; set; }
     }
