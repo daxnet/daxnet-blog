@@ -1,4 +1,5 @@
 ﻿FROM microsoft/dotnet:latest
+RUN apt-get install -y libgdiplus
 RUN cd /usr/local/src
 RUN mkdir app
 WORKDIR /usr/local/src/app
