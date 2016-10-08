@@ -9,54 +9,15 @@ footer{
     font-size:small;
 }
 
-.main {
-    border-right: 1px dotted silver;
-}
-
 /* Wrapping element */
 /* Set some basic padding to keep content from hitting the edges */
 .body-content {
-    padding-left: 15px;
-    padding-right: 15px;
-    padding-top: 15px;
-}
-
-/* Pager */
-.pager span {
-    color: #157ab5;
-    padding: 5px;
-    margin-left: 3px;
-    margin-right: 3px;
-    border: 1px solid #157ab5;
-}
-
-.pager span.current {
-    color: white;
-    background: #157ab5;
-    padding: 5px;
-    margin-left: 3px;
-    margin-right: 3px;
-    border: 1px solid black;
-}
-
-.pager .quick-nav {
-    color: #157ab5;
-    padding: 5px;
-    margin-left: 3px;
-    margin-right: 3px;
-    border: 1px solid #157ab5;
-}
-
-.pager .quick-nav-disabled {
-    color: gray;
-    padding: 5px;
-    margin-left: 3px;
-    margin-right: 3px;
-    border: 1px solid darkgray;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 10px;
 }
 
 /* article list page */
-
 ul.article-list li {
     list-style-type: none;
     margin-left: -25px;
@@ -78,7 +39,6 @@ ul.article-list div.auth{
 }
 
 /* article*/
-
 article header {
     font-family: "Microsoft YaHei", "微软雅黑", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
    font-size: 26px !important;
@@ -156,5 +116,8 @@ textarea {
   /* Hide captions */
   .carousel-caption {
     display: none
+  }
+  .pagination .pn {
+      display: none
   }
 }

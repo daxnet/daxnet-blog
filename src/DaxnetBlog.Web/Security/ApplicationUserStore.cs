@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Net.Http;
+using Newtonsoft.Json;
 
 namespace DaxnetBlog.Web.Security
 {
@@ -44,22 +45,31 @@ namespace DaxnetBlog.Web.Security
 
         public async Task<User> FindByIdAsync(string userId, CancellationToken cancellationToken)
         {
-            return await (await this.httpClient.GetAsync($"accounts/{userId}", cancellationToken))
+            var user = JsonConvert.DeserializeObject<User>(await (await this.httpClient.GetAsync($"accounts/{userId}", cancellationToken))
                 .Content
-                .ReadAsAsync<User>();
+                .ReadAsStringAsync());
+            return user;
         }
 
         public async Task<User> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
         {
-            var user = await (await this.httpClient.GetAsync($"accounts/name/{normalizedUserName}", cancellationToken))
-                .Content
-                .ReadAsAsync<User>();
-            return user;
+            var serviceInvocationResult = await this.httpClient.GetAsync($"accounts/name/{normalizedUserName}", cancellationToken);
+
+            try
+            {
+                serviceInvocationResult.EnsureSuccessStatusCode();
+                var user = JsonConvert.DeserializeObject<User>(await serviceInvocationResult.Content.ReadAsStringAsync());
+                return user;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public async Task<string> GetNormalizedUserNameAsync(User user, CancellationToken cancellationToken)
         {
-            return await Task.FromResult(user.NickName);
+            return await Task.FromResult(user.UserName.ToUpper());
         }
 
         public async Task<string> GetPasswordHashAsync(User user, CancellationToken cancellationToken)
@@ -85,7 +95,6 @@ namespace DaxnetBlog.Web.Security
 
         public Task SetNormalizedUserNameAsync(User user, string normalizedName, CancellationToken cancellationToken)
         {
-            user.NickName = normalizedName;
             return Task.CompletedTask;
         }
 

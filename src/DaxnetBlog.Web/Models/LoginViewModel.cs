@@ -8,12 +8,12 @@ namespace DaxnetBlog.Web.Models
 {
     public class LoginViewModel
     {
-        [Required]
         [StringLength(16)]
         [Display(Name = "用户名")]
+        [Required(ErrorMessage = "用户名字段是必填项")]
         public string UserName { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "密码字段是必填项")]
         [StringLength(16)]
         [DataType(DataType.Password)]
         [Display(Name = "密码")]
