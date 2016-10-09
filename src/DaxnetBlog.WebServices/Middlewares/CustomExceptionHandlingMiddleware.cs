@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace DaxnetBlog.WebServices.Middlewares
@@ -32,7 +33,7 @@ namespace DaxnetBlog.WebServices.Middlewares
             }
             catch (ServiceException ex)
             {
-                await FillResponseWithExceptionAsync(context, ex.StatusCode, ex.ToString());
+                await FillResponseWithExceptionAsync(context, ex.StatusCode, ex.IncludeFullStackTraceIfError ? ex.ToString() : ex.Message);
             }
             catch (Exception ex)
             {
@@ -43,8 +44,8 @@ namespace DaxnetBlog.WebServices.Middlewares
         private static async Task FillResponseWithExceptionAsync(HttpContext context, HttpStatusCode httpStatusCode, string exceptionMessage)
         {
             context.Response.StatusCode = Convert.ToInt32(httpStatusCode);
-            context.Response.ContentLength = exceptionMessage.Length;
-            context.Response.ContentType = "text/plain";
+            context.Response.ContentLength = Encoding.UTF8.GetBytes(exceptionMessage).Length;
+            context.Response.ContentType = "text/plain; charset=utf-8";
             await context.Response.WriteAsync(exceptionMessage);
         }
     }

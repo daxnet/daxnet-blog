@@ -52,6 +52,24 @@ namespace DaxnetBlog.WebServices.Controllers
 
             var result = await storage.ExecuteAsync(async(connection, transaction, cancellationToken) => 
             {
+                var userWithName = (await accountStore.SelectAsync(connection, 
+                    x => x.UserName == userName, 
+                    transaction: transaction, 
+                    cancellationToken: cancellationToken)).FirstOrDefault();
+                if (userWithName != null)
+                {
+                    throw new ServiceException(HttpStatusCode.Conflict, $"用户名 {userName} 已经存在。", false);
+                }
+
+                var userWithEmail = (await accountStore.SelectAsync(connection,
+                    x => x.EmailAddress == email,
+                    transaction: transaction,
+                    cancellationToken: cancellationToken)).FirstOrDefault();
+                if (userWithEmail != null)
+                {
+                    throw new ServiceException(HttpStatusCode.Conflict, $"电子邮件地址 {email} 已经存在。", false);
+                }
+
                 var rowsAffected = await accountStore.InsertAsync(
                    new Account
                    {

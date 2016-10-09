@@ -101,19 +101,27 @@ namespace DaxnetBlog.Web.Controllers
                     return View(nameof(Register));
                 }
 
-                var registerResult = await userManager.CreateAsync(new User
+                var user = new User
                 {
                     EmailAddress = model.Email,
                     UserName = model.UserName,
                     NickName = model.NickName
-                }, model.Password);
+                };
+
+                var registerResult = await userManager.CreateAsync(user, model.Password);
 
                 if (registerResult.Succeeded)
                 {
+                    await signInManager.SignInAsync(user, isPersistent: false);
+                    return RedirectToLocal(returnUrl);
+                }
 
+                foreach (var error in registerResult.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
-            await Task.CompletedTask;
+
             return View(model);
         }
 
