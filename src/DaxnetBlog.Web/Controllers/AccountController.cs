@@ -49,7 +49,7 @@ namespace DaxnetBlog.Web.Controllers
                 if (captchaString != encryptedString)
                 {
                     ModelState.AddModelError("", "验证码不正确。");
-                    return View("Login");
+                    return View(nameof(Login));
                 }
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
@@ -93,6 +93,25 @@ namespace DaxnetBlog.Web.Controllers
             ViewData["ReturnUrl"] = returnUrl;
             if (ModelState.IsValid)
             {
+                var captchaString = this.Request.Form["__captcha_image"];
+                var encryptedString = Convert.ToBase64String(UTF32Encoding.Unicode.GetBytes(model.Captcha.ToLower()));
+                if (captchaString != encryptedString)
+                {
+                    ModelState.AddModelError("", "验证码不正确。");
+                    return View(nameof(Register));
+                }
+
+                var registerResult = await userManager.CreateAsync(new User
+                {
+                    EmailAddress = model.Email,
+                    UserName = model.UserName,
+                    NickName = model.NickName
+                }, model.Password);
+
+                if (registerResult.Succeeded)
+                {
+
+                }
             }
             await Task.CompletedTask;
             return View(model);

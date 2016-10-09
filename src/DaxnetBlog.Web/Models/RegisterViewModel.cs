@@ -32,5 +32,11 @@ namespace DaxnetBlog.Web.Models
         [Display(Name = "确认密码")]
         [Compare("Password", ErrorMessage = "输入的确认密码与密码不符")]
         public string ConfirmPassword { get; set; }
+
+        [Required(ErrorMessage = "验证码字段是必填项")]
+        [StringLength(10)]
+        [DataType(DataType.Password)]
+        [Display(Name = "验证码", Prompt = "请输入下方的验证码")]
+        public string Captcha { get; set; }
     }
 }

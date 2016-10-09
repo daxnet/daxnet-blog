@@ -64,7 +64,7 @@ namespace DaxnetBlog.Common.Storage
                         typeof(TEntity)
                             .GetTypeInfo()
                             .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                            .Where(p => p.CanWrite)
+                            .Where(p => p.PropertyType.IsPrimitive() && p.CanWrite)
                             .ToList()
                             .ForEach(x =>
                             {
@@ -205,7 +205,7 @@ namespace DaxnetBlog.Common.Storage
             var propertySelection = typeof(TEntity)
                 .GetTypeInfo()
                 .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .Where(p => p.CanRead);
+                .Where(p => p.CanRead && p.PropertyType.IsPrimitive());
 
             if (autoIncrementFields != null)
             {

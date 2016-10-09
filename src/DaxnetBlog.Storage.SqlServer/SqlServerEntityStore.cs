@@ -82,7 +82,7 @@ namespace DaxnetBlog.Storage.SqlServer
                         typeof(TEntity)
                             .GetTypeInfo()
                             .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                            .Where(p => p.CanWrite)
+                            .Where(p => p.CanWrite && p.PropertyType.IsPrimitive())
                             .ToList()
                             .ForEach(x =>
                             {
@@ -159,7 +159,7 @@ namespace DaxnetBlog.Storage.SqlServer
                         typeof(TEntity)
                             .GetTypeInfo()
                             .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                            .Where(p => p.CanWrite)
+                            .Where(p => p.CanWrite && p.PropertyType.IsPrimitive())
                             .ToList()
                             .ForEach(x =>
                             {
@@ -213,7 +213,7 @@ namespace DaxnetBlog.Storage.SqlServer
                         typeof(TEntity)
                             .GetTypeInfo()
                             .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                            .Where(p => p.CanWrite)
+                            .Where(p => p.CanWrite && p.PropertyType.IsPrimitive())
                             .ToList()
                             .ForEach(x =>
                             {
