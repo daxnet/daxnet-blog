@@ -23,7 +23,6 @@ namespace DaxnetBlog.Common.Storage
         private readonly Dictionary<string, object> parameterValues = new Dictionary<string, object>();
         private readonly IStoreMapping storeMapping;
         private readonly StorageDialectSettings dialectSettings;
-        private static readonly Random rnd = new Random(DateTime.Now.Millisecond);
         private bool startsWith = false;
         private bool endsWith = false;
         private bool contains = false;
@@ -204,7 +203,7 @@ namespace DaxnetBlog.Common.Storage
         /// returns the original expression.</returns>
         protected override Expression VisitConstant(ConstantExpression node)
         {
-            string paramName = string.Format("{0}{1}", this.dialectSettings.ParameterChar, GetUniqueParameterName(8));
+            string paramName = string.Format("{0}{1}", this.dialectSettings.ParameterChar, Utils.GetUniqueStringValue(8));
             Out(paramName);
             if (!parameterValues.ContainsKey(paramName))
             {
@@ -593,23 +592,5 @@ namespace DaxnetBlog.Common.Storage
             return result;
         }
         #endregion
-
-        private static string GetUniqueParameterName(int length)
-        {
-            var candidatesBuilder = new StringBuilder();
-            for (var i = 0; i < 5; i++)
-            {
-                candidatesBuilder.Append(Guid.NewGuid().ToString().Replace("-", "").ToUpper());
-            }
-            var candidates = candidatesBuilder.ToString();
-
-            var result = new StringBuilder("P");
-            for (var i = 0; i < length; i++)
-            {
-                var pos = rnd.Next(candidates.Length);
-                result.Append(candidates[pos]);
-            }
-            return result.ToString();
-        }
     }
 }

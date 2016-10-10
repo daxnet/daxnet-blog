@@ -74,7 +74,7 @@ namespace DaxnetBlog.Web.Security
 
         public async Task<string> GetPasswordHashAsync(User user, CancellationToken cancellationToken)
         {
-            var pwdHash = await (await this.httpClient.GetAsync($"accounts/pwd/{user.Id}", cancellationToken)).Content.ReadAsStringAsync();
+            var pwdHash = await (await this.httpClient.GetAsync($"accounts/authenticate/passwordhash/{user.Id}", cancellationToken)).Content.ReadAsStringAsync();
             return pwdHash;
         }
 

@@ -10,32 +10,32 @@ namespace DaxnetBlog.WebServices
     public class ServiceException : DaxnetBlogException
     {
 
-        public ServiceException(bool includeFullStackTraceIfError = true)
+        public ServiceException(bool includeFullStackTraceIfError = false)
             : this(HttpStatusCode.InternalServerError, includeFullStackTraceIfError)
         { }
 
-        public ServiceException(HttpStatusCode statusCode, bool includeFullStackTraceIfError = true) : base()
+        public ServiceException(HttpStatusCode statusCode, bool includeFullStackTraceIfError = false) : base()
         {
             this.StatusCode = statusCode;
             this.IncludeFullStackTraceIfError = includeFullStackTraceIfError;
         }
 
-        public ServiceException(string message, bool includeFullStackTraceIfError = true)
+        public ServiceException(string message, bool includeFullStackTraceIfError = false)
             : this(HttpStatusCode.InternalServerError, message, includeFullStackTraceIfError)
         { }
 
-        public ServiceException(HttpStatusCode statusCode, string message, bool includeFullStackTraceIfError = true)
+        public ServiceException(HttpStatusCode statusCode, string message, bool includeFullStackTraceIfError = false)
             : base(message)
         {
             this.StatusCode = statusCode;
             this.IncludeFullStackTraceIfError = includeFullStackTraceIfError;
         }
 
-        public ServiceException(string message, Exception innerException, bool includeFullStackTraceIfError = true)
+        public ServiceException(string message, Exception innerException, bool includeFullStackTraceIfError = false)
             : this(HttpStatusCode.InternalServerError, message, innerException, includeFullStackTraceIfError)
         { }
 
-        public ServiceException(HttpStatusCode statusCode, string message, Exception innerException, bool includeFullStackTraceIfError = true)
+        public ServiceException(HttpStatusCode statusCode, string message, Exception innerException, bool includeFullStackTraceIfError = false)
             : base(message, innerException)
         {
             this.StatusCode = statusCode;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace DaxnetBlog.Common
@@ -8,8 +9,9 @@ namespace DaxnetBlog.Common
     /// <summary>
     /// Provides the method extensions globally.
     /// </summary>
-    public static class Extensions
+    public static class Utils
     {
+        private static readonly Random rnd = new Random(DateTime.Now.Millisecond);
         private static Lazy<Type[]> PrimitiveTypesInternal = new Lazy<Type[]>(() =>
         {
             var types = new[]
@@ -54,6 +56,24 @@ namespace DaxnetBlog.Common
             }
 
             return PrimitiveTypesInternal.Value.Contains(src);
+        }
+
+        public static string GetUniqueStringValue(int length)
+        {
+            var candidatesBuilder = new StringBuilder();
+            for (var i = 0; i < 5; i++)
+            {
+                candidatesBuilder.Append(Guid.NewGuid().ToString().Replace("-", "").ToUpper());
+            }
+            var candidates = candidatesBuilder.ToString();
+
+            var result = new StringBuilder("P");
+            for (var i = 0; i < length; i++)
+            {
+                var pos = rnd.Next(candidates.Length);
+                result.Append(candidates[pos]);
+            }
+            return result.ToString();
         }
     }
 }

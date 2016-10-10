@@ -140,6 +140,50 @@ namespace DaxnetBlog.Common.Storage
             return await Task.FromResult(this.Insert(entity, connection, autoIncrementFields, transaction));
         }
 
+        public virtual int Update(TEntity entity,
+            IDbConnection connection,
+            Expression<Func<TEntity, bool>> expression = null,
+            IEnumerable<Expression<Func<TEntity, object>>> updateFields = null,
+            IDbTransaction transaction = null)
+        {
+            var updateStatementConstructResult = ConstructUpdateStatement(entity, expression, updateFields);
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = updateStatementConstructResult.Item1;
+                if (transaction != null)
+                {
+                    command.Transaction = transaction;
+                }
+                command.Parameters.Clear();
+                foreach(var c in updateStatementConstructResult.Item2)
+                {
+                    var param = command.CreateParameter();
+                    param.ParameterName = c.Item2;
+                    param.Value = c.Item3;
+                    command.Parameters.Add(param);
+                }
+                if (updateStatementConstructResult.Item3 != null)
+                {
+                    foreach(var c in updateStatementConstructResult.Item3.ParameterValues)
+                    {
+                        var param = command.CreateParameter();
+                        param.ParameterName = c.Key;
+                        param.Value = c.Value;
+                        command.Parameters.Add(param);
+                    }
+                }
+                return command.ExecuteNonQuery();
+            }
+        }
+
+        public virtual async Task<int> UpdateAsync(TEntity entity,
+            IDbConnection connection,
+            Expression<Func<TEntity, bool>> expression = null,
+            IEnumerable<Expression<Func<TEntity, object>>> updateFields = null,
+            IDbTransaction transaction = null,
+            CancellationToken cancellationToken = default(CancellationToken))
+            => await Task.FromResult(this.Update(entity, connection, expression, updateFields, transaction));
+
         protected static LambdaExpression StripConvert<T>(Expression<Func<T, object>> source)
         {
             Expression result = source.Body;
@@ -232,6 +276,47 @@ namespace DaxnetBlog.Common.Storage
             return new Tuple<string, IEnumerable<Tuple<string, string, object>>>(sqlBuilder.ToString(), columnNames);
         }
 
-        
+        protected Tuple<string, IEnumerable<Tuple<string, string, object>>, WhereClauseBuildResult> ConstructUpdateStatement(TEntity entity,
+            Expression<Func<TEntity, bool>> expression,
+            IEnumerable<Expression<Func<TEntity, object>>> updateFields)
+        {
+            var sqlBuilder = new StringBuilder($"UPDATE {mapping.GetEscapedTableName<TEntity, TKey>(dialectSettings)} SET ");
+            var columnNames = new List<Tuple<string, string, object>>();
+            var updateProperties = typeof(TEntity)
+                .GetTypeInfo()
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(p => p.CanRead && p.PropertyType.IsPrimitive());
+            if (updateFields!=null)
+            {
+                updateProperties = updateProperties.Where(p =>
+                    updateFields.Any(expr => ((MemberExpression)StripConvert(expr).Body).Member.Name == p.Name));
+            }
+            updateProperties
+                .ToList()
+                .ForEach(ps =>
+                {
+                    columnNames.Add(new Tuple<string, string, object>(mapping.GetEscapedColumnName<TEntity, TKey>(dialectSettings, ps),
+                        $"{this.dialectSettings.ParameterChar}{ps.Name}", ps.GetValue(entity) ?? DBNull.Value));
+                });
+            for (var i = 0; i < columnNames.Count; i++)
+            {
+                sqlBuilder.Append($"{columnNames[i].Item1}={columnNames[i].Item2}");
+                if (i < columnNames.Count - 1)
+                {
+                    sqlBuilder.Append(", ");
+                }
+            }
+
+            WhereClauseBuildResult whereClauseBuildResult = null;
+            if (expression != null)
+            {
+                var whereClauseBuilder = new WhereClauseBuilder<TEntity, TKey>(mapping, dialectSettings);
+                whereClauseBuildResult = whereClauseBuilder.BuildWhereClause(expression);
+                sqlBuilder.Append($" WHERE {whereClauseBuildResult.WhereClause}");
+            }
+            return new Tuple<string, IEnumerable<Tuple<string, string, object>>, WhereClauseBuildResult>(sqlBuilder.ToString(),
+                columnNames,
+                whereClauseBuildResult);
+        }
     }
 }

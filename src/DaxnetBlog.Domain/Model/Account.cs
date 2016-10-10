@@ -21,6 +21,12 @@ namespace DaxnetBlog.Domain.Model
 
         public IList<BlogPost> BlogPosts { get; set; }
 
+        public string EmailVerifyCode { get; set; }
+
+        public DateTime? EmailVerifiedDate { get; set; }
+
+        public bool? IsLocked { get; set; }
+
         public int Id { get; set; }
 
         public override string ToString() => UserName;
