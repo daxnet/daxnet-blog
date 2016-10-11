@@ -58,6 +58,11 @@ namespace DaxnetBlog.Web.Controllers
                 {
                     return RedirectToLocal(returnUrl);
                 }
+                else if (result.IsLockedOut)
+                {
+                    ModelState.AddModelError(string.Empty, "登录失败，该账户已被锁定。");
+                    return View(model);
+                }
                 else
                 {
                     ModelState.AddModelError(string.Empty, "登录失败，请检查用户名或密码。");
@@ -81,6 +86,7 @@ namespace DaxnetBlog.Web.Controllers
         [AllowAnonymous]
         public IActionResult Register(string returnUrl = null)
         {
+            ViewData["ShowMessage"] = false;
             ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
@@ -112,17 +118,43 @@ namespace DaxnetBlog.Web.Controllers
 
                 if (registerResult.Succeeded)
                 {
-                    await signInManager.SignInAsync(user, isPersistent: false);
-                    return RedirectToLocal(returnUrl);
+                    var verificationCode = await userManager.GenerateEmailConfirmationTokenAsync(user);
+                    var callbackUrl = Url.Action(nameof(ConfirmEmail), "Account", new { userName = Convert.ToBase64String(Encoding.ASCII.GetBytes(user.UserName)), code = verificationCode }, protocol: HttpContext.Request.Scheme);
+                    // TODO: Send Email
+                    ViewData["ShowMessage"] = true;
+                    ViewData["MessageTitle"] = "注册成功！";
+                    ViewData["MessageBody"] = @"验证码已发送至注册邮箱，请点击邮件中链接激活账户。";
                 }
-
-                foreach (var error in registerResult.Errors)
+                else
                 {
-                    ModelState.AddModelError(string.Empty, error.Description);
+                    foreach (var error in registerResult.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
                 }
             }
 
             return View(model);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> ConfirmEmail(string userName, string code)
+        {
+            if (userName == null || code == null)
+            {
+                return View(nameof(ConfirmEmail), IdentityResult.Failed(new IdentityError { Description = "待验证的数据不正确。" }));
+            }
+            var userNameDecoded = Encoding.ASCII.GetString(Convert.FromBase64String(userName));
+
+            var user = await userManager.FindByNameAsync(userNameDecoded);
+            if (user == null)
+            {
+                return View(nameof(ConfirmEmail), IdentityResult.Failed(new IdentityError { Description = "待验证的用户不存在。" }));
+            }
+
+            var result = await userManager.ConfirmEmailAsync(user, code);
+            return View(nameof(ConfirmEmail), result);
         }
 
         private IActionResult RedirectToLocal(string returnUrl)

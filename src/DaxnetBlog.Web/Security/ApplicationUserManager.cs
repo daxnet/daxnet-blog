@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Net.Http;
+using System.Threading;
 
 namespace DaxnetBlog.Web.Security
 {
@@ -54,6 +55,45 @@ namespace DaxnetBlog.Web.Security
                 Code = result.StatusCode.ToString(),
                 Description = message
             } });
+        }
+
+        public override async Task<string> GenerateEmailConfirmationTokenAsync(User user)
+        {
+            return await (await this.httpClient.GetAsync($"accounts/verification/code/{user.UserName}")).Content.ReadAsStringAsync();
+        }
+
+        public override async Task<bool> GetLockoutEnabledAsync(User user)
+        {
+            return await Task.FromResult(true);
+        }
+
+        public override async Task<bool> IsLockedOutAsync(User user)
+        {
+            var account = await Store.FindByNameAsync(user.UserName, default(CancellationToken));
+            return !account.IsLocked.HasValue || account.IsLocked.Value;
+        }
+
+        public override async Task<IdentityResult> ConfirmEmailAsync(User user, string token)
+        {
+            var result = await httpClient.PostAsJsonAsync("accounts/verification/verify", new { UserName = user.UserName, Code = token });
+            try
+            {
+                result.EnsureSuccessStatusCode();
+                var verified = Convert.ToBoolean(await result.Content.ReadAsStringAsync());
+                return verified ? IdentityResult.Success : IdentityResult.Failed(new IdentityError { Description = "请检查所提供的用户信息是否正确。" });
+            }
+            catch(Exception ex)
+            {
+                return IdentityResult.Failed(new IdentityError { Description = $"错误信息：{ex.Message}。" });
+            }
+        }
+
+        public override bool SupportsUserLockout
+        {
+            get
+            {
+                return true;
+            }
         }
     }
 }

@@ -1,0 +1,20 @@
+﻿@using Microsoft.AspNetCore.Identity
+
+@model IdentityResult
+
+@if (Model.Succeeded)
+{
+    <message message-enabled="true"
+             message-title="验证成功！"
+             message-type="Success">
+        请<a href="@Url.Action("Login", "Account")"><strong>【点击此处】</strong></a>进入登录界面。
+    </message>
+}
+else
+{
+    <message message-enabled="true"
+             message-title="验证失败！"
+             message-type="Error">
+        @Model.Errors.First().Description
+    </message>
+}

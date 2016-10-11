@@ -26,8 +26,7 @@
     "System.Runtime.Serialization.Xml": "4.1.1",
     "Humanizer.Core": "2.1.0",
     "Microsoft.AspNetCore.Mvc.ViewFeatures": "1.0.1",
-    "CoreCompat.System.Drawing": "1.0.0-beta006"
-  },
+    "CoreCompat.System.Drawing": "1.0.0-beta006"  },
 
   "tools": {
     "BundlerMinifier.Core": "2.0.238",

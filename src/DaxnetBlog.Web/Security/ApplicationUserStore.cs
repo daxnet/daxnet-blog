@@ -13,7 +13,7 @@ namespace DaxnetBlog.Web.Security
     /// 
     /// </summary>
     /// <seealso cref="Microsoft.AspNetCore.Identity.IUserStore{DaxnetBlog.Web.Security.User}" />
-    public class ApplicationUserStore : IUserStore<User>, IUserPasswordStore<User>
+    public class ApplicationUserStore : IUserStore<User>, IUserPasswordStore<User>, IUserLockoutStore<User>
     {
         private readonly HttpClient httpClient;
 
@@ -67,6 +67,22 @@ namespace DaxnetBlog.Web.Security
             }
         }
 
+        public Task<int> GetAccessFailedCountAsync(User user, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(0);
+        }
+
+        public Task<bool> GetLockoutEnabledAsync(User user, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(true);
+        }
+
+        public Task<DateTimeOffset?> GetLockoutEndDateAsync(User user, CancellationToken cancellationToken)
+        {
+            DateTimeOffset? value = DateTimeOffset.MaxValue;
+            return Task.FromResult(value);
+        }
+
         public async Task<string> GetNormalizedUserNameAsync(User user, CancellationToken cancellationToken)
         {
             return await Task.FromResult(user.UserName.ToUpper());
@@ -91,6 +107,26 @@ namespace DaxnetBlog.Web.Security
         public async Task<bool> HasPasswordAsync(User user, CancellationToken cancellationToken)
         {
             return await Task.FromResult(true);
+        }
+
+        public Task<int> IncrementAccessFailedCountAsync(User user, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(0);
+        }
+
+        public Task ResetAccessFailedCountAsync(User user, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task SetLockoutEnabledAsync(User user, bool enabled, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task SetLockoutEndDateAsync(User user, DateTimeOffset? lockoutEnd, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
         }
 
         public Task SetNormalizedUserNameAsync(User user, string normalizedName, CancellationToken cancellationToken)

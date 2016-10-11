@@ -7,6 +7,7 @@ using DaxnetBlog.Common.Storage;
 using DaxnetBlog.Domain.EntityStore;
 using DaxnetBlog.Domain.Model;
 using System.Linq.Expressions;
+using DaxnetBlog.Common;
 
 namespace DaxnetBlog.WebServices.Controllers
 {
