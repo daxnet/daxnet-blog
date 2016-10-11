@@ -9,6 +9,11 @@ footer{
     font-size:small;
 }
 
+.row {
+  margin-left: 0;
+  margin-right: 0;
+}
+
 /* Wrapping element */
 /* Set some basic padding to keep content from hitting the edges */
 .body-content {
