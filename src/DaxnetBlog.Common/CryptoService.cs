@@ -109,8 +109,13 @@ namespace DaxnetBlog.Common
         /// <returns>an encrypted string</returns>
         public string Encrypt(string inputText, string password)
         {
-            this.Password = password;
-            return this.Encrypt(inputText);
+            if (!string.IsNullOrEmpty(inputText) &&
+                !string.IsNullOrEmpty(password))
+            {
+                this.Password = password;
+                return this.Encrypt(inputText);
+            }
+            return null;
         }
 
         /// <summary>
@@ -166,8 +171,13 @@ namespace DaxnetBlog.Common
         /// <returns>a decrypted string</returns>
         public string Decrypt(string inputText, string password)
         {
-            this.Password = password;
-            return Decrypt(inputText);
+            if (!string.IsNullOrEmpty(inputText) &&
+                !string.IsNullOrEmpty(password))
+            {
+                this.Password = password;
+                return Decrypt(inputText);
+            }
+            return null;
         }
 
         /// <summary>

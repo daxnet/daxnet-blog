@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using DaxnetBlog.Web.Security;
 using System.Net.Http;
+using DaxnetBlog.Web.Services;
 
 namespace DaxnetBlog.Web
 {
@@ -34,10 +35,12 @@ namespace DaxnetBlog.Web
 
             services.AddTransient<HttpClient, ServiceProxy>();
 
+            services.AddSingleton<IEmailService, EmailService>();
+
             // Build the configuration from configuration file.
             services.AddOptions();
             services.Configure<WebsiteSettings>(Configuration);
-
+            
             services
                 .AddIdentity<User, Role>()
                 .AddUserStore<ApplicationUserStore>()
