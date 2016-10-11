@@ -82,7 +82,7 @@ namespace DaxnetBlog.Storage.SqlServer
                         typeof(TEntity)
                             .GetTypeInfo()
                             .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                            .Where(p => p.CanWrite)
+                            .Where(p => p.CanWrite && p.PropertyType.IsPrimitive())
                             .ToList()
                             .ForEach(x =>
                             {
@@ -159,7 +159,7 @@ namespace DaxnetBlog.Storage.SqlServer
                         typeof(TEntity)
                             .GetTypeInfo()
                             .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                            .Where(p => p.CanWrite)
+                            .Where(p => p.CanWrite && p.PropertyType.IsPrimitive())
                             .ToList()
                             .ForEach(x =>
                             {
@@ -213,7 +213,7 @@ namespace DaxnetBlog.Storage.SqlServer
                         typeof(TEntity)
                             .GetTypeInfo()
                             .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                            .Where(p => p.CanWrite)
+                            .Where(p => p.CanWrite && p.PropertyType.IsPrimitive())
                             .ToList()
                             .ForEach(x =>
                             {
@@ -254,6 +254,36 @@ namespace DaxnetBlog.Storage.SqlServer
             }
         }
 
-        
+        public override async Task<int> UpdateAsync(TEntity entity, IDbConnection connection, Expression<Func<TEntity, bool>> expression = null, IEnumerable<Expression<Func<TEntity, object>>> updateFields = null, IDbTransaction transaction = null, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var updateStatementConstructResult = ConstructUpdateStatement(entity, expression, updateFields);
+            using (var command = (SqlCommand)connection.CreateCommand())
+            {
+                command.CommandText = updateStatementConstructResult.Item1;
+                if (transaction != null)
+                {
+                    command.Transaction = (SqlTransaction)transaction;
+                }
+                command.Parameters.Clear();
+                foreach (var c in updateStatementConstructResult.Item2)
+                {
+                    var param = command.CreateParameter();
+                    param.ParameterName = c.Item2;
+                    param.Value = c.Item3;
+                    command.Parameters.Add(param);
+                }
+                if (updateStatementConstructResult.Item3 != null)
+                {
+                    foreach (var c in updateStatementConstructResult.Item3.ParameterValues)
+                    {
+                        var param = command.CreateParameter();
+                        param.ParameterName = c.Key;
+                        param.Value = c.Value;
+                        command.Parameters.Add(param);
+                    }
+                }
+                return await command.ExecuteNonQueryAsync(cancellationToken);
+            }
+        }
     }
 }

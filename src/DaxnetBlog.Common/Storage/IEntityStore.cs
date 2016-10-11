@@ -84,5 +84,18 @@ namespace DaxnetBlog.Common.Storage
             IEnumerable<Expression<Func<TEntity, object>>> autoIncrementFields = null,
             IDbTransaction transaction = null,
             CancellationToken cancellationToken = default(CancellationToken));
+
+        int Update(TEntity entity,
+            IDbConnection connection,
+            Expression<Func<TEntity, bool>> expression = null,
+            IEnumerable<Expression<Func<TEntity, object>>> updateFields = null,
+            IDbTransaction transaction = null);
+
+        Task<int> UpdateAsync(TEntity entity,
+            IDbConnection connection,
+            Expression<Func<TEntity, bool>> expression = null,
+            IEnumerable<Expression<Func<TEntity, object>>> updateFields = null,
+            IDbTransaction transaction = null,
+            CancellationToken cancellationToken = default(CancellationToken));
     }
 }

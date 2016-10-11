@@ -15,6 +15,8 @@ namespace DaxnetBlog.Web.Security
 
         public string EmailAddress { get; set; }
 
+        public bool? IsLocked { get; set; }
+
         public override string ToString() => UserName;
     }
 }

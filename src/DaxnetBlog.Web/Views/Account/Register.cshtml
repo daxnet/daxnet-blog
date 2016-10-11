@@ -4,6 +4,11 @@
 @{
     ViewData["Title"] = "注册新账户";
 }
+<message message-enabled="@ViewData["ShowMessage"] != null && @Convert.ToBoolean(ViewData["ShowMessage"])"
+         message-title=@ViewData["MessageTitle"]
+         message-type="info">
+    @ViewData["MessageBody"]
+</message>
 
 <h2>@ViewData["Title"]</h2>
 <hr />
@@ -45,6 +50,19 @@
                     <div class="col-md-10">
                         <input asp-for="ConfirmPassword" class="form-control" />
                         <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Captcha" class="col-md-2 control-label"></label>
+                    <div class="col-md-10">
+                        <input asp-for="Captcha" class="form-control" />
+                        <span asp-validation-for="Captcha" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10" />
+                    <div>
+                        <img asp-captcha="true" />
                     </div>
                 </div>
                 <div class="form-group">
