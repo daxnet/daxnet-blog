@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DaxnetBlog.Common;
@@ -22,8 +20,8 @@ namespace DaxnetBlog.Web.Services
             try
             {
                 smtpServerName = Environment.GetEnvironmentVariable("DAXNETBLOG_SMTP_SERVERNAME");
-                smtpUserName = crypto.Decrypt(Environment.GetEnvironmentVariable("DAXNETBLOG_SMTP_USERNAME"), "DaxnetBlog");
-                smtpPassword = crypto.Decrypt(Environment.GetEnvironmentVariable("DAXNETBLOG_SMTP_PASSWORD"), "DaxnetBlog");
+                smtpUserName = crypto.Decrypt(Environment.GetEnvironmentVariable("DAXNETBLOG_SMTP_USERNAME"), Crypto.GlobalKey);
+                smtpPassword = crypto.Decrypt(Environment.GetEnvironmentVariable("DAXNETBLOG_SMTP_PASSWORD"), Crypto.GlobalKey);
             }
             catch
             {
@@ -35,25 +33,30 @@ namespace DaxnetBlog.Web.Services
 
         public async Task SendEmailAsync(string toName, string toAddess, string title, string bodyHtml, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var message = new MimeMessage();
-            message.From.Add(new MailboxAddress("daxnet", "daxnet@outlook.com"));
-            message.To.Add(new MailboxAddress(toName, toAddess));
-            message.Subject = title;
-            message.Body = new TextPart(TextFormat.Html)
+            if (!string.IsNullOrEmpty(smtpServerName) &&
+                !string.IsNullOrEmpty(smtpUserName) &&
+                !string.IsNullOrEmpty(smtpPassword))
             {
-                Text = bodyHtml
-            };
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress("daxnet", "daxnet@outlook.com"));
+                message.To.Add(new MailboxAddress(toName, toAddess));
+                message.Subject = title;
+                message.Body = new TextPart(TextFormat.Html)
+                {
+                    Text = bodyHtml
+                };
 
-            using (var client = new SmtpClient())
-            {
-                client.ServerCertificateValidationCallback = (a, b, c, d) => true;
-                await client.ConnectAsync(smtpServerName, cancellationToken: cancellationToken);
-                client.AuthenticationMechanisms.Remove("XOAUTH2");
-                await client.AuthenticateAsync(smtpUserName, smtpPassword);
+                using (var client = new SmtpClient())
+                {
+                    client.ServerCertificateValidationCallback = (a, b, c, d) => true;
+                    await client.ConnectAsync(smtpServerName, cancellationToken: cancellationToken);
+                    client.AuthenticationMechanisms.Remove("XOAUTH2");
+                    await client.AuthenticateAsync(smtpUserName, smtpPassword);
 
-                client.Send(message);
+                    client.Send(message);
 
-                client.Disconnect(true);
+                    client.Disconnect(true);
+                }
             }
         }
     }

@@ -19,8 +19,6 @@ namespace DaxnetBlog.Domain.Model
 
         public DateTime? DateLastLogin { get; set; }
 
-        public IList<BlogPost> BlogPosts { get; set; }
-
         public string EmailVerifyCode { get; set; }
 
         public DateTime? EmailVerifiedDate { get; set; }

@@ -34,7 +34,7 @@ namespace DaxnetBlog.WebServices
                 try
                 {
                     var c = Crypto.Create(CryptoTypes.EncTypeTripleDes);
-                    connectionString = c.Decrypt(connectionString, "DaxnetBlog");
+                    connectionString = c.Decrypt(connectionString, Crypto.GlobalKey);
                 }
                 catch
                 {
@@ -55,6 +55,11 @@ namespace DaxnetBlog.WebServices
             builder.Register(x => 
                     new SqlServerEntityStore<BlogPost, int>(x.Resolve<IStoreMapping>(), x.Resolve<IStorage>().DialectSettings))
                 .As<IEntityStore<BlogPost, int>>();
+
+            // Registers the entity store for Reply entity.
+            builder.Register(x =>
+                    new SqlServerEntityStore<Reply, int>(x.Resolve<IStoreMapping>(), x.Resolve<IStorage>().DialectSettings))
+                .As<IEntityStore<Reply, int>>();
 
             // Registers the SQL Server storage.
             builder.RegisterType<SqlServerStorage>()

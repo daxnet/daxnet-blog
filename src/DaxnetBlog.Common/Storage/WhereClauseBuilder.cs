@@ -47,11 +47,11 @@ namespace DaxnetBlog.Common.Storage
             sb.Append(s);
         }
 
-        private void OutMember(Expression instance, MemberInfo member)
-        {
-            string mappedFieldName = storeMapping.GetEscapedColumnName<TEntity, TKey>(this.dialectSettings, member.Name);
-            Out(mappedFieldName);
-        }
+        //private void OutMember(Expression instance, MemberInfo member)
+        //{
+        //    string mappedFieldName = storeMapping.GetEscapedColumnName<TEntity, TKey>(this.dialectSettings, member.Name);
+        //    Out(mappedFieldName);
+        //}
         #endregion
 
         #region Protected Properties
@@ -177,7 +177,7 @@ namespace DaxnetBlog.Common.Storage
             if (node.Member.DeclaringType == typeof(TEntity) ||
                 typeof(TEntity).GetTypeInfo().IsSubclassOf(node.Member.DeclaringType))
             {
-                string mappedFieldName = storeMapping.GetEscapedColumnName<TEntity, TKey>(this.dialectSettings, node.Member.Name);
+                string mappedFieldName =$"T_{storeMapping.GetTableName<TEntity, TKey>()}.{storeMapping.GetEscapedColumnName<TEntity, TKey>(this.dialectSettings, node.Member.Name)}";
                 Out(mappedFieldName);
             }
             else

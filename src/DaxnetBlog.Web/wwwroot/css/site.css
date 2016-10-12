@@ -97,6 +97,11 @@ article h4 {
 	font-style: italic;
 }
 
+article .replies .panel-default .panel-heading {
+    font-size: small;
+    color: gray;
+}
+
 /* Set widths on the form inputs since otherwise they're 100% wide */
 input,
 select,

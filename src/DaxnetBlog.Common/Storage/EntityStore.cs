@@ -68,7 +68,8 @@ namespace DaxnetBlog.Common.Storage
                             .ToList()
                             .ForEach(x =>
                             {
-                                var value = reader[mapping.GetColumnName<TEntity, TKey>(x)];
+                                var columnName = $"{mapping.GetTableName<TEntity, TKey>()}_{mapping.GetColumnName<TEntity, TKey>(x)}";
+                                var value = reader[columnName];
                                 if (value == DBNull.Value)
                                 {
                                     value = null;
@@ -81,6 +82,105 @@ namespace DaxnetBlog.Common.Storage
                 }
             }
             return entities;
+        }
+
+        public virtual IEnumerable<TEntity> Select<TJoined>(IDbConnection connection,
+            Expression<Func<TEntity, TJoined>> includePath,
+            Expression<Func<TEntity, TKey>> keySelector,
+            Expression<Func<TJoined, TKey>> joinedKeySelector,
+            Expression<Func<TEntity, bool>> expression = null,
+            Sort<TEntity, TKey> sorting = null,
+            IDbTransaction transaction = null)
+            where TJoined : class, IEntity<TKey>, new()
+        {
+            IEnumerable<KeyValuePair<string, object>> potentialParameters;
+            var sql = this.ConstructSelectStatementForJoin<TJoined>(out potentialParameters,
+                keySelector,
+                joinedKeySelector,
+                expression, 
+                sorting);
+
+            var entities = new List<TEntity>();
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = sql;
+                if (transaction != null)
+                {
+                    command.Transaction = transaction;
+                }
+                if (potentialParameters != null)
+                {
+                    command.Parameters.Clear();
+                    foreach (var kvp in potentialParameters)
+                    {
+                        var param = command.CreateParameter();
+                        param.ParameterName = kvp.Key;
+                        param.Value = kvp.Value;
+                        command.Parameters.Add(param);
+                    }
+                }
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var entity = new TEntity();
+                        var joined = new TJoined();
+                        typeof(TEntity)
+                            .GetTypeInfo()
+                            .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                            .Where(p => p.CanWrite)
+                            .ToList()
+                            .ForEach(x =>
+                            {
+                                if (x.PropertyType.IsPrimitive())
+                                {
+                                    var columnName = $"{mapping.GetTableName<TEntity, TKey>()}_{mapping.GetColumnName<TEntity, TKey>(x)}";
+                                    var value = reader[columnName];
+                                    if (value == DBNull.Value)
+                                    {
+                                        value = null;
+                                    }
+                                    x.SetValue(entity, value);
+                                }
+                                else if (x.PropertyType == typeof(TJoined))
+                                {
+                                    typeof(TJoined)
+                                        .GetTypeInfo()
+                                        .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                                        .Where(p => p.CanWrite && p.PropertyType.IsPrimitive())
+                                        .ToList()
+                                        .ForEach(y =>
+                                        {
+                                            var joinedColumnName = $"{mapping.GetTableName<TJoined, TKey>()}_{mapping.GetColumnName<TJoined, TKey>(y)}";
+                                            var joinedValue = reader[joinedColumnName];
+                                            if (joinedValue == DBNull.Value)
+                                            {
+                                                joinedValue = null;
+                                            }
+                                            y.SetValue(joined, joinedValue);
+                                        });
+                                    x.SetValue(entity, joined);
+                                }
+                            });
+                        entities.Add(entity);
+                    }
+                    reader.Close();
+                }
+            }
+            return entities;
+        }
+
+        public virtual async Task<IEnumerable<TEntity>> SelectAsync<TJoined>(IDbConnection connection,
+            Expression<Func<TEntity, TJoined>> includePath,
+            Expression<Func<TEntity, TKey>> keySelector,
+            Expression<Func<TJoined, TKey>> joinedKeySelector,
+            Expression<Func<TEntity, bool>> expression = null,
+            Sort<TEntity, TKey> sorting = null,
+            IDbTransaction transaction = null,
+            CancellationToken cancellationToken = default(CancellationToken))
+            where TJoined : class, IEntity<TKey>, new()
+        {
+            return await Task.FromResult(this.Select<TJoined>(connection, includePath, keySelector, joinedKeySelector, expression, sorting, transaction));
         }
 
         public abstract PagedResult<TEntity, TKey> Select(int pageNumber, int pageSize, 
@@ -201,10 +301,72 @@ namespace DaxnetBlog.Common.Storage
             Expression<Func<TEntity, bool>> expression = null,
             Sort<TEntity, TKey> sorting = null)
         {
+            var tableName = mapping.GetTableName<TEntity, TKey>();
+            var escapedTableName = mapping.GetEscapedTableName<TEntity, TKey>(dialectSettings);
             var sqlBuilder = new StringBuilder();
             parameters = null;
 
-            sqlBuilder.AppendLine($"SELECT * FROM {mapping.GetEscapedTableName<TEntity, TKey>(dialectSettings)} ");
+            var fieldSet = string.Join(", ",
+                typeof(TEntity)
+                .GetTypeInfo()
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(p => p.CanRead && p.PropertyType.IsPrimitive())
+                .Select(p => $"T_{tableName}.{mapping.GetEscapedColumnName<TEntity, TKey>(dialectSettings, p)} AS {tableName}_{mapping.GetColumnName<TEntity, TKey>(p)}"));
+                
+
+            sqlBuilder.AppendLine($"SELECT {fieldSet} FROM {mapping.GetEscapedTableName<TEntity, TKey>(dialectSettings)} AS T_{tableName}");
+
+            if (expression != null)
+            {
+                var whereClauseBuildResult = this.BuildWhereClause(expression);
+                sqlBuilder.AppendLine($"WHERE {whereClauseBuildResult.WhereClause} ");
+                parameters = new Dictionary<string, object>(whereClauseBuildResult.ParameterValues);
+            }
+
+            if (sorting != null && sorting.Count > 0)
+            {
+                sqlBuilder.Append("ORDER BY ");
+                sqlBuilder.Append(BuildOrderByClause(sorting));
+            }
+
+            return sqlBuilder.ToString();
+        }
+
+        protected string ConstructSelectStatementForJoin<TJoined>(out IEnumerable<KeyValuePair<string, object>> parameters,
+            Expression<Func<TEntity, TKey>> keySelector,
+            Expression<Func<TJoined, TKey>> joinedKeySelector,
+            Expression<Func<TEntity, bool>> expression = null,
+            Sort<TEntity, TKey> sorting = null)
+            where TJoined : class, IEntity<TKey>, new()
+        {
+            var tableName = mapping.GetTableName<TEntity, TKey>();
+            var joinedTableName = mapping.GetTableName<TJoined, TKey>();
+            var escapedTableName = mapping.GetEscapedTableName<TEntity, TKey>(dialectSettings);
+            var joinedEscapedTableName = mapping.GetEscapedTableName<TJoined, TKey>(dialectSettings);
+            var escapedKeyName = mapping.GetEscapedColumnName<TEntity, TKey>(dialectSettings, ((MemberExpression)keySelector.Body).Member.Name);
+            var escapedJoinKeyName = mapping.GetEscapedColumnName<TJoined, TKey>(dialectSettings, ((MemberExpression)joinedKeySelector.Body).Member.Name);
+
+            var sqlBuilder = new StringBuilder();
+            parameters = null;
+
+            var fieldSet = string.Join(", ",
+                typeof(TEntity)
+                .GetTypeInfo()
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(p => p.CanRead && p.PropertyType.IsPrimitive())
+                .Select(p => $"T_{tableName}.{mapping.GetEscapedColumnName<TEntity, TKey>(dialectSettings, p)} AS {tableName}_{mapping.GetColumnName<TEntity, TKey>(p)}"));
+
+            var joinedFieldSet = string.Join(", ",
+                typeof(TJoined)
+                .GetTypeInfo()
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(p => p.CanRead && p.PropertyType.IsPrimitive())
+                .Select(p => $"T_{joinedTableName}.{mapping.GetEscapedColumnName<TJoined, TKey>(dialectSettings, p)} AS {joinedTableName}_{mapping.GetColumnName<TJoined, TKey>(p)}"));
+
+
+            sqlBuilder.AppendLine($"SELECT {fieldSet}, {joinedFieldSet} FROM {escapedTableName} AS T_{tableName}");
+            sqlBuilder.AppendLine($"JOIN  {joinedEscapedTableName} AS T_{joinedTableName}");
+            sqlBuilder.AppendLine($"ON T_{tableName}.{escapedKeyName} = T_{joinedTableName}.{escapedJoinKeyName}");
 
             if (expression != null)
             {

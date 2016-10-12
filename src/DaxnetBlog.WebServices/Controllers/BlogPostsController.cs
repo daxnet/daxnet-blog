@@ -16,11 +16,15 @@ namespace DaxnetBlog.WebServices.Controllers
     {
         private readonly IStorage storage;
         private readonly IEntityStore<BlogPost, int> blogPostStore;
+        private readonly IEntityStore<Reply, int> replyStore;
 
-        public BlogPostsController(IStorage storage, IEntityStore<BlogPost, int> blogPostStore)
+        public BlogPostsController(IStorage storage, 
+            IEntityStore<BlogPost, int> blogPostStore,
+            IEntityStore<Reply, int> replyStore)
         {
             this.storage = storage;
             this.blogPostStore = blogPostStore;
+            this.replyStore = replyStore;
         }
 
         [HttpGet]
@@ -56,20 +60,38 @@ namespace DaxnetBlog.WebServices.Controllers
         [Route("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var blogpost = (await this.storage.ExecuteAsync(async (connection, cancellationToken) => 
-                await blogPostStore.SelectAsync(connection, x => x.Id == id, cancellationToken: cancellationToken))).FirstOrDefault();
-
-            if (blogpost == null)
+            var result = await this.storage.ExecuteAsync(async (connection, transaction, cancellationToken) =>
             {
-                throw new ServiceException(HttpStatusCode.NotFound, $"The blog post of Id ${id} doesn't exist.");
-            }
+                var blogpost = (await blogPostStore.SelectAsync(connection, x => x.Id == id, transaction: transaction, cancellationToken: cancellationToken)).FirstOrDefault();
+                if (blogpost == null)
+                {
+                    throw new ServiceException(HttpStatusCode.NotFound, $"The blog post of Id ${id} doesn't exist.");
+                }
+
+                var replies = await replyStore.SelectAsync(connection,
+                    r => r.Account,
+                    r => r.AccountId,
+                    a => a.Id,
+                    r => r.BlogPostId == id,
+                    transaction: transaction, cancellationToken: cancellationToken);
+
+                return new Tuple<BlogPost, IEnumerable<Reply>>(blogpost, replies);
+            });
 
             return Ok(new
             {
                 Id = id,
-                Title = blogpost.Title,
-                Content = blogpost.Content,
-                DatePublished = blogpost.DatePublished
+                Title = result.Item1.Title,
+                Content = result.Item1.Content,
+                DatePublished = result.Item1.DatePublished,
+                Replies = result.Item2.Select(x=> new {
+                    x.Id,
+                    x.DatePublished,
+                    x.Content,
+                    AccountId = x.Account.Id,
+                    x.Account.UserName,
+                    x.Account.NickName
+                })
             });
         }
     }

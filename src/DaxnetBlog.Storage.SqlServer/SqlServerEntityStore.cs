@@ -217,12 +217,91 @@ namespace DaxnetBlog.Storage.SqlServer
                             .ToList()
                             .ForEach(x =>
                             {
-                                var value = reader[mapping.GetColumnName<TEntity, TKey>(x)];
+                                var columnName = $"{mapping.GetTableName<TEntity, TKey>()}_{mapping.GetColumnName<TEntity, TKey>(x)}";
+                                var value = reader[columnName];
                                 if (value == DBNull.Value)
                                 {
                                     value = null;
                                 }
                                 x.SetValue(entity, value);
+                            });
+                        entities.Add(entity);
+                    }
+                }
+            }
+            return entities;
+        }
+
+        public override async Task<IEnumerable<TEntity>> SelectAsync<TJoined>(IDbConnection connection, Expression<Func<TEntity, TJoined>> includePath, Expression<Func<TEntity, TKey>> keySelector, Expression<Func<TJoined, TKey>> joinedKeySelector, Expression<Func<TEntity, bool>> expression = null, Sort<TEntity, TKey> sorting = null, IDbTransaction transaction = null, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            IEnumerable<KeyValuePair<string, object>> potentialParameters;
+            var sql = this.ConstructSelectStatementForJoin<TJoined>(out potentialParameters,
+                keySelector,
+                joinedKeySelector,
+                expression,
+                sorting);
+
+            var entities = new List<TEntity>();
+            using (var command = (SqlCommand)connection.CreateCommand())
+            {
+                command.CommandText = sql;
+                if (transaction != null)
+                {
+                    command.Transaction = (SqlTransaction)transaction;
+                }
+                if (potentialParameters != null)
+                {
+                    command.Parameters.Clear();
+                    foreach (var kvp in potentialParameters)
+                    {
+                        var param = command.CreateParameter();
+                        param.ParameterName = kvp.Key;
+                        param.Value = kvp.Value;
+                        command.Parameters.Add(param);
+                    }
+                }
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        var entity = new TEntity();
+                        var joined = new TJoined();
+                        typeof(TEntity)
+                            .GetTypeInfo()
+                            .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                            .Where(p => p.CanWrite)
+                            .ToList()
+                            .ForEach(x =>
+                            {
+                                if (x.PropertyType.IsPrimitive())
+                                {
+                                    var columnName = $"{mapping.GetTableName<TEntity, TKey>()}_{mapping.GetColumnName<TEntity, TKey>(x)}";
+                                    var value = reader[columnName];
+                                    if (value == DBNull.Value)
+                                    {
+                                        value = null;
+                                    }
+                                    x.SetValue(entity, value);
+                                }
+                                else if (x.PropertyType == typeof(TJoined))
+                                {
+                                    typeof(TJoined)
+                                        .GetTypeInfo()
+                                        .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                                        .Where(p => p.CanWrite && p.PropertyType.IsPrimitive())
+                                        .ToList()
+                                        .ForEach(y =>
+                                        {
+                                            var joinedColumnName = $"{mapping.GetTableName<TJoined, TKey>()}_{mapping.GetColumnName<TJoined, TKey>(y)}";
+                                            var joinedValue = reader[joinedColumnName];
+                                            if (joinedValue == DBNull.Value)
+                                            {
+                                                joinedValue = null;
+                                            }
+                                            y.SetValue(joined, joinedValue);
+                                        });
+                                    x.SetValue(entity, joined);
+                                }
                             });
                         entities.Add(entity);
                     }

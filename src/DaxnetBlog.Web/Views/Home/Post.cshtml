@@ -1,12 +1,10 @@
 ﻿@model dynamic
-
 @{
     ViewData["Title"] = $"{(string)Model.title} - daxnet.me";
 }
 
-
 <div class="row">
-    <div class="col-md-10 main">
+    <div class="col-md-10">
         <article>
             <header>
                 @Model.title
@@ -14,13 +12,16 @@
             <content>
                 @Html.Raw(Model.content)
             </content>
+            <div class="replies">
+                <hr />
+                @await Html.PartialAsync("_RepliesPartial", (object)Model.replies)
+            </div>
         </article>
     </div>
     <div class="col-md-2">
         @await Html.PartialAsync("_BulletinBoardPartial")
     </div>
 </div>
-
 @section scripts{
     <link rel="stylesheet" href="~/css/SyntaxHighlighter/shCore.css" type="text/css" />
     <link rel="stylesheet" href="~/css/SyntaxHighlighter/shCoreDefault.css" type="text/css" />
@@ -39,8 +40,8 @@
     <script src="~/lib/SyntaxHighlighter/shBrushJava.js"></script>
     <script src="~/lib/SyntaxHighlighter/shBrushJScript.js"></script>
     <script language="javascript" type="text/javascript">
-            SyntaxHighlighter.config.bloggerMode = false;
-            SyntaxHighlighter.defaults['ruler'] = true;
-            SyntaxHighlighter.all();
+        SyntaxHighlighter.config.bloggerMode = false;
+        SyntaxHighlighter.defaults['ruler'] = true;
+        SyntaxHighlighter.all();
     </script>
 }
