@@ -15,7 +15,9 @@
     <div class="row">
         <div class="col-md-12">
             <section>
-                <form asp-controller="Home" asp-action="Reply" asp-route-returnurl="@Url.Action(action, controller)" method="post" class="form-horizontal">
+                
+                <form id="commentForm" asp-controller="Home" asp-action="Reply" asp-route-returnurl="@Url.Action(action, controller)" method="post" class="form-horizontal">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                     <input id="key" type="hidden" name="key" value="@key" />
                     <input id="feature" type="hidden" name="feature" value="@feature" />
                     <div class="form-group">
@@ -25,7 +27,7 @@
                         <span class="form-inline">
                             <img asp-captcha="true" />
                             <label for="captcha" >请输入左侧验证码：</label>
-                            <input type="password" class="form-control" id="captcha" name="captcha" />
+                            <input type="text" class="form-control" id="captcha" name="captcha" />
                             <button class="btn btn-primary" type="submit">发表评论</button>
                         </span>
                     </div>
@@ -33,20 +35,38 @@
             </section>
         </div>
     </div>
-    
 }
 else
 {
-    
+
     <div class="alert alert-warning">
         <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-        请<a href="@Url.Action("Login", "Account", new { returnUrl = Url.Action(action, controller) })" class="alert-link">【点击此处】</a>登录后发表评论。
+        请<a href="@Url.Action("Login", "Account", new { returnUrl = Url.Action(action, controller, null, null, null, "gotoComments") })" class="alert-link">【点击此处】</a>登录后发表评论。
     </div>
 }
 
+<a name="anchor_comments" id="anchor_comments"></a>
+
 <script src="~/ckeditor/ckeditor.js"></script>
 <script language="javascript" type="text/javascript">
-        CKEDITOR.replace('comments', {
+        
+</script>
+<script language="javascript" type="text/javascript">
+    $(document).ready(function () {
+        var editor = CKEDITOR.replace('comments', {
             customConfig: 'config.comment.js'
         });
+
+        editor.on("instanceReady", function () {
+            if (window.location.href.indexOf('gotoComments') > -1) {
+                document.getElementById('anchor_comments').scrollIntoView(true);
+                this.focus();
+            }
+        })
+
+        $('#commentForm').submit(function (e) {
+            alert('submitting');
+            e.preventDefault();
+        });
+    });
 </script>

@@ -57,7 +57,6 @@ namespace DaxnetBlog.Web.Controllers
                 if (captchaString != encryptedString)
                 {
                     ModelState.AddModelError("", "验证码不正确。");
-                    return null;
                 }
             }
             return null;
