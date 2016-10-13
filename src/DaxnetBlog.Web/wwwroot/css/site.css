@@ -97,6 +97,16 @@ article h4 {
 	font-style: italic;
 }
 
+article .replies h2 {
+    font-weight: bold;
+    color: black;
+}
+
+article .replies h3 {
+    font-weight: normal;
+    color: black;
+}
+
 article .replies .panel-default .panel-heading {
     font-size: small;
     color: gray;

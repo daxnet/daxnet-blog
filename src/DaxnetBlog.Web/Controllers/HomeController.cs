@@ -7,6 +7,8 @@ using System.Net.Http;
 using Microsoft.Net.Http;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using DaxnetBlog.Web.Models;
+using System.Text;
 
 namespace DaxnetBlog.Web.Controllers
 {
@@ -43,6 +45,22 @@ namespace DaxnetBlog.Web.Controllers
             ViewData["Message"] = "Your application description page.";
 
             return View();
+        }
+
+        [HttpPost]
+        public IActionResult Reply(string feature, string key, string comments, string captcha)
+        {
+            if (ModelState.IsValid)
+            {
+                var captchaString = this.Request.Form["__captcha_image"];
+                var encryptedString = Convert.ToBase64String(UTF32Encoding.Unicode.GetBytes(captcha));
+                if (captchaString != encryptedString)
+                {
+                    ModelState.AddModelError("", "验证码不正确。");
+                    return null;
+                }
+            }
+            return null;
         }
 
         public IActionResult Error()

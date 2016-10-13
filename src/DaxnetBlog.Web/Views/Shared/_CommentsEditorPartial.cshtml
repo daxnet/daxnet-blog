@@ -1,0 +1,52 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using DaxnetBlog.Web.Models;
+@using DaxnetBlog.Web.Security
+
+@inject SignInManager<User> SignInManager
+@{
+    var controller = ViewContext.RouteData.Values["controller"].ToString();
+    var action = ViewContext.RouteData.Values["action"].ToString();
+
+    var feature = (string)Model.Feature;
+    var key = (string)Model.Key;
+}
+@if (SignInManager.IsSignedIn(User))
+{
+    <div class="row">
+        <div class="col-md-12">
+            <section>
+                <form asp-controller="Home" asp-action="Reply" asp-route-returnurl="@Url.Action(action, controller)" method="post" class="form-horizontal">
+                    <input id="key" type="hidden" name="key" value="@key" />
+                    <input id="feature" type="hidden" name="feature" value="@feature" />
+                    <div class="form-group">
+                        <textarea id="comments" name="comments"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <span class="form-inline">
+                            <img asp-captcha="true" />
+                            <label for="captcha" >请输入左侧验证码：</label>
+                            <input type="password" class="form-control" id="captcha" name="captcha" />
+                            <button class="btn btn-primary" type="submit">发表评论</button>
+                        </span>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </div>
+    
+}
+else
+{
+    
+    <div class="alert alert-warning">
+        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+        请<a href="@Url.Action("Login", "Account", new { returnUrl = Url.Action(action, controller) })" class="alert-link">【点击此处】</a>登录后发表评论。
+    </div>
+}
+
+<script src="~/ckeditor/ckeditor.js"></script>
+<script language="javascript" type="text/javascript">
+        CKEDITOR.replace('comments', {
+            customConfig: 'config.comment.js'
+        });
+</script>

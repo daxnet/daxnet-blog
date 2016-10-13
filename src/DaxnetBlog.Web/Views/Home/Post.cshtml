@@ -1,4 +1,6 @@
-﻿@model dynamic
+﻿@using DaxnetBlog.Common
+
+@model dynamic
 @{
     ViewData["Title"] = $"{(string)Model.title} - daxnet.me";
 }
@@ -14,7 +16,14 @@
             </content>
             <div class="replies">
                 <hr />
-                @await Html.PartialAsync("_RepliesPartial", (object)Model.replies)
+                <h2>评论列表</h2>
+                @if (Model.replies.Count > 0) {
+                    @await Html.PartialAsync("_RepliesPartial", (object)Model.replies);
+                }
+                else {
+                    <h3>当前没有评论！</h3>
+                }
+                @await Html.PartialAsync("_CommentsEditorPartial", new { Feature = "BlogPost", Key = (string)Model.id }.ToExpando())
             </div>
         </article>
     </div>
