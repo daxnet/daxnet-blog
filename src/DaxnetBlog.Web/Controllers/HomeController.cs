@@ -51,7 +51,9 @@ namespace DaxnetBlog.Web.Controllers
         public IActionResult Reply(string feature, string key, string comments)
         {
             var userName = this.User.Identity.Name;
+            //ViewData["Message"] = "处理成功，您的回复已经提交并进入审核流程。";
             return Ok(userName);
+            //throw new Exception("失败");
         }
 
         [HttpPost]
