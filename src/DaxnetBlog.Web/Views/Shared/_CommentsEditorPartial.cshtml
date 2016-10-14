@@ -14,22 +14,25 @@
 {
     <div class="row">
         <div class="col-md-12">
+            <div id="errorMessage" class="alert alert-danger">
+                <span class="glyphicon glyphicon-remove-sign" aria-hidden="true"></span>
+                <a class="close" data-hide="alert" aria-label="close">&times;</a>
+                <span id="txtErrorMessage"></span>
+            </div>
             <section>
-                
                 <form id="commentForm" asp-controller="Home" asp-action="Reply" asp-route-returnurl="@Url.Action(action, controller)" method="post" class="form-horizontal">
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                     <input id="key" type="hidden" name="key" value="@key" />
                     <input id="feature" type="hidden" name="feature" value="@feature" />
                     <div class="form-group">
                         <textarea id="comments" name="comments"></textarea>
                     </div>
                     <div class="form-group">
-                        <span class="form-inline">
+                        <div class="form-inline">
                             <img asp-captcha="true" />
-                            <label for="captcha" >请输入左侧验证码：</label>
+                            <label for="captcha">请输入左侧验证码：</label>
                             <input type="text" class="form-control" id="captcha" name="captcha" />
-                            <button class="btn btn-primary" type="submit">发表评论</button>
-                        </span>
+                            <button class="btn btn-primary" type="submit" id="submit-btn">发表评论</button>
+                        </div>
                     </div>
                 </form>
             </section>
@@ -49,10 +52,16 @@ else
 
 <script src="~/ckeditor/ckeditor.js"></script>
 <script language="javascript" type="text/javascript">
-        
+
 </script>
 <script language="javascript" type="text/javascript">
     $(document).ready(function () {
+        // Hides the alert instead of closing and remove the alert from DOM.
+        $("[data-hide]").on("click", function () {
+            $("." + $(this).attr("data-hide")).hide();
+        });
+        $('#errorMessage').hide();
+
         var editor = CKEDITOR.replace('comments', {
             customConfig: 'config.comment.js'
         });
@@ -65,8 +74,60 @@ else
         })
 
         $('#commentForm').submit(function (e) {
-            alert('submitting');
             e.preventDefault();
+            editor.setReadOnly(true);
+            $('#captcha').attr("disabled", "disabled");
+            $('#submit-btn').attr("disabled", "disabled");
+            var isCommentEmpty = !$.trim(editor.getData());
+            if (isCommentEmpty) {
+                $('#errorMessage').show();
+                $('#txtErrorMessage').text('评论内容为空，请输入评论的内容。');
+                editor.focus();
+                return;
+            }
+            var captchaString = $('#captcha').val();
+            var isCaptchaEmpty = !$.trim(captchaString);
+            if (isCaptchaEmpty) {
+                $('#errorMessage').show();
+                $('#txtErrorMessage').text('请输入验证码。');
+                $('#captcha').focus();
+                return;
+            }
+
+            var encryptedString = $('#__captcha_image').val();
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("VerifyCaptcha", "Home")',
+                data: { captchaString: captchaString, encryptedString: encryptedString },
+                success: function (result, status, xhr) {
+                    if (!result) {
+                        $('#errorMessage').show();
+                        $('#txtErrorMessage').text('输入的验证码不正确。');
+                        $('#captcha').focus();
+                    } else {
+                        var comments = editor.getData();
+                        alert(comments);
+                        @*$.ajax({
+                            type: "POST",
+                            url: '@Url.Action("Reply", "Home")',
+                            data: { feature: feature, key: key, comments: comments },
+                            success: function (r, s, x) {
+                                alert(r);
+
+                            }
+                        });*@
+                    }
+                },
+                error: function (xhr) {
+                    $('#errorMessage').show();
+                    $('#txtErrorMessage').text(xhr.statusText);
+                },
+                complete: function (xhr, status) {
+                    editor.setReadOnly(false);
+                    $('#captcha').removeAttr("disabled");
+                    $('#submit-btn').removeAttr("disabled");
+                }
+            });
         });
     });
 </script>

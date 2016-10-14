@@ -48,18 +48,17 @@ namespace DaxnetBlog.Web.Controllers
         }
 
         [HttpPost]
-        public IActionResult Reply(string feature, string key, string comments, string captcha)
+        public IActionResult Reply(string feature, string key, string comments)
         {
-            if (ModelState.IsValid)
-            {
-                var captchaString = this.Request.Form["__captcha_image"];
-                var encryptedString = Convert.ToBase64String(UTF32Encoding.Unicode.GetBytes(captcha));
-                if (captchaString != encryptedString)
-                {
-                    ModelState.AddModelError("", "验证码不正确。");
-                }
-            }
-            return null;
+            var userName = this.User.Identity.Name;
+            return Ok(userName);
+        }
+
+        [HttpPost]
+        public IActionResult VerifyCaptcha(string captchaString, string encryptedString)
+        {
+            var enc = Convert.ToBase64String(UTF32Encoding.Unicode.GetBytes(captchaString));
+            return Ok(enc == encryptedString);
         }
 
         public IActionResult Error()
