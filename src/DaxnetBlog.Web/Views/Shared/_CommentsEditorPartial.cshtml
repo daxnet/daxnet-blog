@@ -52,16 +52,16 @@ else
 
 <script src="~/ckeditor/ckeditor.js"></script>
 <script language="javascript" type="text/javascript">
-
-</script>
-<script language="javascript" type="text/javascript">
     $(document).ready(function () {
         // Hides the alert instead of closing and remove the alert from DOM.
         $("[data-hide]").on("click", function () {
             $("." + $(this).attr("data-hide")).hide();
         });
+
+        // Hides the error message by default
         $('#errorMessage').hide();
 
+        // Render the comments editor (ckeditor)
         var editor = CKEDITOR.replace('comments', {
             customConfig: 'config.comment.js'
         });
@@ -73,11 +73,10 @@ else
             }
         })
 
+        // Overrides the submit behavior of the comment form
         $('#commentForm').submit(function (e) {
             e.preventDefault();
-            editor.setReadOnly(true);
-            $('#captcha').attr("disabled", "disabled");
-            $('#submit-btn').attr("disabled", "disabled");
+
             var isCommentEmpty = !$.trim(editor.getData());
             if (isCommentEmpty) {
                 $('#errorMessage').show();
@@ -99,34 +98,39 @@ else
                 type: "POST",
                 url: '@Url.Action("VerifyCaptcha", "Home")',
                 data: { captchaString: captchaString, encryptedString: encryptedString },
-                success: function (result, status, xhr) {
-                    if (!result) {
-                        $('#errorMessage').show();
-                        $('#txtErrorMessage').text('输入的验证码不正确。');
-                        $('#captcha').focus();
-                    } else {
-                        var comments = editor.getData();
-                        alert(comments);
-                        @*$.ajax({
-                            type: "POST",
-                            url: '@Url.Action("Reply", "Home")',
-                            data: { feature: feature, key: key, comments: comments },
-                            success: function (r, s, x) {
-                                alert(r);
-
-                            }
-                        });*@
-                    }
-                },
-                error: function (xhr) {
-                    $('#errorMessage').show();
-                    $('#txtErrorMessage').text(xhr.statusText);
-                },
-                complete: function (xhr, status) {
-                    editor.setReadOnly(false);
-                    $('#captcha').removeAttr("disabled");
-                    $('#submit-btn').removeAttr("disabled");
+                beforeSend: function (xhr, settings) {
+                    editor.setReadOnly(true);
+                    $('#captcha').attr("disabled", "disabled");
+                    $('#submit-btn').attr("disabled", "disabled");
                 }
+            })
+            .done(function (result, status, xhr) {
+                if (!result) {
+                    $('#errorMessage').show();
+                    $('#txtErrorMessage').text('输入的验证码不正确。');
+                    $('#captcha').focus();
+                } else {
+                    var comments = editor.getData();
+                    alert(comments);
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("Reply", "Home")',
+                        data: { feature: feature, key: key, comments: comments },
+                        success: function (r, s, x) {
+                            alert(r);
+
+                        }
+                    });
+                }
+            })
+            .fail(function (xhr) {
+                $('#errorMessage').show();
+                $('#txtErrorMessage').text(xhr.statusText);
+            })
+            .always(function (xhr, status) {
+                editor.setReadOnly(false);
+                $('#captcha').removeAttr("disabled");
+                $('#submit-btn').removeAttr("disabled");
             });
         });
     });
