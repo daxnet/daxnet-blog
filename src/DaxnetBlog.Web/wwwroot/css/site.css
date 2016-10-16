@@ -97,13 +97,16 @@ article h4 {
 	font-style: italic;
 }
 
-article .replies h2 {
-    font-weight: bold;
+article .replies .replies-title {
+    font-size: 24px;
+    margin-top: 10px;
     color: black;
 }
 
-article .replies h3 {
-    font-weight: normal;
+article .replies .no-replies {
+    font-size: 18px;
+    margin-top: 15px;
+    margin-bottom: 15px;
     color: black;
 }
 

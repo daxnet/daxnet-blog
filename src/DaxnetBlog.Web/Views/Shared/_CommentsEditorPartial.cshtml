@@ -1,6 +1,8 @@
 ﻿@using Microsoft.AspNetCore.Identity
-@using DaxnetBlog.Web.Models;
+@using System.IO
+@using DaxnetBlog.Web
 @using DaxnetBlog.Web.Security
+@using System.Text.Encodings.Web
 
 @inject SignInManager<User> SignInManager
 @{
@@ -14,15 +16,21 @@
 {
     <div class="row">
         <div class="col-md-12">
-            <div id="errorMessage" class="alert alert-danger">
+
+            <div id="errorMessage" class="alert alert-danger" style="display: none">
                 <span class="glyphicon glyphicon-remove-sign" aria-hidden="true"></span>
                 <a class="close" data-hide="alert" aria-label="close">&times;</a>
                 <span id="txtErrorMessage"></span>
             </div>
-            
+
+            <div id="infoMessage" class="alert alert-info" style="display: none">
+                <span class="glyphicon glyphicon-ok-sign" aria-hidden="true"></span>
+                <a class="close" data-hide="alert" aria-label="close">&times;</a>
+                <span id="txtInfoMessage"></span>
+            </div>
+
             <section>
                 <div class="form-horizontal">
-                    @*<form id="commentForm" asp-controller="Home" asp-action="Reply" asp-route-returnurl="@Url.Action(action, controller, null, null, null, "gotoComments")" method="post" class="form-horizontal">*@
                     <input id="key" type="hidden" name="key" value="@key" />
                     <input id="feature" type="hidden" name="feature" value="@feature" />
                     <div class="form-group">
@@ -30,13 +38,14 @@
                     </div>
                     <div class="form-group">
                         <div class="form-inline">
-                            <img asp-captcha="true" />
+                            <span id="captchaArea">
+                                @await Html.PartialAsync("_CaptchaPartial")
+                            </span>
                             <label for="captcha">请输入左侧验证码：</label>
                             <input type="text" class="form-control" id="captcha" name="captcha" />
                             <button class="btn btn-primary" type="button" id="submit-btn">发表评论</button>
                         </div>
                     </div>
-                    @*</form>*@
                 </div>
             </section>
         </div>
@@ -55,6 +64,57 @@ else
 
 <script src="~/ckeditor/ckeditor.js"></script>
 <script language="javascript" type="text/javascript">
+    function updateCaptcha() {
+        $.ajax({
+            type: 'GET',
+            url: '@Url.Action("UpdateCaptcha", "Home")'
+        })
+        .done(function (result, status, xhr) {
+            $('#captchaArea').html(result);
+        })
+        .fail(function (xhr) {
+
+        });
+    };
+
+    function showError(errMsg) {
+        hideInfo();
+        $('#txtErrorMessage').text(errMsg);
+        $('#errorMessage').show();
+    };
+
+    function hideError() {
+        $('#errorMessage').hide();
+    };
+
+    function showInfo(infoMsg) {
+        hideError();
+        $('#txtInfoMessage').text(infoMsg);
+        $('#infoMessage').show();
+    };
+
+    function hideInfo() {
+        $('#infoMessage').hide();
+    };
+
+    function disableControls(editor) {
+        editor.setReadOnly(true);
+        $('#captcha').attr("disabled", "disabled");
+        $('#submit-btn').attr("disabled", "disabled");
+    };
+
+    function enableControls(editor) {
+        editor.setReadOnly(false);
+        $('#captcha').removeAttr("disabled");
+        $('#submit-btn').removeAttr("disabled");
+    };
+
+    function resetControlValues(editor) {
+        editor.setData('<p />');
+        $('#captcha').val('');
+
+    };
+
     $(document).ready(function () {
         // Hides the alert instead of closing and remove the alert from DOM.
         $("[data-hide]").on("click", function () {
@@ -62,7 +122,8 @@ else
         });
 
         // Hides the error message by default
-        $('#errorMessage').hide();
+        hideError();
+        hideInfo();
 
         // Render the comments editor (ckeditor)
         var editor = CKEDITOR.replace('comments', {
@@ -80,88 +141,77 @@ else
         $('#submit-btn').click(function (e) {
             e.preventDefault();
 
+            // Check if the comment is empty.
             var isCommentEmpty = !$.trim(editor.getData());
             if (isCommentEmpty) {
-                $('#errorMessage').show();
-                $('#txtErrorMessage').text('评论内容为空，请输入评论的内容。');
+                showError('评论内容为空，请输入评论的内容。');
                 editor.focus();
                 return;
             }
+
+            // Check if the CAPTCHA code is empty.
             var captchaString = $('#captcha').val();
             var isCaptchaEmpty = !$.trim(captchaString);
             if (isCaptchaEmpty) {
-                $('#errorMessage').show();
-                $('#txtErrorMessage').text('请输入验证码。');
+                showError('请输入验证码。');
                 $('#captcha').focus();
                 return;
             }
 
+            // Call ajax to check if the CAPTCHA code is correct.
             var encryptedString = $('#__captcha_image').val();
             var verify = $.ajax({
                 type: "POST",
                 url: '@Url.Action("VerifyCaptcha", "Home")',
                 data: { captchaString: captchaString, encryptedString: encryptedString },
                 beforeSend: function (xhr, settings) {
-                    editor.setReadOnly(true);
-                    $('#captcha').attr("disabled", "disabled");
-                    $('#submit-btn').attr("disabled", "disabled");
+                    disableControls(editor);
                 }
             })
             .done(function (result, status, xhr) {
                 if (!result) {
-                    $('#errorMessage').show();
-                    $('#txtErrorMessage').text('输入的验证码不正确。');
+                    showError('输入的验证码不正确。');
                     $('#captcha').focus();
                     return false;
                 } else {
-                    // Continue posting
-                    //$('#commentForm').unbind('submit').submit();
-
                     return true;
                 }
             })
             .fail(function (xhr) {
-                $('#errorMessage').show();
-                $('#txtErrorMessage').text(xhr.statusText);
+                showError('xhr.statusText');
             })
             .always(function (xhr, status) {
-                editor.setReadOnly(false);
-                $('#captcha').removeAttr("disabled");
-                $('#submit-btn').removeAttr("disabled");
+                enableControls(editor);
+                updateCaptcha();
             });
 
+            // If CAPTCHA code is correct, post the reply.
             var final = verify.then(function (response) {
                 if (response) {
                     var comments = editor.getData();
                     return $.ajax({
                         type: "POST",
                         url: '@Url.Action("Reply", "Home")',
+                        beforeSend: function (xhr, settings) {
+                            disableControls(editor);
+                        },
                         data: { feature: '@feature', key: '@key', comments: comments }
                     });
                 }
             });
 
-            final.done(function (r, s, x) {
-                alert('Done' + r);
-            }).fail(function (xx) {
-                alert('Fail' + xx.statusText);
-            }).always(function (xxx, sss) {
-                alert('Always' + xxx);
-
+            final.done(function (result, status, xhr) {
+                if (status === 'success') {
+                    showInfo('评论已成功提交，请等待审核，审核通过后即会发表。感谢您的参与！');
+                    resetControlValues(editor);
+                    editor.focus();
+                }
+            }).fail(function (xhr) {
+                showError(xhr.statusText);
+            }).always(function (xhr, status) {
+                enableControls(editor);
+                updateCaptcha();
             });
-
-            @*$.when(verify)
-                .done(function (response) {
-                    if (response) {
-                        $.ajax({
-                            type: "POST",
-                            async: false,
-                            url: '@Url.Action("Reply", "Home")',
-                            data: { feature: feature, key: key, comments: editor.getData() }
-
-                        });
-                    }
-                })*@
         });
     });
 </script>

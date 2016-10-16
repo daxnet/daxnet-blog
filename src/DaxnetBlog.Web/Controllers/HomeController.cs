@@ -18,6 +18,11 @@ namespace DaxnetBlog.Web.Controllers
         private readonly IOptions<WebsiteSettings> config;
         private readonly int pageSize;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HomeController"/> class.
+        /// </summary>
+        /// <param name="httpClient">The HTTP client.</param>
+        /// <param name="config">The configuration.</param>
         public HomeController(HttpClient httpClient,
             IOptions<WebsiteSettings> config)
         {
@@ -47,6 +52,42 @@ namespace DaxnetBlog.Web.Controllers
             return View();
         }
 
+        public IActionResult Error()
+        {
+            return View();
+        }
+
+        #region Helper Actions        
+        /// <summary>
+        /// Updates the captcha and return the HTML string representing the
+        /// updated captcha.
+        /// </summary>
+        /// <returns></returns>
+        public IActionResult UpdateCaptcha()
+        {
+            return PartialView("_CaptchaPartial");
+        }
+
+        /// <summary>
+        /// Verifies the captcha.
+        /// </summary>
+        /// <param name="captchaString">The captcha string.</param>
+        /// <param name="encryptedString">The encrypted string.</param>
+        /// <returns></returns>
+        [HttpPost]
+        public IActionResult VerifyCaptcha(string captchaString, string encryptedString)
+        {
+            var enc = Convert.ToBase64String(UTF32Encoding.Unicode.GetBytes(captchaString));
+            return Ok(enc == encryptedString);
+        }
+
+        /// <summary>
+        /// Posts the reply comments.
+        /// </summary>
+        /// <param name="feature">The feature.</param>
+        /// <param name="key">The key.</param>
+        /// <param name="comments">The comments.</param>
+        /// <returns></returns>
         [HttpPost]
         public IActionResult Reply(string feature, string key, string comments)
         {
@@ -55,17 +96,6 @@ namespace DaxnetBlog.Web.Controllers
             return Ok(userName);
             //throw new Exception("失败");
         }
-
-        [HttpPost]
-        public IActionResult VerifyCaptcha(string captchaString, string encryptedString)
-        {
-            var enc = Convert.ToBase64String(UTF32Encoding.Unicode.GetBytes(captchaString));
-            return Ok(enc == encryptedString);
-        }
-
-        public IActionResult Error()
-        {
-            return View();
-        }
+        #endregion
     }
 }

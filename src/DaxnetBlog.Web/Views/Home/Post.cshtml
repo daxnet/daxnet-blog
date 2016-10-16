@@ -16,12 +16,12 @@
             </content>
             <div class="replies">
                 <hr />
-                <h2>评论列表</h2>
+                <div class="replies-title">评论列表</div>
                 @if (Model.replies.Count > 0) {
                     @await Html.PartialAsync("_RepliesPartial", (object)Model.replies);
                 }
                 else {
-                    <h3>当前没有评论！</h3>
+                    <div class="no-replies">当前没有评论！</div>
                 }
                 @await Html.PartialAsync("_CommentsEditorPartial", new { Feature = "BlogPost", Key = (string)Model.id }.ToExpando())
             </div>

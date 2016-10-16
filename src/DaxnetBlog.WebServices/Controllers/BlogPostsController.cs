@@ -62,7 +62,11 @@ namespace DaxnetBlog.WebServices.Controllers
         {
             var result = await this.storage.ExecuteAsync(async (connection, transaction, cancellationToken) =>
             {
-                var blogpost = (await blogPostStore.SelectAsync(connection, x => x.Id == id, transaction: transaction, cancellationToken: cancellationToken)).FirstOrDefault();
+                var blogpost = (await blogPostStore.SelectAsync(connection, 
+                    x => x.Id == id, 
+                    transaction: transaction, 
+                    cancellationToken: cancellationToken)).FirstOrDefault();
+
                 if (blogpost == null)
                 {
                     throw new ServiceException(HttpStatusCode.NotFound, $"The blog post of Id ${id} doesn't exist.");
@@ -72,7 +76,7 @@ namespace DaxnetBlog.WebServices.Controllers
                     r => r.Account,
                     r => r.AccountId,
                     a => a.Id,
-                    r => r.BlogPostId == id,
+                    r => r.BlogPostId == id && r.IsApproved.Value == true,
                     transaction: transaction, cancellationToken: cancellationToken);
 
                 return new Tuple<BlogPost, IEnumerable<Reply>>(blogpost, replies);

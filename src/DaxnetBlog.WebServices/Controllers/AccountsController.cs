@@ -128,7 +128,8 @@ namespace DaxnetBlog.WebServices.Controllers
                        NickName = nickName,
                        DateRegistered = DateTime.UtcNow,
                        EmailVerifyCode = verificationCode,
-                       IsLocked = true
+                       IsLocked = true,
+                       IsAdmin = false
                    },
                    connection,
                    new Expression<Func<Account, object>>[] { a => a.Id },
@@ -176,7 +177,8 @@ namespace DaxnetBlog.WebServices.Controllers
                 account.DateLastLogin,
                 account.EmailVerifyCode,
                 account.EmailVerifiedDate,
-                account.IsLocked
+                account.IsLocked,
+                account.IsAdmin
             });
         }
 
@@ -202,7 +204,8 @@ namespace DaxnetBlog.WebServices.Controllers
                 account.DateLastLogin,
                 account.EmailVerifyCode,
                 account.EmailVerifiedDate,
-                account.IsLocked
+                account.IsLocked,
+                account.IsAdmin
             });
         }
 

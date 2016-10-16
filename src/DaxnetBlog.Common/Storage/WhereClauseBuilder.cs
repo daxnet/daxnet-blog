@@ -190,6 +190,22 @@ namespace DaxnetBlog.Common.Storage
                     Expression constantExpr = Expression.Constant(fieldValue);
                     Visit(constantExpr);
                 }
+                else if (node.Member is PropertyInfo)
+                {
+                    if (node.NodeType == ExpressionType.Constant)
+                    {
+                        ConstantExpression ce = node.Expression as ConstantExpression;
+                        PropertyInfo pi = node.Member as PropertyInfo;
+                        object fieldValue = pi.GetValue(ce.Value);
+                        Expression constantExpr = Expression.Constant(fieldValue);
+                        Visit(constantExpr);
+                    }
+                    else if (node.NodeType == ExpressionType.MemberAccess)
+                    {
+                        var memberExpression = node.Expression as MemberExpression;
+                        VisitMember(memberExpression);
+                    }
+                }
                 else
                     throw new NotSupportedException();
             }

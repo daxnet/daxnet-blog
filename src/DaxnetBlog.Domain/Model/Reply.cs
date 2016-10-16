@@ -60,5 +60,7 @@ namespace DaxnetBlog.Domain.Model
         public string Content { get; set; }
 
         public Account Account { get; set; }
+
+        public bool? IsApproved { get; set; }
     }
 }
