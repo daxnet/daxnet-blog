@@ -9,6 +9,7 @@ using DaxnetBlog.Web.Security;
 using DaxnetBlog.Web.Models;
 using System.Text;
 using DaxnetBlog.Web.Services;
+using DaxnetBlog.Common;
 
 // For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -141,6 +142,13 @@ namespace DaxnetBlog.Web.Controllers
             }
 
             return View(model);
+        }
+
+        [Authorize]
+        public async Task<IActionResult> Manage(string category="Profile")
+        {
+            var accountModel = await this.userManager.FindByNameAsync(User.Identity.Name);
+            return View(new { category, accountModel }.ToExpando());
         }
 
         [HttpGet]

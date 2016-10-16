@@ -45,9 +45,8 @@ ul.article-list div.auth{
 
 /* article*/
 article header {
-    font-family: "Microsoft YaHei", "微软雅黑", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+   font-family: "Microsoft YaHei", "微软雅黑", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
    font-size: 26px !important;
-   font-weight:bold;
    text-align:center;
    padding-bottom: 12px;
 }
