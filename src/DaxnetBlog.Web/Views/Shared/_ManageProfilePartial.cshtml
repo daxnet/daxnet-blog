@@ -9,29 +9,32 @@
 <div class="row">
     <div class="col-md-5">
         <section>
-            <div class="form-horizontal">
+            <form asp-action="UpdateProfile" asp-controller="Account" method="post" class="form-horizontal">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <div class="form-group">
                     <label asp-for="Id" class="col-md-2 control-label"></label>
                     <div class="col-md-10">
-                        <input asp-for="Id" class="form-control" id="txtId" disabled />
+                        <input asp-for="Id" class="form-control" id="txtId" readonly />
                     </div>
                 </div>
                 <div class="form-group">
                     <label asp-for="UserName" class="col-md-2 control-label"></label>
                     <div class="col-md-10">
-                        <input asp-for="UserName" class="form-control" id="txtUserName" disabled />
+                        <input asp-for="UserName" class="form-control" id="txtUserName" readonly />
                     </div>
                 </div>
                 <div class="form-group">
                     <label asp-for="NickName" class="col-md-2 control-label"></label>
                     <div class="col-md-10">
                         <input asp-for="NickName" class="form-control" id="txtNickName" />
+                        <span asp-validation-for="NickName" class="text-danger"></span>
                     </div>
                 </div>
                 <div class="form-group">
                     <label asp-for="EmailAddress" class="col-md-2 control-label"></label>
                     <div class="col-md-10">
                         <input asp-for="EmailAddress" class="form-control" id="txtEmailAddress" />
+                        <span asp-validation-for="EmailAddress" class="text-danger"></span>
                     </div>
                 </div>
                 <div class="form-group">
@@ -40,11 +43,12 @@
                         <span id="captchaArea">
                             @await Html.PartialAsync("_CaptchaPartial")
                         </span>
-                        <input type="text" class="form-control" id="captcha" name="captcha" />
-                        <button class="btn btn-primary" type="button" id="submit-btn">保存</button>
+                        <input asp-for="Captcha" class="form-control" id="txtCaptcha" />
+                        <span asp-validation-for="Captcha" class="text-danger"></span>
+                        <button class="btn btn-primary" type="submit" id="submit-btn">保存</button>
                     </div>
                 </div>
-            </div>
+            </form>
         </section>
     </div>
 </div>

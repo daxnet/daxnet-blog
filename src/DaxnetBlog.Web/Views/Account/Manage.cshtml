@@ -4,6 +4,7 @@
 @model dynamic
 
 @{
+    ViewData["Title"] = "账户管理";
     var category = (string)Model.category;
     var accountModel = (DaxnetBlog.Web.Security.User)Model.accountModel;
 }
@@ -74,3 +75,7 @@
         }
     </div>
 </div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

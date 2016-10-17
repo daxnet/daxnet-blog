@@ -151,6 +151,17 @@ namespace DaxnetBlog.Web.Controllers
             return View(new { category, accountModel }.ToExpando());
         }
 
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> UpdateProfile(AccountProfileViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+
+            }
+            return RedirectToAction(nameof(Manage), new { category = "Profile" });
+        }
+
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> ConfirmEmail(string userName, string code)
