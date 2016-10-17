@@ -62,7 +62,7 @@
                 <div class="form-group">
                     <div class="col-sm-offset-2 col-sm-10" />
                     <div>
-                        <img asp-captcha="true" />
+                        @await Html.PartialAsync("_CaptchaPartial")
                     </div>
                 </div>
                 <div class="form-group">

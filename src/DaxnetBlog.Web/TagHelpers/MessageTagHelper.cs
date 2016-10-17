@@ -35,6 +35,7 @@ namespace DaxnetBlog.Web.TagHelpers
             {
                 var tagBuilder = new TagBuilder("div");
                 tagBuilder.AddCssClass("alert");
+                tagBuilder.Attributes.Add("id", "message-alert");
                 switch(Type.ToUpper())
                 {
                     case "SUCCESS":
@@ -52,18 +53,22 @@ namespace DaxnetBlog.Web.TagHelpers
                 }
                 var aBuilder = new TagBuilder("a");
                 aBuilder.AddCssClass("close");
-                aBuilder.Attributes.Add("href", "#");
-                aBuilder.Attributes.Add("data-dismiss", "alert");
+                aBuilder.Attributes.Add("data-hide", "alert");
                 aBuilder.Attributes.Add("aria-label", "close");
                 aBuilder.InnerHtml.AppendHtml("&times;");
                 tagBuilder.InnerHtml.AppendHtml(aBuilder.ToHtmlString());
 
                 var titleBuilder = new TagBuilder("strong");
-                titleBuilder.InnerHtml.Append(Title);
+                titleBuilder.Attributes.Add("id", "message-alert-title");
+                titleBuilder.InnerHtml.Append($"{Title}：");
                 tagBuilder.InnerHtml.AppendHtml(titleBuilder.ToHtmlString());
 
                 var bodyContent = (await output.GetChildContentAsync()).GetContent();
-                tagBuilder.InnerHtml.AppendHtml(this.htmlHelper.Raw(bodyContent).ToString());
+                var spanBuilder = new TagBuilder("span");
+                spanBuilder.Attributes.Add("id", "message-alert-body");
+                spanBuilder.InnerHtml.AppendHtml(this.htmlHelper.Raw(bodyContent).ToString());
+
+                tagBuilder.InnerHtml.AppendHtml(spanBuilder.ToHtmlString());
 
                 output.TagMode = TagMode.StartTagAndEndTag;
                 output.Content.AppendHtml(tagBuilder.ToHtmlString());

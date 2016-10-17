@@ -1,1 +1,55 @@
-﻿<h2>Profile</h2>
+﻿@using DaxnetBlog.Web.Models
+@model AccountProfileViewModel
+
+<div class="row">
+    <div class="col-md-12">
+        <message message-enabled="true"></message>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-5">
+        <section>
+            <div class="form-horizontal">
+                <div class="form-group">
+                    <label asp-for="Id" class="col-md-2 control-label"></label>
+                    <div class="col-md-10">
+                        <input asp-for="Id" class="form-control" id="txtId" disabled />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label asp-for="UserName" class="col-md-2 control-label"></label>
+                    <div class="col-md-10">
+                        <input asp-for="UserName" class="form-control" id="txtUserName" disabled />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label asp-for="NickName" class="col-md-2 control-label"></label>
+                    <div class="col-md-10">
+                        <input asp-for="NickName" class="form-control" id="txtNickName" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label asp-for="EmailAddress" class="col-md-2 control-label"></label>
+                    <div class="col-md-10">
+                        <input asp-for="EmailAddress" class="form-control" id="txtEmailAddress" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="form-inline">
+                        <label for="captcha">请输入验证码：</label>
+                        <span id="captchaArea">
+                            @await Html.PartialAsync("_CaptchaPartial")
+                        </span>
+                        <input type="text" class="form-control" id="captcha" name="captcha" />
+                        <button class="btn btn-primary" type="button" id="submit-btn">保存</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        hideMessage();
+    });
+</script>

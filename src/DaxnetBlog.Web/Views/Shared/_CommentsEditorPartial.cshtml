@@ -17,7 +17,7 @@
     <div class="row">
         <div class="col-md-12">
 
-            <div id="errorMessage" class="alert alert-danger" style="display: none">
+            @*<div id="errorMessage" class="alert alert-danger" style="display: none">
                 <span class="glyphicon glyphicon-remove-sign" aria-hidden="true"></span>
                 <a class="close" data-hide="alert" aria-label="close">&times;</a>
                 <span id="txtErrorMessage"></span>
@@ -27,7 +27,10 @@
                 <span class="glyphicon glyphicon-ok-sign" aria-hidden="true"></span>
                 <a class="close" data-hide="alert" aria-label="close">&times;</a>
                 <span id="txtInfoMessage"></span>
-            </div>
+            </div>*@
+
+            <message message-enabled="true" message-title="" message-type="">
+            </message>
 
             <section>
                 <div class="form-horizontal">
@@ -77,25 +80,25 @@ else
         });
     };
 
-    function showError(errMsg) {
-        hideInfo();
-        $('#txtErrorMessage').text(errMsg);
-        $('#errorMessage').show();
-    };
+    //function showError(errMsg) {
+    //    hideInfo();
+    //    $('#txtErrorMessage').text(errMsg);
+    //    $('#errorMessage').show();
+    //};
 
-    function hideError() {
-        $('#errorMessage').hide();
-    };
+    //function hideError() {
+    //    $('#errorMessage').hide();
+    //};
 
-    function showInfo(infoMsg) {
-        hideError();
-        $('#txtInfoMessage').text(infoMsg);
-        $('#infoMessage').show();
-    };
+    //function showInfo(infoMsg) {
+    //    hideError();
+    //    $('#txtInfoMessage').text(infoMsg);
+    //    $('#infoMessage').show();
+    //};
 
-    function hideInfo() {
-        $('#infoMessage').hide();
-    };
+    //function hideInfo() {
+    //    $('#infoMessage').hide();
+    //};
 
     function disableControls(editor) {
         editor.setReadOnly(true);
@@ -116,15 +119,10 @@ else
     };
 
     $(document).ready(function () {
-        // Hides the alert instead of closing and remove the alert from DOM.
-        $("[data-hide]").on("click", function () {
-            $("." + $(this).attr("data-hide")).hide();
-        });
-
         // Hides the error message by default
-        hideError();
-        hideInfo();
-
+        //hideError();
+        //hideInfo();
+        hideMessage();
         // Render the comments editor (ckeditor)
         var editor = CKEDITOR.replace('comments', {
             customConfig: 'config.comment.js'
@@ -144,7 +142,8 @@ else
             // Check if the comment is empty.
             var isCommentEmpty = !$.trim(editor.getData());
             if (isCommentEmpty) {
-                showError('评论内容为空，请输入评论的内容。');
+                //showError('评论内容为空，请输入评论的内容。');
+                showMessage('danger', '错误', '评论内容为空，请输入评论的内容。');
                 editor.focus();
                 return;
             }
@@ -153,7 +152,8 @@ else
             var captchaString = $('#captcha').val();
             var isCaptchaEmpty = !$.trim(captchaString);
             if (isCaptchaEmpty) {
-                showError('请输入验证码。');
+                // showError('请输入验证码。');
+                showMessage('danger', '错误', '请输入验证码。');
                 $('#captcha').focus();
                 return;
             }
@@ -170,7 +170,8 @@ else
             })
             .done(function (result, status, xhr) {
                 if (!result) {
-                    showError('输入的验证码不正确。');
+                    //showError('输入的验证码不正确。');
+                    showMessage('danger', '错误', '输入的验证码不正确。');
                     $('#captcha').focus();
                     return false;
                 } else {
@@ -178,7 +179,8 @@ else
                 }
             })
             .fail(function (xhr) {
-                showError('xhr.statusText');
+                //showError('xhr.statusText');
+                showMessage('danger', '错误', xhr.statusText);
             })
             .always(function (xhr, status) {
                 enableControls(editor);
@@ -202,12 +204,14 @@ else
 
             final.done(function (result, status, xhr) {
                 if (status === 'success') {
-                    showInfo('评论已成功提交，请等待审核，审核通过后即会发表。感谢您的参与！');
+                    //showInfo('评论已成功提交，请等待审核，审核通过后即会发表。感谢您的参与！');
+                    showMessage('info', '成功', '评论已成功提交，请等待审核，审核通过后即会发表。感谢您的参与！');
                     resetControlValues(editor);
                     editor.focus();
                 }
             }).fail(function (xhr) {
-                showError(xhr.statusText);
+                //showError(xhr.statusText);
+                showMessage('danger', '错误', xhr.statusText);
             }).always(function (xhr, status) {
                 enableControls(editor);
                 updateCaptcha();
