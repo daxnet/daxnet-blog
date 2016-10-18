@@ -50,6 +50,17 @@
     </div>
 </div>
 <script type="text/javascript">
+    function disableControls() {
+        $('#txtNickName').attr('disabled', 'disabled');
+        $('#txtEmailAddress').attr('disabled', 'disabled');
+    }
+
+    function enableControls() {
+        $('#txtNickName').removeAttr('disabled');
+        $('#txtEmailAddress').removeAttr('disabled');
+    }
+
+
     $(document).ready(function () {
         // hideMessage();
         $('#submit-btn').click(function () {
@@ -57,14 +68,55 @@
             if (!$form.valid()) {
                 var validator = $form.data('validator');
                 var msg = validator.errorList[0].message;
-                //$.each(validator.errorList, function () {
-                //    msg += '<li>' + this.message + '</li>';
-                //})
-                //msg += '</ul>';
                 showMessage('danger', '错误', msg);
             } else {
                 hideMessage();
+                // Call ajax to check if the CAPTCHA code is correct.
+                var captchaString = $('#txtCaptcha').val();
+                var encryptedString = $('#__captcha_image').val();
+                var verify = $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("VerifyCaptcha", "Captcha")',
+                    data: { captchaString: captchaString, encryptedString: encryptedString },
+                    beforeSend: function (xhr, settings) {
+                        disableControls();
+                    }
+                })
+                .done(function (result, status, xhr) {
+                    if (!result) {
+                        showMessage('danger', '错误', '输入的验证码不正确。');
+                        return false;
+                    } else {
+                        return true;
+                    }
+                })
+                .fail(function (xhr) {
+                    showMessage('danger', '错误', xhr.statusText);
+                })
+                .always(function (xhr, status) {
+                    enableControls();
+                    updateCaptcha('@Url.Action("UpdateCaptcha", "Captcha")');
+                });
 
+                var final = verify.then(function (response) {
+                    if (response) {
+                        var data = {
+                            Id: $('#txtId').val(),
+                            UserName: $('#txtUserName').val(),
+                            NickName: $('#txtNickName').val(),
+                            EmailAddress: $('#txtEmailAddress').val(),
+                            Captcha: $('#txtCaptcha').val()
+                        };
+                        return $.ajax({
+                            type: "POST",
+                            url: '@Url.Action("UpdateProfile", "Account")',
+                            beforeSend: function (xhr, settings) {
+                                disableControls();
+                            },
+                            data: data
+                        });
+                    }
+                });
             }
         });
     });

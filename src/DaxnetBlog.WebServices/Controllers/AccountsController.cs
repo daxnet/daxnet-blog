@@ -42,6 +42,7 @@ using DaxnetBlog.Common.Storage;
 using DaxnetBlog.Domain.Model;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
@@ -339,6 +340,50 @@ namespace DaxnetBlog.WebServices.Controllers
                     return rowsAffected > 0;
                 }
                 return false;
+            });
+
+            return Ok(result);
+        }
+
+
+        [HttpPost]
+        [Route("update/{id}")]
+        public async Task<IActionResult> UpdateAccount(int id, [FromBody] dynamic model)
+        {
+            var nickName = (string)model.NickName;
+            var emailAddress = (string)model.EmailAddress;
+
+            var result = await storage.ExecuteAsync(async (connection, transaction, cancellationToken) =>
+            {
+                var account = (await accountStore.SelectAsync(connection, 
+                    x => x.Id == id, 
+                    transaction: transaction, 
+                    cancellationToken: cancellationToken)).FirstOrDefault();
+                if (account == null)
+                {
+                    throw new ServiceException(HttpStatusCode.NotFound, "Account does not exist.");
+                }
+
+                var updateFields = new List<Expression<Func<Account, object>>>();
+                if (!string.IsNullOrEmpty(nickName))
+                {
+                    account.NickName = nickName;
+                    updateFields.Add(x => x.NickName);
+                }
+
+                if (!string.IsNullOrEmpty(emailAddress))
+                {
+                    account.EmailAddress = emailAddress;
+                    updateFields.Add(x => x.EmailAddress);
+                }
+
+                return updateFields.Count > 0 ? 
+                    await accountStore.UpdateAsync(account, 
+                        connection, 
+                        x => x.Id == id, 
+                        updateFields, 
+                        transaction, 
+                        cancellationToken) : 0;
             });
 
             return Ok(result);

@@ -55,18 +55,6 @@ else
 
 <script src="~/ckeditor/ckeditor.js"></script>
 <script language="javascript" type="text/javascript">
-    function updateCaptcha() {
-        $.ajax({
-            type: 'GET',
-            url: '@Url.Action("UpdateCaptcha", "Home")'
-        })
-        .done(function (result, status, xhr) {
-            $('#captchaArea').html(result);
-        })
-        .fail(function (xhr) {
-
-        });
-    };
 
     function disableControls(editor) {
         editor.setReadOnly(true);
@@ -124,7 +112,7 @@ else
             var encryptedString = $('#__captcha_image').val();
             var verify = $.ajax({
                 type: "POST",
-                url: '@Url.Action("VerifyCaptcha", "Home")',
+                url: '@Url.Action("VerifyCaptcha", "Captcha")',
                 data: { captchaString: captchaString, encryptedString: encryptedString },
                 beforeSend: function (xhr, settings) {
                     disableControls(editor);
@@ -144,7 +132,7 @@ else
             })
             .always(function (xhr, status) {
                 enableControls(editor);
-                updateCaptcha();
+                updateCaptcha('@Url.Action("UpdateCaptcha", "Captcha")');
             });
 
             // If CAPTCHA code is correct, post the reply.
@@ -172,7 +160,7 @@ else
                 showMessage('danger', '错误', xhr.statusText);
             }).always(function (xhr, status) {
                 enableControls(editor);
-                updateCaptcha();
+                updateCaptcha('@Url.Action("UpdateCaptcha", "Captcha")');
             });
         });
     });

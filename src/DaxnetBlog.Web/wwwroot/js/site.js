@@ -26,3 +26,16 @@ function showMessage(type, title, body) {
 function hideMessage() {
     $('#message-alert').hide();
 }
+
+function updateCaptcha(updateCaptchaUrl) {
+    $.ajax({
+        type: 'GET',
+        url: updateCaptchaUrl
+    })
+    .done(function (result, status, xhr) {
+        $('#captchaArea').html(result);
+    })
+    .fail(function (xhr) {
+
+    });
+};
