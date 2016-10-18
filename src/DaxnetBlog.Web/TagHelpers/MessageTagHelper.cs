@@ -35,6 +35,7 @@ namespace DaxnetBlog.Web.TagHelpers
             {
                 var tagBuilder = new TagBuilder("div");
                 tagBuilder.AddCssClass("alert");
+                tagBuilder.Attributes.Add("style", "display: none;");
                 tagBuilder.Attributes.Add("id", "message-alert");
                 switch(Type.ToUpper())
                 {
@@ -66,7 +67,7 @@ namespace DaxnetBlog.Web.TagHelpers
                 var bodyContent = (await output.GetChildContentAsync()).GetContent();
                 var spanBuilder = new TagBuilder("span");
                 spanBuilder.Attributes.Add("id", "message-alert-body");
-                spanBuilder.InnerHtml.AppendHtml(this.htmlHelper.Raw(bodyContent).ToString());
+                spanBuilder.InnerHtml.AppendHtml(bodyContent);
 
                 tagBuilder.InnerHtml.AppendHtml(spanBuilder.ToHtmlString());
 

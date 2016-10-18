@@ -157,7 +157,17 @@ namespace DaxnetBlog.Web.Controllers
         {
             if (ModelState.IsValid)
             {
+                var captchaString = this.Request.Form["__captcha_image"];
+                var encryptedString = Convert.ToBase64String(UTF32Encoding.Unicode.GetBytes(model.Captcha.ToLower()));
+                if (captchaString != encryptedString)
+                {
+                    ModelState.AddModelError("", "验证码不正确。");
+                    return View(nameof(UpdateProfile), model);
+                }
+                else
+                {
 
+                }
             }
             return RedirectToAction(nameof(Manage), new { category = "Profile" });
         }

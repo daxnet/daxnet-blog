@@ -3,49 +3,46 @@
 
 <div class="row">
     <div class="col-md-12">
-        <message message-enabled="true"></message>
+        <message message-enabled="true">
+        </message>
     </div>
 </div>
 <div class="row">
-    <div class="col-md-5">
+    <div class="col-md-6">
         <section>
-            <form asp-action="UpdateProfile" asp-controller="Account" method="post" class="form-horizontal">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <form id="main" class="form-horizontal">
                 <div class="form-group">
-                    <label asp-for="Id" class="col-md-2 control-label"></label>
-                    <div class="col-md-10">
+                    <label asp-for="Id" class="col-md-3 control-label"></label>
+                    <div class="col-md-9">
                         <input asp-for="Id" class="form-control" id="txtId" readonly />
                     </div>
                 </div>
                 <div class="form-group">
-                    <label asp-for="UserName" class="col-md-2 control-label"></label>
-                    <div class="col-md-10">
+                    <label asp-for="UserName" class="col-md-3 control-label"></label>
+                    <div class="col-md-9">
                         <input asp-for="UserName" class="form-control" id="txtUserName" readonly />
                     </div>
                 </div>
                 <div class="form-group">
-                    <label asp-for="NickName" class="col-md-2 control-label"></label>
-                    <div class="col-md-10">
+                    <label asp-for="NickName" class="col-md-3 control-label"></label>
+                    <div class="col-md-9">
                         <input asp-for="NickName" class="form-control" id="txtNickName" />
-                        <span asp-validation-for="NickName" class="text-danger"></span>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label asp-for="EmailAddress" class="col-md-2 control-label"></label>
-                    <div class="col-md-10">
+                    <label asp-for="EmailAddress" class="col-md-3 control-label"></label>
+                    <div class="col-md-9">
                         <input asp-for="EmailAddress" class="form-control" id="txtEmailAddress" />
-                        <span asp-validation-for="EmailAddress" class="text-danger"></span>
                     </div>
                 </div>
                 <div class="form-group">
                     <div class="form-inline">
-                        <label for="captcha">请输入验证码：</label>
+                        <label for="captcha" class="col-md-3 control-label">验证码</label>
                         <span id="captchaArea">
                             @await Html.PartialAsync("_CaptchaPartial")
                         </span>
                         <input asp-for="Captcha" class="form-control" id="txtCaptcha" />
-                        <span asp-validation-for="Captcha" class="text-danger"></span>
-                        <button class="btn btn-primary" type="submit" id="submit-btn">保存</button>
+                        <button class="btn btn-primary" type="button" id="submit-btn">保存</button>
                     </div>
                 </div>
             </form>
@@ -54,6 +51,21 @@
 </div>
 <script type="text/javascript">
     $(document).ready(function () {
-        hideMessage();
+        // hideMessage();
+        $('#submit-btn').click(function () {
+            var $form = $('#main');
+            if (!$form.valid()) {
+                var validator = $form.data('validator');
+                var msg = validator.errorList[0].message;
+                //$.each(validator.errorList, function () {
+                //    msg += '<li>' + this.message + '</li>';
+                //})
+                //msg += '</ul>';
+                showMessage('danger', '错误', msg);
+            } else {
+                hideMessage();
+
+            }
+        });
     });
 </script>
