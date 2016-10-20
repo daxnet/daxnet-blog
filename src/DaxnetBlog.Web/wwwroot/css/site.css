@@ -99,6 +99,7 @@ article h4 {
 article .replies .replies-title {
     font-size: 24px;
     margin-top: 10px;
+    margin-bottom: 10px;
     color: black;
 }
 

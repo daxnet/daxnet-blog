@@ -246,47 +246,6 @@ namespace DaxnetBlog.WebServices.Controllers
             return Ok(account.ValidatePassword(password));
         }
 
-        //[HttpPost]
-        //[Route("verification/create")]
-        //public async Task<IActionResult> GenerateEmailVerificationCodeByUserName([FromBody] dynamic userNameModel)
-        //{
-        //    var userName = (string)userNameModel.UserName;
-        //    if (string.IsNullOrEmpty(userName))
-        //    {
-        //        throw new ServiceException(HttpStatusCode.BadRequest, $"{nameof(userName)}参数不能为空。");
-        //    }
-
-        //    var verificationCode = Utils.GetUniqueStringValue(16);
-        //    return await storage.ExecuteAsync(async (connection, transaction, cancellationToken) =>
-        //    {
-        //        var account = (await accountStore.SelectAsync(connection, 
-        //            x => x.UserName == userName, 
-        //            transaction: transaction, 
-        //            cancellationToken: cancellationToken)).FirstOrDefault();
-
-        //        if (account == null)
-        //        {
-        //            throw new ServiceException(HttpStatusCode.NotFound, $"用户{userName}不存在。");
-        //        }
-
-        //        account.EmailVerifyCode = verificationCode;
-
-        //        var rowsAffected = await accountStore.UpdateAsync(account,
-        //            connection,
-        //            expr => expr.Id == account.Id,
-        //            new Expression<Func<Account, object>>[] { x => x.EmailVerifyCode },
-        //            transaction);
-
-        //        if (rowsAffected > 0)
-        //            return Ok(new
-        //            {
-        //                UserName = userName,
-        //                VerificationCode = verificationCode
-        //            });
-        //        throw new ServiceException("生成电子邮件验证码失败。");
-        //    });
-        //}
-
         [HttpGet]
         [Route("verification/code/{userName}")]
         public async Task<IActionResult> GetEmailVerificationCode(string userName)

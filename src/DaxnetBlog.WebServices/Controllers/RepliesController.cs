@@ -32,6 +32,37 @@ namespace DaxnetBlog.WebServices.Controllers
             this.accountStore = accountStore;
         }
 
+        [HttpGet]
+        [Route("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var reply = await this.storage.ExecuteAsync(async (connection, transaction, cancellationToken) =>
+            {
+                var r = (await replyStore.SelectAsync(connection, x => x.Account, x => x.AccountId, acct => acct.Id, x => x.Id == id, transaction: transaction, cancellationToken: cancellationToken)).FirstOrDefault();
+                if (r == null)
+                {
+                    throw new ServiceException(HttpStatusCode.NotFound);
+                }
+                return r;
+            });
+
+            return Ok(new
+            {
+                reply.Id,
+                reply.BlogPostId,
+                reply.Content,
+                reply.DatePublished,
+                reply.ParentId,
+                reply.IsApproved,
+                Account = new
+                {
+                    reply.Account.Id,
+                    reply.Account.UserName,
+                    reply.Account.NickName
+                }
+            });
+        }
+
         [HttpPost]
         [Route("create")]
         public async Task<IActionResult> CreateReply([FromBody] dynamic model)
