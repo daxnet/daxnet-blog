@@ -355,9 +355,9 @@ namespace DaxnetBlog.WebServices.Controllers
 
             var result = await storage.ExecuteAsync(async (connection, transaction, cancellationToken) =>
             {
-                var account = (await accountStore.SelectAsync(connection, 
-                    x => x.Id == id, 
-                    transaction: transaction, 
+                var account = (await accountStore.SelectAsync(connection,
+                    x => x.Id == id,
+                    transaction: transaction,
                     cancellationToken: cancellationToken)).FirstOrDefault();
                 if (account == null)
                 {
@@ -377,12 +377,12 @@ namespace DaxnetBlog.WebServices.Controllers
                     updateFields.Add(x => x.EmailAddress);
                 }
 
-                return updateFields.Count > 0 ? 
-                    await accountStore.UpdateAsync(account, 
-                        connection, 
-                        x => x.Id == id, 
-                        updateFields, 
-                        transaction, 
+                return updateFields.Count > 0 ?
+                    await accountStore.UpdateAsync(account,
+                        connection,
+                        x => x.Id == id,
+                        updateFields,
+                        transaction,
                         cancellationToken) : 0;
             });
 

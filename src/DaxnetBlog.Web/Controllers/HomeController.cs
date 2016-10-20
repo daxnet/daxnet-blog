@@ -38,13 +38,6 @@ namespace DaxnetBlog.Web.Controllers
             return View(model);
         }
 
-        public async Task<IActionResult> Post(int id)
-        {
-            var json = await (await this.httpClient.GetAsync($"blogPosts/{id}")).Content.ReadAsStringAsync();
-            dynamic model = JsonConvert.DeserializeObject(json);
-            return View(model);
-        }
-
         public IActionResult About()
         {
             ViewData["Message"] = "Your application description page.";
@@ -61,21 +54,7 @@ namespace DaxnetBlog.Web.Controllers
 
         
 
-        /// <summary>
-        /// Posts the reply comments.
-        /// </summary>
-        /// <param name="feature">The feature.</param>
-        /// <param name="key">The key.</param>
-        /// <param name="comments">The comments.</param>
-        /// <returns></returns>
-        [HttpPost]
-        public IActionResult Reply(string feature, string key, string comments)
-        {
-            var userName = this.User.Identity.Name;
-            //ViewData["Message"] = "处理成功，您的回复已经提交并进入审核流程。";
-            return Ok(userName);
-            //throw new Exception("失败");
-        }
+        
         #endregion
     }
 }

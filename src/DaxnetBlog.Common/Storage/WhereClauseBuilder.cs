@@ -23,6 +23,7 @@ namespace DaxnetBlog.Common.Storage
         private readonly Dictionary<string, object> parameterValues = new Dictionary<string, object>();
         private readonly IStoreMapping storeMapping;
         private readonly StorageDialectSettings dialectSettings;
+        private readonly bool useTableAlias;
         private bool startsWith = false;
         private bool endsWith = false;
         private bool contains = false;
@@ -34,10 +35,11 @@ namespace DaxnetBlog.Common.Storage
         /// </summary>
         /// <param name="storeMapping">The <c>Apworks.Storage.IStorageMappingResolver</c>
         /// instance which will be used for generating the mapped field names.</param>
-        public WhereClauseBuilder(IStoreMapping storeMapping, StorageDialectSettings dialectSettings)
+        public WhereClauseBuilder(IStoreMapping storeMapping, StorageDialectSettings dialectSettings, bool useTableAlias = true)
         {
             this.storeMapping = storeMapping;
             this.dialectSettings = dialectSettings;
+            this.useTableAlias = useTableAlias;
         }
         #endregion
 
@@ -177,7 +179,15 @@ namespace DaxnetBlog.Common.Storage
             if (node.Member.DeclaringType == typeof(TEntity) ||
                 typeof(TEntity).GetTypeInfo().IsSubclassOf(node.Member.DeclaringType))
             {
-                string mappedFieldName =$"T_{storeMapping.GetTableName<TEntity, TKey>()}.{storeMapping.GetEscapedColumnName<TEntity, TKey>(this.dialectSettings, node.Member.Name)}";
+                var mappedFieldName = "";
+                if (this.useTableAlias)
+                {
+                    mappedFieldName = $"T_{storeMapping.GetTableName<TEntity, TKey>()}.{storeMapping.GetEscapedColumnName<TEntity, TKey>(this.dialectSettings, node.Member.Name)}";
+                }
+                else
+                {
+                    mappedFieldName = $"{storeMapping.GetEscapedTableName<TEntity, TKey>(dialectSettings)}.{storeMapping.GetEscapedColumnName<TEntity, TKey>(this.dialectSettings, node.Member.Name)}";
+                }
                 Out(mappedFieldName);
             }
             else

@@ -21,39 +21,39 @@
             {
                 case "Profile":
                     <li class="active"><a href="#">基本信息</a></li>
-                    <li><a href="@Url.Action("Manage","Account", new { category = "Messages" })">站内消息</a></li>
-                    <li><a href="@Url.Action("Manage","Account", new { category = "Security" })">安全设置</a></li>
-                    if (accountModel.IsAdmin.HasValue && accountModel.IsAdmin.Value)
+                    @*<li><a href="@Url.Action("Manage","Account", new { category = "Messages" })">站内消息</a></li>*@
+                    @*<li><a href="@Url.Action("Manage","Account", new { category = "Security" })">安全设置</a></li>*@
+                    @*if (accountModel.IsAdmin.HasValue && accountModel.IsAdmin.Value)
                     {
                         <li><a href="@Url.Action("Manage", "Account", new { category = "Administration" })">站点管理</a></li>
-                    }
+                    }*@
                     break;
                 case "Messages":
                     <li><a href="@Url.Action("Manage","Account", new { category = "Profile" })">基本信息</a></li>
-                    <li class="active"><a href="#">站内消息</a></li>
-                    <li><a href="@Url.Action("Manage","Account", new { category = "Security" })">安全设置</a></li>
-                    if (accountModel.IsAdmin.HasValue && accountModel.IsAdmin.Value)
+                    @*<li class="active"><a href="#">站内消息</a></li>*@
+                    @*<li><a href="@Url.Action("Manage","Account", new { category = "Security" })">安全设置</a></li>*@
+                    @*if (accountModel.IsAdmin.HasValue && accountModel.IsAdmin.Value)
                     {
                         <li><a href="@Url.Action("Manage", "Account", new { category = "Administration" })">站点管理</a></li>
-                    }
+                    }*@
                     break;
                 case "Security":
                     <li><a href="@Url.Action("Manage","Account", new { category = "Profile" })">基本信息</a></li>
-                    <li><a href="@Url.Action("Manage","Account", new { category = "Messages" })">站内消息</a></li>
-                    <li class="active"><a href="#">安全设置</a></li>
-                    if (accountModel.IsAdmin.HasValue && accountModel.IsAdmin.Value)
+                    @*<li><a href="@Url.Action("Manage","Account", new { category = "Messages" })">站内消息</a></li>*@
+                    @*<li class="active"><a href="#">安全设置</a></li>*@
+                    @*if (accountModel.IsAdmin.HasValue && accountModel.IsAdmin.Value)
                     {
                         <li><a href="@Url.Action("Manage", "Account", new { category = "Administration" })">站点管理</a></li>
-                    }
+                    }*@
                     break;
                 case "Administration":
                     <li><a href="@Url.Action("Manage","Account", new { category = "Profile" })">基本信息</a></li>
-                    <li><a href="@Url.Action("Manage","Account", new { category = "Messages" })">站内消息</a></li>
-                    <li><a href="@Url.Action("Manage","Account", new { category = "Security" })">安全设置</a></li>
-                    if (accountModel.IsAdmin.HasValue && accountModel.IsAdmin.Value)
+                    @*<li><a href="@Url.Action("Manage","Account", new { category = "Messages" })">站内消息</a></li>*@
+                    @*<li><a href="@Url.Action("Manage","Account", new { category = "Security" })">安全设置</a></li>*@
+                    @*if (accountModel.IsAdmin.HasValue && accountModel.IsAdmin.Value)
                     {
                         <li class="active"><a href="#">站点管理</a></li>
-                    }
+                    }*@
                     break;
             }
         </ul>

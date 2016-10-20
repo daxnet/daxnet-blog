@@ -128,7 +128,7 @@ else
                 }
             })
             .fail(function (xhr) {
-                showMessage('danger', '错误', xhr.statusText);
+                showMessage('danger', '错误', xhr.responseText);
             })
             .always(function (xhr, status) {
                 enableControls(editor);
@@ -141,7 +141,7 @@ else
                     var comments = editor.getData();
                     return $.ajax({
                         type: "POST",
-                        url: '@Url.Action("Reply", "Home")',
+                        url: '@Url.Action("Reply", "BlogPosts")',
                         beforeSend: function (xhr, settings) {
                             disableControls(editor);
                         },
@@ -157,7 +157,7 @@ else
                     editor.focus();
                 }
             }).fail(function (xhr) {
-                showMessage('danger', '错误', xhr.statusText);
+                showMessage('danger', '错误', xhr.responseText);
             }).always(function (xhr, status) {
                 enableControls(editor);
                 updateCaptcha('@Url.Action("UpdateCaptcha", "Captcha")');

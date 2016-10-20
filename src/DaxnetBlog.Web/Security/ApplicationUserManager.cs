@@ -88,6 +88,20 @@ namespace DaxnetBlog.Web.Security
             }
         }
 
+        public override async Task<IdentityResult> UpdateAsync(User user)
+        {
+            var result = await httpClient.PostAsJsonAsync($"accounts/update/{user.Id}", new { NickName = user.NickName, EmailAddress = user.EmailAddress });
+            try
+            {
+                result.EnsureSuccessStatusCode();
+                return IdentityResult.Success;
+            }
+            catch(Exception ex)
+            {
+                return IdentityResult.Failed(new IdentityError { Description = $"错误信息：{ex.Message}。" });
+            }
+        }
+
         public override bool SupportsUserLockout
         {
             get

@@ -17,7 +17,7 @@
                 var content = (string)m.content;
                 var datePublished = (DateTime)m.datePublished;
                 <li>
-                    <h4>@Html.ActionLink(title, "Post", new { id = m.id })</h4>
+                    <h4>@Html.ActionLink(title, "Post", "BlogPosts", new { id = m.id })</h4>
                     <div class="summary">@content.Summary(config.Value.TruncateSummaryLength)</div>
                     <div class="pull-right auth">@datePublished</div>
                 </li>

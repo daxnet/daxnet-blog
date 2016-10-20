@@ -155,21 +155,14 @@ namespace DaxnetBlog.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> UpdateProfile(AccountProfileViewModel model)
         {
-            if (ModelState.IsValid)
+            var identityResult = await userManager.UpdateAsync(new User
             {
-                var captchaString = this.Request.Form["__captcha_image"];
-                var encryptedString = Convert.ToBase64String(UTF32Encoding.Unicode.GetBytes(model.Captcha.ToLower()));
-                if (captchaString != encryptedString)
-                {
-                    ModelState.AddModelError("", "验证码不正确。");
-                    return View(nameof(UpdateProfile), model);
-                }
-                else
-                {
+                Id = model.Id,
+                NickName = model.NickName,
+                EmailAddress = model.EmailAddress
+            });
 
-                }
-            }
-            return RedirectToAction(nameof(Manage), new { category = "Profile" });
+            return Ok(identityResult.Succeeded);
         }
 
         [HttpGet]

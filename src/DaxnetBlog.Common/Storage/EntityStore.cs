@@ -472,7 +472,7 @@ namespace DaxnetBlog.Common.Storage
             WhereClauseBuildResult whereClauseBuildResult = null;
             if (expression != null)
             {
-                var whereClauseBuilder = new WhereClauseBuilder<TEntity, TKey>(mapping, dialectSettings);
+                var whereClauseBuilder = new WhereClauseBuilder<TEntity, TKey>(mapping, dialectSettings, false);
                 whereClauseBuildResult = whereClauseBuilder.BuildWhereClause(expression);
                 sqlBuilder.Append($" WHERE {whereClauseBuildResult.WhereClause}");
             }
