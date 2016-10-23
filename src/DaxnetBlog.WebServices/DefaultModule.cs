@@ -24,24 +24,6 @@ namespace DaxnetBlog.WebServices
         /// </remarks>
         protected override void Load(ContainerBuilder builder)
         {
-            var connectionString = Environment.GetEnvironmentVariable("DAXNETBLOG_SQL_STR");
-            if (string.IsNullOrEmpty(connectionString))
-            {
-                connectionString = DefaultConnectionString;
-            }
-            else
-            {
-                try
-                {
-                    var c = Crypto.Create(CryptoTypes.EncTypeTripleDes);
-                    connectionString = c.Decrypt(connectionString, Crypto.GlobalKey);
-                }
-                catch
-                {
-                    connectionString = DefaultConnectionString;
-                }
-            }
-
             // Registers the store mapping instance.
             builder.RegisterType<PluralTableNameStoreMapping>()
                 .As<IStoreMapping>();
@@ -64,7 +46,7 @@ namespace DaxnetBlog.WebServices
             // Registers the SQL Server storage.
             builder.RegisterType<SqlServerStorage>()
                 .As<IStorage>()
-                .WithParameter("connectionString", connectionString);
+                .WithParameter("connectionString", EnvironmentVariables.ServerDatabaseConnectionString);
         }
     }
 }

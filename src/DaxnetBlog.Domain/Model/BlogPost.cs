@@ -21,6 +21,8 @@ namespace DaxnetBlog.Domain.Model
 
         public int? Visits { get; set; }
 
+        public bool? IsDeleted { get; set; }
+
         public override string ToString() => Title;
     }
 }

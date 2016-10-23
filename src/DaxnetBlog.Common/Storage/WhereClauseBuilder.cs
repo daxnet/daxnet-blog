@@ -35,7 +35,7 @@ namespace DaxnetBlog.Common.Storage
         /// </summary>
         /// <param name="storeMapping">The <c>Apworks.Storage.IStorageMappingResolver</c>
         /// instance which will be used for generating the mapped field names.</param>
-        public WhereClauseBuilder(IStoreMapping storeMapping, StorageDialectSettings dialectSettings, bool useTableAlias = true)
+        public WhereClauseBuilder(IStoreMapping storeMapping, StorageDialectSettings dialectSettings, bool useTableAlias = false)
         {
             this.storeMapping = storeMapping;
             this.dialectSettings = dialectSettings;
@@ -80,6 +80,10 @@ namespace DaxnetBlog.Common.Storage
         /// </summary>
         private string NotEqual => dialectSettings.SqlNotEqualOperator;
 
+        private string Is => dialectSettings.SqlIsOperator;
+
+        private string IsNot => dialectSettings.SqlIsNotOperator;
+
         /// <summary>
         /// Gets a <c>System.String</c> value which represents the LIKE operation in the WHERE clause.
         /// </summary>
@@ -117,7 +121,15 @@ namespace DaxnetBlog.Common.Storage
                     str = "/";
                     break;
                 case ExpressionType.Equal:
-                    str = this.Equal;
+                    if (node.Right.NodeType == ExpressionType.Constant &&
+                        ((ConstantExpression)node.Right).Value == null)
+                    {
+                        str = this.Is;
+                    }
+                    else
+                    {
+                        str = this.Equal;
+                    }
                     break;
                 case ExpressionType.GreaterThan:
                     str = ">";
@@ -144,7 +156,15 @@ namespace DaxnetBlog.Common.Storage
                     str = this.Not;
                     break;
                 case ExpressionType.NotEqual:
-                    str = this.NotEqual;
+                    if (node.Right.NodeType == ExpressionType.Constant &&
+                        ((ConstantExpression)node.Right).Value == null)
+                    {
+                        str = this.IsNot;
+                    }
+                    else
+                    {
+                        str = this.NotEqual;
+                    }
                     break;
                 case ExpressionType.OrElse:
                     str = this.Or;
@@ -229,31 +249,38 @@ namespace DaxnetBlog.Common.Storage
         /// returns the original expression.</returns>
         protected override Expression VisitConstant(ConstantExpression node)
         {
-            string paramName = string.Format("{0}{1}", this.dialectSettings.ParameterChar, Utils.GetUniqueStringValue(8));
-            Out(paramName);
-            if (!parameterValues.ContainsKey(paramName))
+            if (node.Value == null)
             {
-                object v = null;
-                if (startsWith && node.Value is string)
+                Out("NULL");
+            }
+            else
+            {
+                string paramName = string.Format("{0}{1}", this.dialectSettings.ParameterChar, Utils.GetUniqueStringValue(8));
+                Out(paramName);
+                if (!parameterValues.ContainsKey(paramName))
                 {
-                    startsWith = false;
-                    v = node.Value.ToString() + LikeSymbol;
+                    object v = null;
+                    if (startsWith && node.Value is string)
+                    {
+                        startsWith = false;
+                        v = node.Value.ToString() + LikeSymbol;
+                    }
+                    else if (endsWith && node.Value is string)
+                    {
+                        endsWith = false;
+                        v = LikeSymbol + node.Value.ToString();
+                    }
+                    else if (contains && node.Value is string)
+                    {
+                        contains = false;
+                        v = LikeSymbol + node.Value.ToString() + LikeSymbol;
+                    }
+                    else
+                    {
+                        v = node.Value;
+                    }
+                    parameterValues.Add(paramName, v);
                 }
-                else if (endsWith && node.Value is string)
-                {
-                    endsWith = false;
-                    v = LikeSymbol + node.Value.ToString();
-                }
-                else if (contains && node.Value is string)
-                {
-                    contains = false;
-                    v = LikeSymbol + node.Value.ToString() + LikeSymbol;
-                }
-                else
-                {
-                    v = node.Value;
-                }
-                parameterValues.Add(paramName, v);
             }
             return node;
         }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using DaxnetBlog.Web.Security;
 using System.Net.Http;
 using DaxnetBlog.Web.Services;
+using WilderMinds.MetaWeblog;
 
 namespace DaxnetBlog.Web
 {
@@ -33,6 +30,8 @@ namespace DaxnetBlog.Web
             // Add framework services.
             services.AddMvc();
 
+            services.AddMetaWeblog<MetaWeblogService>();
+
             services.AddTransient<HttpClient, ServiceProxy>();
 
             services.AddSingleton<IEmailService, EmailService>();
@@ -45,8 +44,7 @@ namespace DaxnetBlog.Web
                 .AddIdentity<User, Role>()
                 .AddUserStore<ApplicationUserStore>()
                 .AddRoleStore<ApplicationRoleStore>()
-                .AddUserManager<ApplicationUserManager>()
-                ;
+                .AddUserManager<ApplicationUserManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -64,6 +62,8 @@ namespace DaxnetBlog.Web
             {
                 app.UseExceptionHandler("/Home/Error");
             }
+
+            app.UseMetaWeblog("/metaweblog");
 
             app.UseStaticFiles();
 

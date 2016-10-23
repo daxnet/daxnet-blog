@@ -318,7 +318,7 @@ namespace DaxnetBlog.Common.Storage
 
             if (expression != null)
             {
-                var whereClauseBuildResult = this.BuildWhereClause(expression);
+                var whereClauseBuildResult = new WhereClauseBuilder<TEntity, TKey>(mapping, dialectSettings, true).BuildWhereClause(expression);
                 sqlBuilder.AppendLine($"WHERE {whereClauseBuildResult.WhereClause} ");
                 parameters = new Dictionary<string, object>(whereClauseBuildResult.ParameterValues);
             }
@@ -370,7 +370,7 @@ namespace DaxnetBlog.Common.Storage
 
             if (expression != null)
             {
-                var whereClauseBuildResult = this.BuildWhereClause(expression);
+                var whereClauseBuildResult = new WhereClauseBuilder<TEntity, TKey>(mapping, dialectSettings, true).BuildWhereClause(expression);
                 sqlBuilder.AppendLine($"WHERE {whereClauseBuildResult.WhereClause} ");
                 parameters = new Dictionary<string, object>(whereClauseBuildResult.ParameterValues);
             }
@@ -472,8 +472,7 @@ namespace DaxnetBlog.Common.Storage
             WhereClauseBuildResult whereClauseBuildResult = null;
             if (expression != null)
             {
-                var whereClauseBuilder = new WhereClauseBuilder<TEntity, TKey>(mapping, dialectSettings, false);
-                whereClauseBuildResult = whereClauseBuilder.BuildWhereClause(expression);
+                whereClauseBuildResult = this.BuildWhereClause(expression);
                 sqlBuilder.Append($" WHERE {whereClauseBuildResult.WhereClause}");
             }
             return new Tuple<string, IEnumerable<Tuple<string, string, object>>, WhereClauseBuildResult>(sqlBuilder.ToString(),

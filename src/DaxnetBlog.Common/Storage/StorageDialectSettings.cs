@@ -27,6 +27,10 @@ namespace DaxnetBlog.Common.Storage
 
         public virtual string SqlEqualOperator => "=";
 
+        public virtual string SqlIsOperator => "IS";
+
+        public virtual string SqlIsNotOperator => "IS NOT";
+
         public virtual string SqlNotStatement => "NOT";
 
         public virtual string SqlNotEqualOperator => "<>";
