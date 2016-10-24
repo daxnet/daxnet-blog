@@ -29,7 +29,8 @@
     "CoreCompat.System.Drawing": "1.0.0-beta006",
     "DaxnetBlog.Common": "1.0.0-*",
     "MailKit": "1.8.1",
-    "WilderMinds.MetaWeblog": "1.0.2"},
+    "WilderMinds.MetaWeblog": "1.0.2"
+  },
 
   "tools": {
     "BundlerMinifier.Core": "2.0.238",
