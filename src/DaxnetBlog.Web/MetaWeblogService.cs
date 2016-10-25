@@ -1,4 +1,5 @@
-﻿using DaxnetBlog.Web.Security;
+﻿using DaxnetBlog.Common.IntegrationServices;
+using DaxnetBlog.Web.Security;
 using Microsoft.AspNetCore.Identity;
 using Newtonsoft.Json;
 using System;
@@ -13,12 +14,15 @@ namespace DaxnetBlog.Web
     {
         private readonly HttpClient httpClient;
         private readonly UserManager<User> userManager;
+        private readonly IMediaObjectStorageService storageService;
 
         public MetaWeblogService(HttpClient httpClient,
-            UserManager<User> userManager)
+            UserManager<User> userManager,
+            IMediaObjectStorageService storageService)
         {
             this.httpClient = httpClient;
             this.userManager = userManager;
+            this.storageService = storageService;
         }
 
         public int AddCategory(string key, string username, string password, NewCategory category)

@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace DaxnetBlog.Common
 {
@@ -12,6 +9,9 @@ namespace DaxnetBlog.Common
         private const string KEY_DAXNETBLOG_SMTP_USERNAME = @"DAXNETBLOG_SMTP_USERNAME";
         private const string KEY_DAXNETBLOG_SMTP_PASSWORD = @"DAXNETBLOG_SMTP_PASSWORD";
         private const string KEY_DAXNETBLOG_SVC_BASEURL = @"DAXNETBLOG_SVC_BASEURL";
+        private const string KEY_DAXNETBLOG_AZURE_STORAGE_ACCT = @"DAXNETBLOG_AZURE_STORAGE_ACCT";
+        private const string KEY_DAXNETBLOG_AZURE_STORAGE_KEY = @"DAXNETBLOG_AZURE_STORAGE_KEY";
+        
         private const string DefaultConnectionString = @"Server=localhost; Database=DaxnetBlogDB; Integrated Security=SSPI;";
 
         private static readonly Crypto crypto = Crypto.Create(CryptoTypes.EncTypeTripleDes);
@@ -83,6 +83,40 @@ namespace DaxnetBlog.Common
             get
             {
                 return Environment.GetEnvironmentVariable(KEY_DAXNETBLOG_SVC_BASEURL);
+            }
+        }
+
+        public static string WebAzureStorageAccount
+        {
+            get
+            {
+                try
+                {
+                    var encryptedStorageAccount = Environment.GetEnvironmentVariable(KEY_DAXNETBLOG_AZURE_STORAGE_ACCT);
+                    if (!string.IsNullOrEmpty(encryptedStorageAccount))
+                    {
+                        return crypto.Decrypt(encryptedStorageAccount, Crypto.GlobalKey);
+                    }
+                }
+                catch { }
+                return null;
+            }
+        }
+
+        public static string WebAzureStorageKey
+        {
+            get
+            {
+                try
+                {
+                    var encryptedStorageKey = Environment.GetEnvironmentVariable(KEY_DAXNETBLOG_AZURE_STORAGE_KEY);
+                    if (!string.IsNullOrEmpty(encryptedStorageKey))
+                    {
+                        return crypto.Decrypt(encryptedStorageKey, Crypto.GlobalKey);
+                    }
+                }
+                catch { }
+                return null;
             }
         }
     }

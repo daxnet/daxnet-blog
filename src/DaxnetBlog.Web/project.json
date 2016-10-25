@@ -1,11 +1,15 @@
 {
   "dependencies": {
-    "Microsoft.NETCore.App": {
-      "version": "1.0.1",
-      "type": "platform"
-    },
+    "CoreCompat.System.Drawing": "1.0.0-beta006",
+    "DaxnetBlog.AzureServices": "1.0.0-*",
+    "DaxnetBlog.Common": "1.0.0-*",
+    "Humanizer.Core": "2.1.0",
+    "MailKit": "1.8.1",
+    "Microsoft.AspNet.WebApi.Client": "5.2.3",
     "Microsoft.AspNetCore.Diagnostics": "1.0.0",
+    "Microsoft.AspNetCore.Identity": "1.0.0",
     "Microsoft.AspNetCore.Mvc": "1.0.1",
+    "Microsoft.AspNetCore.Mvc.ViewFeatures": "1.0.1",
     "Microsoft.AspNetCore.Razor.Tools": {
       "version": "1.0.0-preview2-final",
       "type": "build"
@@ -20,15 +24,12 @@
     "Microsoft.Extensions.Logging.Console": "1.0.0",
     "Microsoft.Extensions.Logging.Debug": "1.0.0",
     "Microsoft.Extensions.Options.ConfigurationExtensions": "1.0.0",
+    "Microsoft.NETCore.App": {
+      "version": "1.0.1",
+      "type": "platform"
+    },
     "Microsoft.VisualStudio.Web.BrowserLink.Loader": "14.0.0",
-    "Microsoft.AspNetCore.Identity": "1.0.0",
-    "Microsoft.AspNet.WebApi.Client": "5.2.3",
     "System.Runtime.Serialization.Xml": "4.1.1",
-    "Humanizer.Core": "2.1.0",
-    "Microsoft.AspNetCore.Mvc.ViewFeatures": "1.0.1",
-    "CoreCompat.System.Drawing": "1.0.0-beta006",
-    "DaxnetBlog.Common": "1.0.0-*",
-    "MailKit": "1.8.1",
     "WilderMinds.MetaWeblog": "1.0.2"
   },
 
