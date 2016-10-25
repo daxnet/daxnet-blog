@@ -9,6 +9,7 @@ namespace DaxnetBlog.Common
         private const string KEY_DAXNETBLOG_SMTP_USERNAME = @"DAXNETBLOG_SMTP_USERNAME";
         private const string KEY_DAXNETBLOG_SMTP_PASSWORD = @"DAXNETBLOG_SMTP_PASSWORD";
         private const string KEY_DAXNETBLOG_SVC_BASEURL = @"DAXNETBLOG_SVC_BASEURL";
+        private const string KEY_DAXNETBLOG_AZURE_BASEURL = @"DAXNETBLOG_AZURE_BASEURL";
         private const string KEY_DAXNETBLOG_AZURE_STORAGE_ACCT = @"DAXNETBLOG_AZURE_STORAGE_ACCT";
         private const string KEY_DAXNETBLOG_AZURE_STORAGE_KEY = @"DAXNETBLOG_AZURE_STORAGE_KEY";
         
@@ -113,6 +114,23 @@ namespace DaxnetBlog.Common
                     if (!string.IsNullOrEmpty(encryptedStorageKey))
                     {
                         return crypto.Decrypt(encryptedStorageKey, Crypto.GlobalKey);
+                    }
+                }
+                catch { }
+                return null;
+            }
+        }
+
+        public static string WebAzureStorageBaseUrl
+        {
+            get
+            {
+                try
+                {
+                    var encryptedStorageBaseUrl = Environment.GetEnvironmentVariable(KEY_DAXNETBLOG_AZURE_BASEURL);
+                    if (!string.IsNullOrEmpty(encryptedStorageBaseUrl))
+                    {
+                        return crypto.Decrypt(encryptedStorageBaseUrl, Crypto.GlobalKey);
                     }
                 }
                 catch { }

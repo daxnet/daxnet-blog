@@ -183,7 +183,7 @@ namespace DaxnetBlog.Web
                         {
                             blogid = "1",
                             blogName = "daxnet.me",
-                            url = "http://localhost:22368"
+                            url = "http://daxnet.me"
                         }
                     };
             }

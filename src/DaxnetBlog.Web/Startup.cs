@@ -9,6 +9,7 @@ using DaxnetBlog.Web.Services;
 using WilderMinds.MetaWeblog;
 using DaxnetBlog.Common.IntegrationServices;
 using DaxnetBlog.AzureServices;
+using DaxnetBlog.Common;
 
 namespace DaxnetBlog.Web
 {
@@ -37,7 +38,8 @@ namespace DaxnetBlog.Web
             services.AddTransient<HttpClient, ServiceProxy>();
 
             services.AddSingleton<IEmailService, EmailService>();
-            services.AddSingleton<IMediaObjectStorageService>(new AzureBlobStorageService("abc", "def"));
+            services.AddSingleton<IMediaObjectStorageService>(new AzureBlobStorageService(EnvironmentVariables.WebAzureStorageBaseUrl, 
+                EnvironmentVariables.WebAzureStorageAccount, EnvironmentVariables.WebAzureStorageKey));
 
             // Build the configuration from configuration file.
             services.AddOptions();
