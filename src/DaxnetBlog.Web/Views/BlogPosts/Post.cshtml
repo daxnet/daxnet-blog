@@ -5,12 +5,13 @@
     ViewData["Title"] = $"{(string)Model.title} - daxnet.me";
 }
 
+<div class="jumbotron jumbotron-no-border jumbotron-article">
+    <h2>@Model.title</h2>
+    <h4>作者：陈晴阳 发布于：7/23/2016</h4>
+</div>
 <div class="row">
     <div class="col-md-10">
         <article>
-            <header>
-                @Model.title
-            </header>
             <content>
                 @Html.Raw(Model.content)
             </content>

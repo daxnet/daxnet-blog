@@ -24,7 +24,7 @@ namespace DaxnetBlog.AzureServices
             this.accessKey = accessKey;
         }
 
-        public  async Task<bool> SaveAsync(string container, string fileName, string base64)
+        public  async Task<string> SaveAsync(string container, string fileName, string base64)
         {
             HttpWebResponse response;
 
@@ -33,7 +33,11 @@ namespace DaxnetBlog.AzureServices
             headers.Add("x-ms-blob-type", "BlockBlob");
             HttpWebRequest request = await this.CreateRESTRequestAsync("PUT", container, fileName, requestBody, headers);
             response = request.GetResponseAsync().Result as HttpWebResponse;
-            return response.StatusCode == HttpStatusCode.Created;
+            if (response.StatusCode == HttpStatusCode.Created)
+            {
+                return $"{this.baseUrl}{container}/{fileName}";
+            }
+            return null;
         }
 
         #region Helper Methods

@@ -1,17 +1,25 @@
 ﻿body {
     padding-top: 50px;
     padding-bottom: 20px;
-    font-family: 'Microsoft YaHei', 'Microsoft YaHei UI', 'Segoe UI'
+    font-family: 'Microsoft YaHei', 'Microsoft YaHei UI', 'Segoe UI';
 }
 
-footer{
+footer {
     color: silver;
-    font-size:small;
+    font-size: small;
 }
+
+/* Making the navbar transparent */
+.navbar {
+    border: none;
+    border-radius: 0;
+    background-color: rgba(0,0,0,0.8);
+}
+
 
 .row {
-  margin-left: 0;
-  margin-right: 0;
+    margin-left: 0;
+    margin-right: 0;
 }
 
 /* Wrapping element */
@@ -38,18 +46,37 @@ ul.article-list div.summary {
     font-size: small;
 }
 
-ul.article-list div.auth{
+ul.article-list div.auth {
     color: lightblue;
     font-size: small;
 }
 
-/* article*/
-article header {
-   font-family: "Microsoft YaHei", "微软雅黑", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-   font-size: 26px !important;
-   text-align:center;
-   padding-bottom: 12px;
+.jumbotron-no-border {
+    margin-top: -10px;
+    margin-left: -10px;
+    margin-right: -10px;
 }
+
+/* article*/
+
+.jumbotron-article  {
+    text-align: center;
+    border: none;
+    border-radius: 0 !important;
+    background-color: rgba(0,0,0,0.6);
+    color: whitesmoke;
+}
+
+.jumbotron-article h4 {
+    padding-top: 15px;
+}
+
+/*article header {
+    font-family: "Microsoft YaHei", "微软雅黑", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 26px !important;
+    text-align: center;
+    padding-bottom: 12px;
+}*/
 
 article p {
     font-family: "Microsoft YaHei", "微软雅黑", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -59,41 +86,41 @@ article p {
 }
 
 article a {
-    color:#4F81BD;
+    color: #4F81BD;
     text-decoration: none;
 }
 
 article h1 {
-	font-size: 24px !important;
-	color: #365F91;
-	font-family: "Microsoft YaHei", "微软雅黑", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-	font-weight: bold;
-	padding-top: 6pt;
+    font-size: 28px !important;
+    color: #365F91;
+    font-family: "Microsoft YaHei", "微软雅黑", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    /*font-weight: bold;*/
+    padding-top: 6pt;
 }
 
 article h2 {
-	font-size: 20px !important;
-	color: #4F81BD;
-	font-family: "Microsoft YaHei", "微软雅黑", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-	font-weight: bold;
-	padding-top: 6pt;
+    font-size: 24px !important;
+    color: #4F81BD;
+    font-family: "Microsoft YaHei", "微软雅黑", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    /*font-weight: bold;*/
+    padding-top: 6pt;
 }
 
 article h3 {
-	font-size: 16px !important;
-	color: #4F81BD;
-	font-family: "Microsoft YaHei", "微软雅黑", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-	font-weight: bold;
-	padding-top: 6pt;
+    font-size: 20px !important;
+    color: #4F81BD;
+    font-family: "Microsoft YaHei", "微软雅黑", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: bold;
+    padding-top: 6pt;
 }
 
 article h4 {
-	font-size: 14px !important;
-	color: #4F81BD;
-	font-family: "Microsoft YaHei", "微软雅黑", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-	padding-top: 6pt;
-	font-weight: bold;
-	font-style: italic;
+    font-size: 18px !important;
+    color: #4F81BD;
+    font-family: "Microsoft YaHei", "微软雅黑", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    padding-top: 6pt;
+    font-weight: bold;
+    font-style: italic;
 }
 
 article .replies .replies-title {
@@ -129,18 +156,18 @@ textarea {
 }
 
 /* Make .svg files in the carousel display properly in older browsers */
-.carousel-inner .item img[src$=".svg"]
-{
+.carousel-inner .item img[src$=".svg"] {
     width: 100%;
 }
 
 /* Hide/rearrange for smaller screens */
 @media screen and (max-width: 767px) {
-  /* Hide captions */
-  .carousel-caption {
-    display: none
-  }
-  .pagination .pn {
-      display: none
-  }
+    /* Hide captions */
+    .carousel-caption {
+        display: none;
+    }
+
+    .pagination .pn {
+        display: none;
+    }
 }

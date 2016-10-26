@@ -11,6 +11,6 @@ namespace DaxnetBlog.Common.IntegrationServices
     /// </summary>
     public interface IMediaObjectStorageService
     {
-        Task<bool> SaveAsync(string container, string fileName, string base64);
+        Task<string> SaveAsync(string container, string fileName, string base64);
     }
 }

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using WilderMinds.MetaWeblog;
@@ -12,6 +13,8 @@ namespace DaxnetBlog.Web
 {
     public class MetaWeblogService : IMetaWeblogProvider
     {
+        private const string Container = "files";
+
         private readonly HttpClient httpClient;
         private readonly UserManager<User> userManager;
         private readonly IMediaObjectStorageService storageService;
@@ -192,7 +195,22 @@ namespace DaxnetBlog.Web
 
         public MediaObjectInfo NewMediaObject(string blogid, string username, string password, MediaObject mediaObject)
         {
-            throw new NotImplementedException();
+            User user;
+            if (Validate(username, password, out user))
+            {
+                var fileName = mediaObject.name.Replace("Windows-Live-Writer/", "");
+                foreach(var ch in Path.GetInvalidFileNameChars())
+                {
+                    fileName = fileName.Replace(ch, '_');
+                }
+
+                var urlString = this.storageService.SaveAsync(Container, fileName, mediaObject.bits).Result;
+                return new MediaObjectInfo
+                {
+                    url = urlString
+                };
+            }
+            return null;
         }
 
         private bool Validate(string username, string password, out User user)
