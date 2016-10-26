@@ -24,7 +24,7 @@ namespace DaxnetBlog.AzureServices
             this.accessKey = accessKey;
         }
 
-        public  async Task<string> SaveAsync(string container, string fileName, string base64)
+        public async Task<string> SaveAsync(string container, string fileName, string base64)
         {
             HttpWebResponse response;
 

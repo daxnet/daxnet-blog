@@ -89,6 +89,13 @@ namespace DaxnetBlog.Web.Controllers
 
         [HttpGet]
         [AllowAnonymous]
+        public IActionResult PreRegister()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
         public IActionResult Register(string returnUrl = null)
         {
             ViewData["ShowMessage"] = false;
