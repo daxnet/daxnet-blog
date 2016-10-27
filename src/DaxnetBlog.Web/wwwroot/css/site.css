@@ -30,6 +30,10 @@ footer {
     padding-top: 10px;
 }
 
+.syntaxhighlighter table .container:before {
+    display: none !important;
+}
+
 /* article list page */
 ul.article-list li {
     list-style-type: none;
@@ -63,8 +67,9 @@ ul.article-list div.auth {
     text-align: center;
     border: none;
     border-radius: 0 !important;
-    background-color: rgba(0,0,0,0.6);
+    background-color: rgba(0,69,138,0.9);
     color: whitesmoke;
+    text-shadow: black 0.3em 0.3em 0.3em;
 }
 
 .jumbotron-article h4 {

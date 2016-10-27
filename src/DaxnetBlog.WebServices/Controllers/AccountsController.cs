@@ -211,6 +211,36 @@ namespace DaxnetBlog.WebServices.Controllers
         }
 
         [HttpGet]
+        [Route("paginate/{pageSize}/{pageNumber}")]
+        public async Task<IActionResult> GetByPaging(int pageSize, int pageNumber)
+        {
+            var pagedModel = await this.storage.ExecuteAsync(async (connection, cancellationToken) =>
+                await accountStore.SelectAsync(pageNumber, pageSize, connection, new Sort<Account, int> { { x => x.DateRegistered, SortOrder.Descending } }, cancellationToken: cancellationToken)
+            );
+
+            return Ok(new
+            {
+                PageSize = pageSize,
+                PageNumber = pageNumber,
+                TotalRecords = pagedModel.TotalRecords,
+                TotalPages = pagedModel.TotalPages,
+                Count = pagedModel.Count,
+                Data = pagedModel.Select(x => new
+                {
+                    x.Id,
+                    x.UserName,
+                    x.NickName,
+                    x.DateRegistered,
+                    x.IsAdmin,
+                    x.IsLocked,
+                    x.EmailAddress,
+                    x.EmailVerifyCode,
+                    x.EmailVerifiedDate
+                })
+            });
+        }
+
+        [HttpGet]
         [Route("authenticate/passwordhash/{id}")]
         public async Task<IActionResult> GetPasswordHash(int id)
         {

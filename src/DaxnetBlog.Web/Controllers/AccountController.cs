@@ -137,7 +137,7 @@ namespace DaxnetBlog.Web.Controllers
                         $@"感谢您注册成为daxnet.me站点的会员，请<a href=""{callbackUrl}"">【点击此处】</a>完成账户验证。谢谢！");
                     ViewData["ShowMessage"] = true;
                     ViewData["MessageTitle"] = "注册成功";
-                    ViewData["MessageBody"] = @"验证码已发送至注册邮箱，请点击邮件中链接激活账户。";
+                    ViewData["MessageBody"] = @"验证码已发送至注册邮箱，请点击邮件中链接激活账户。如在一定时间内仍未收到激活链接，请发邮件至daxnet@live.com与站长联系。";
                 }
                 else
                 {

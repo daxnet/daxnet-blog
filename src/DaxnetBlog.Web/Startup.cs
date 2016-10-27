@@ -10,6 +10,7 @@ using WilderMinds.MetaWeblog;
 using DaxnetBlog.Common.IntegrationServices;
 using DaxnetBlog.AzureServices;
 using DaxnetBlog.Common;
+using DaxnetBlog.Web.Middlewares;
 
 namespace DaxnetBlog.Web
 {
@@ -55,6 +56,8 @@ namespace DaxnetBlog.Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
+            app.UseMiddleware<ApiAuthenticationMiddleware>();
+
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
