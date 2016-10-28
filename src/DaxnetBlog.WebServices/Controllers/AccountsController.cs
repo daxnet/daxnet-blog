@@ -276,6 +276,27 @@ namespace DaxnetBlog.WebServices.Controllers
             return Ok(account.ValidatePassword(password));
         }
 
+        [HttpPost]
+        [Route("authenticate/username/{userName}")]
+        public async Task<IActionResult> AuthenticateByUserName(string userName, [FromBody] dynamic passwordModel)
+        {
+            var password = (string)passwordModel.Password;
+            if (string.IsNullOrEmpty(password))
+            {
+                throw new ServiceException(HttpStatusCode.BadRequest, "The password argument cannot be null.");
+            }
+
+            var account = (await storage.ExecuteAsync(async (connection, cancellationToken) =>
+                await accountStore.SelectAsync(connection, x => x.UserName == userName, cancellationToken: cancellationToken))).FirstOrDefault();
+
+            if (account == null)
+            {
+                throw new ServiceException(HttpStatusCode.NotFound, $"No account was found with the userName of {userName}.");
+            }
+
+            return Ok(account.ValidatePassword(password));
+        }
+
         [HttpGet]
         [Route("verification/code/{userName}")]
         public async Task<IActionResult> GetEmailVerificationCode(string userName)
