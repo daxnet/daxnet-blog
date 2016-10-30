@@ -53,7 +53,7 @@ namespace DaxnetBlog.WebServices.Controllers
                 reply.Content,
                 reply.DatePublished,
                 reply.ParentId,
-                reply.IsApproved,
+                reply.Status,
                 Account = new
                 {
                     reply.Account.Id,
@@ -98,7 +98,7 @@ namespace DaxnetBlog.WebServices.Controllers
                        AccountId = userId,
                        BlogPostId = blogPostId,
                        DatePublished = DateTime.UtcNow,
-                       IsApproved = false,
+                       Status = ReplyStatus.Created,
                        Content = content
                    };
 
@@ -120,6 +120,14 @@ namespace DaxnetBlog.WebServices.Controllers
                });
             var uri = Url.Action("GetById", new { id = replyId });
             return Created(uri, replyId);
+        }
+
+        [HttpGet]
+        [Route("all")]
+        public async Task<IActionResult> GetAllReplies()
+        {
+            return Ok(await this.storage.ExecuteAsync(async (connection, cancellationToken) => await this.replyStore.SelectAsync(connection,
+                sorting: new Sort<Reply, int> { { x => x.DatePublished, SortOrder.Descending } }, cancellationToken: cancellationToken)));
         }
 
     }

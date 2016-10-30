@@ -1,13 +1,15 @@
 ﻿@using DaxnetBlog.Common
+@using System.Globalization
 
 @model dynamic
 @{
     ViewData["Title"] = $"{(string)Model.title} - daxnet.me";
+    var datePublished = ((DateTime)Model.datePublished).ToLocalTime().ToString(new CultureInfo("zh-CN"));
 }
 
 <div class="jumbotron jumbotron-no-border jumbotron-article">
     <h2>@Model.title</h2>
-    <h4>作者：陈晴阳 发布于：7/23/2016</h4>
+    <h4>@Model.account.nickName 发布于 @datePublished</h4>
 </div>
 <div class="row">
     <div class="col-md-10">

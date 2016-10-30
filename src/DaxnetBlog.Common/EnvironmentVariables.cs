@@ -12,6 +12,7 @@ namespace DaxnetBlog.Common
         private const string KEY_DAXNETBLOG_AZURE_STORAGE_BASEURL = @"DAXNETBLOG_AZURE_STORAGE_BASEURL";
         private const string KEY_DAXNETBLOG_AZURE_STORAGE_ACCT = @"DAXNETBLOG_AZURE_STORAGE_ACCT";
         private const string KEY_DAXNETBLOG_AZURE_STORAGE_KEY = @"DAXNETBLOG_AZURE_STORAGE_KEY";
+        private const string KEY_DAXNETBLOG_MGMTAPI_ENCRYPT_KEY = @"DAXNETBLOG_MGMTAPI_ENCRYPT_KEY";
         
         private const string DefaultConnectionString = @"Server=localhost; Database=DaxnetBlogDB; Integrated Security=SSPI;";
 
@@ -135,6 +136,14 @@ namespace DaxnetBlog.Common
                 }
                 catch { }
                 return null;
+            }
+        }
+
+        public static string WebManagementApiEncryptionKey
+        {
+            get
+            {
+                return Environment.GetEnvironmentVariable(KEY_DAXNETBLOG_MGMTAPI_ENCRYPT_KEY);
             }
         }
     }

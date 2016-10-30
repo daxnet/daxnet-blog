@@ -64,17 +64,13 @@ namespace DaxnetBlog.Common.Storage
                         typeof(TEntity)
                             .GetTypeInfo()
                             .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                            .Where(p => p.PropertyType.IsPrimitive() && p.CanWrite)
+                            .Where(p => p.PropertyType.IsSimpleType() && p.CanWrite)
                             .ToList()
                             .ForEach(x =>
                             {
                                 var columnName = $"{mapping.GetTableName<TEntity, TKey>()}_{mapping.GetColumnName<TEntity, TKey>(x)}";
                                 var value = reader[columnName];
-                                if (value == DBNull.Value)
-                                {
-                                    value = null;
-                                }
-                                x.SetValue(entity, value);
+                                x.SetValue(entity, EvaluatePropertyValue(x, value));
                             });
                         entities.Add(entity);
                     }
@@ -132,34 +128,27 @@ namespace DaxnetBlog.Common.Storage
                             .ToList()
                             .ForEach(x =>
                             {
-                                if (x.PropertyType.IsPrimitive())
+                                if (x.PropertyType.IsSimpleType())
                                 {
                                     var columnName = $"{mapping.GetTableName<TEntity, TKey>()}_{mapping.GetColumnName<TEntity, TKey>(x)}";
                                     var value = reader[columnName];
-                                    if (value == DBNull.Value)
-                                    {
-                                        value = null;
-                                    }
-                                    x.SetValue(entity, value);
+                                    
+                                    x.SetValue(entity, EvaluatePropertyValue(x, value));
                                 }
                                 else if (x.PropertyType == typeof(TJoined))
                                 {
                                     typeof(TJoined)
                                         .GetTypeInfo()
                                         .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                                        .Where(p => p.CanWrite && p.PropertyType.IsPrimitive())
+                                        .Where(p => p.CanWrite && p.PropertyType.IsSimpleType())
                                         .ToList()
                                         .ForEach(y =>
                                         {
                                             var joinedColumnName = $"{mapping.GetTableName<TJoined, TKey>()}_{mapping.GetColumnName<TJoined, TKey>(y)}";
                                             var joinedValue = reader[joinedColumnName];
-                                            if (joinedValue == DBNull.Value)
-                                            {
-                                                joinedValue = null;
-                                            }
-                                            y.SetValue(joined, joinedValue);
+                                            y.SetValue(joined, EvaluatePropertyValue(y, joinedValue));
                                         });
-                                    x.SetValue(entity, joined);
+                                    x.SetValue(entity, EvaluatePropertyValue(x, joined));
                                 }
                             });
                         entities.Add(entity);
@@ -310,7 +299,7 @@ namespace DaxnetBlog.Common.Storage
                 typeof(TEntity)
                 .GetTypeInfo()
                 .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .Where(p => p.CanRead && p.PropertyType.IsPrimitive())
+                .Where(p => p.CanRead && p.PropertyType.IsSimpleType())
                 .Select(p => $"T_{tableName}.{mapping.GetEscapedColumnName<TEntity, TKey>(dialectSettings, p)} AS {tableName}_{mapping.GetColumnName<TEntity, TKey>(p)}"));
                 
 
@@ -353,14 +342,14 @@ namespace DaxnetBlog.Common.Storage
                 typeof(TEntity)
                 .GetTypeInfo()
                 .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .Where(p => p.CanRead && p.PropertyType.IsPrimitive())
+                .Where(p => p.CanRead && p.PropertyType.IsSimpleType())
                 .Select(p => $"T_{tableName}.{mapping.GetEscapedColumnName<TEntity, TKey>(dialectSettings, p)} AS {tableName}_{mapping.GetColumnName<TEntity, TKey>(p)}"));
 
             var joinedFieldSet = string.Join(", ",
                 typeof(TJoined)
                 .GetTypeInfo()
                 .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .Where(p => p.CanRead && p.PropertyType.IsPrimitive())
+                .Where(p => p.CanRead && p.PropertyType.IsSimpleType())
                 .Select(p => $"T_{joinedTableName}.{mapping.GetEscapedColumnName<TJoined, TKey>(dialectSettings, p)} AS {joinedTableName}_{mapping.GetColumnName<TJoined, TKey>(p)}"));
 
 
@@ -411,7 +400,7 @@ namespace DaxnetBlog.Common.Storage
             var propertySelection = typeof(TEntity)
                 .GetTypeInfo()
                 .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .Where(p => p.CanRead && p.PropertyType.IsPrimitive());
+                .Where(p => p.CanRead && p.PropertyType.IsSimpleType());
 
             if (autoIncrementFields != null)
             {
@@ -447,7 +436,7 @@ namespace DaxnetBlog.Common.Storage
             var updateProperties = typeof(TEntity)
                 .GetTypeInfo()
                 .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .Where(p => p.CanRead && p.PropertyType.IsPrimitive());
+                .Where(p => p.CanRead && p.PropertyType.IsSimpleType());
             if (updateFields!=null)
             {
                 updateProperties = updateProperties.Where(p =>
@@ -478,6 +467,29 @@ namespace DaxnetBlog.Common.Storage
             return new Tuple<string, IEnumerable<Tuple<string, string, object>>, WhereClauseBuildResult>(sqlBuilder.ToString(),
                 columnNames,
                 whereClauseBuildResult);
+        }
+
+        protected object EvaluatePropertyValue(PropertyInfo property, object originValue)
+        {
+            if (originValue == DBNull.Value)
+            {
+                return null;
+            }
+
+            var propertyTypeInfo = property.PropertyType.GetTypeInfo();
+            if (propertyTypeInfo.IsEnum)
+            {
+                return Enum.ToObject(property.PropertyType, originValue);
+            }
+
+            if (propertyTypeInfo.IsGenericType &&
+                propertyTypeInfo.GetGenericTypeDefinition() == typeof(Nullable<>) &&
+                propertyTypeInfo.GetGenericArguments().First().GetTypeInfo().IsEnum)
+            {
+                return Enum.ToObject(propertyTypeInfo.GetGenericArguments().First(), originValue);
+            }
+
+            return originValue;
         }
     }
 }

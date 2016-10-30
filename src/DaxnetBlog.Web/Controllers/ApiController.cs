@@ -1,46 +1,39 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling Web API for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+using Newtonsoft.Json;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace DaxnetBlog.Web.Controllers
 {
     [Route("api/management")]
+    [Authorize("Administration")]
     public class ApiController : Controller
     {
-        // GET: api/values
+        private readonly HttpClient httpClient;
+
+        public ApiController(HttpClient httpClient)
+        {
+            this.httpClient = httpClient;
+        }
+
+        [Route("ping")]
         [HttpGet]
-        public IEnumerable<string> Get()
+        public IActionResult Ping()
         {
-            return new string[] { "value1", "value2" };
+            return Ok(new {
+                Result = true
+            });
         }
 
-        // GET api/values/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        [Route("replies/all")]
+        [HttpGet]
+        public async Task<IActionResult> GetAllReplies()
         {
-            return "value";
-        }
-
-        // POST api/values
-        [HttpPost]
-        public void Post([FromBody]string value)
-        {
-        }
-
-        // PUT api/values/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
-        {
-        }
-
-        // DELETE api/values/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
+            var result = await this.httpClient.GetAsync("replies/all");
+            result.EnsureSuccessStatusCode();
+            var model = JsonConvert.DeserializeObject(await result.Content.ReadAsStringAsync());
+            return Ok(model);
         }
     }
 }

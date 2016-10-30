@@ -24,7 +24,7 @@ namespace DaxnetBlog.Web.Models
         [Required]
         [EmailAddress]
         [Display(Name = "电子邮件")]
-        [StringLength(16, ErrorMessage = "电子邮件需小于256个字符")]
+        [StringLength(256, ErrorMessage = "电子邮件需小于256个字符")]
         public string EmailAddress { get; set; }
 
         [Required(ErrorMessage = "验证码字段是必填项")]

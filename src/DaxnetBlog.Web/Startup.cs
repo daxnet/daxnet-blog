@@ -11,6 +11,7 @@ using DaxnetBlog.Common.IntegrationServices;
 using DaxnetBlog.AzureServices;
 using DaxnetBlog.Common;
 using DaxnetBlog.Web.Middlewares;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DaxnetBlog.Web
 {
@@ -51,6 +52,13 @@ namespace DaxnetBlog.Web
                 .AddUserStore<ApplicationUserStore>()
                 .AddRoleStore<ApplicationRoleStore>()
                 .AddUserManager<ApplicationUserManager>();
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("Administration", policy => policy.AddRequirements(new PermissionKeyRequirement("Administration")));
+            });
+
+            services.AddTransient<IAuthorizationHandler, PermissionKeyAuthorizationHandler>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -71,7 +79,7 @@ namespace DaxnetBlog.Web
                 app.UseExceptionHandler("/Home/Error");
             }
 
-            app.UseMetaWeblog("/metaweblog");
+            app.UseMetaWeblog("/api/metaweblog");
 
             app.UseStaticFiles();
 

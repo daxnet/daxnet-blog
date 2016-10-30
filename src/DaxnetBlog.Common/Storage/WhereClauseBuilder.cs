@@ -275,6 +275,10 @@ namespace DaxnetBlog.Common.Storage
                         contains = false;
                         v = LikeSymbol + node.Value.ToString() + LikeSymbol;
                     }
+                    else if (node.Type.GetTypeInfo().IsEnum)
+                    {
+                        v = Convert.ToInt32(node.Value);
+                    }
                     else
                     {
                         v = node.Value;
@@ -621,7 +625,15 @@ namespace DaxnetBlog.Common.Storage
         /// returns the original expression.</returns>
         protected override Expression VisitUnary(UnaryExpression node)
         {
-            throw new NotSupportedException("The current method is not implemented.");
+            if (node.NodeType == ExpressionType.Convert)
+            {
+                Visit(node.Operand);
+                return node;
+            }
+            else
+            {
+                throw new NotSupportedException("The current method is not implemented.");
+            }
         }
         #endregion
 

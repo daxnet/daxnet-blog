@@ -198,7 +198,9 @@ namespace DaxnetBlog.WebServices.Controllers
         {
             var result = await this.storage.ExecuteAsync(async (connection, transaction, cancellationToken) =>
             {
-                var blogpost = (await blogPostStore.SelectAsync(connection, 
+                var blogpost = (await blogPostStore.SelectAsync(connection, p => p.Account, 
+                    p=>p.AccountId, 
+                    acct=>acct.Id, 
                     x => x.Id == id, 
                     transaction: transaction, 
                     cancellationToken: cancellationToken)).FirstOrDefault();
@@ -212,7 +214,7 @@ namespace DaxnetBlog.WebServices.Controllers
                     r => r.Account,
                     r => r.AccountId,
                     a => a.Id,
-                    r => r.BlogPostId == id && r.IsApproved.Value == true,
+                    r => r.BlogPostId == id && r.Status == ReplyStatus.Approved,
                     transaction: transaction, cancellationToken: cancellationToken);
 
                 return new Tuple<BlogPost, IEnumerable<Reply>>(blogpost, replies);
@@ -222,7 +224,6 @@ namespace DaxnetBlog.WebServices.Controllers
             {
                 Id = id,
                 Title = result.Item1.Title,
-                AccountId = result.Item1.AccountId,
                 Content = result.Item1.Content,
                 DatePublished = result.Item1.DatePublished,
                 Replies = result.Item2.Select(x=> new {
@@ -232,7 +233,13 @@ namespace DaxnetBlog.WebServices.Controllers
                     AccountId = x.Account.Id,
                     x.Account.UserName,
                     x.Account.NickName
-                })
+                }),
+                Account = new
+                {
+                    result.Item1.Account.Id,
+                    result.Item1.Account.UserName,
+                    result.Item1.Account.NickName
+                }
             });
         }
     }

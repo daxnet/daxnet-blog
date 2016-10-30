@@ -15,6 +15,8 @@ namespace DaxnetBlog.Domain.Model
 
         public int AccountId { get; set; }
 
+        public Account Account { get; set; }
+
         public int? UpVote { get; set; }
 
         public int? DownVote { get; set; }

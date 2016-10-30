@@ -61,6 +61,6 @@ namespace DaxnetBlog.Domain.Model
 
         public Account Account { get; set; }
 
-        public bool? IsApproved { get; set; }
+        public ReplyStatus? Status { get; set; }
     }
 }
