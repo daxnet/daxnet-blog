@@ -35,7 +35,6 @@ namespace DaxnetBlog.Web.Models
 
         [Required(ErrorMessage = "验证码字段是必填项")]
         [StringLength(10)]
-        [DataType(DataType.Password)]
         [Display(Name = "验证码", Prompt = "请输入下方的验证码")]
         public string Captcha { get; set; }
     }

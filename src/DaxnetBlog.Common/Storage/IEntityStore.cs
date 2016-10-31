@@ -55,6 +55,15 @@ namespace DaxnetBlog.Common.Storage
             Sort<TEntity, TKey> sorting = null,
             IDbTransaction transaction = null);
 
+        IEnumerable<TEntity> Select<TJoined>(IDbConnection connection,
+            Expression<Func<TEntity, TJoined>> includePath,
+            Expression<Func<TEntity, TKey>> keySelector,
+            Expression<Func<TJoined, TKey>> joinedKeySelector,
+            Expression<Func<TEntity, bool>> expression = null,
+            Sort<TEntity, TKey> sorting = null,
+            IDbTransaction transaction = null)
+            where TJoined : class, IEntity<TKey>, new();
+
         PagedResult<TEntity, TKey> Select(int pageNumber, int pageSize,
             IDbConnection connection,
             Sort<TEntity, TKey> sorting,
@@ -66,6 +75,16 @@ namespace DaxnetBlog.Common.Storage
             Sort<TEntity, TKey> sorting = null,
             IDbTransaction transaction = null,
             CancellationToken cancellationToken = default(CancellationToken));
+
+        Task<IEnumerable<TEntity>> SelectAsync<TJoined>(IDbConnection connection,
+            Expression<Func<TEntity, TJoined>> includePath,
+            Expression<Func<TEntity, TKey>> keySelector,
+            Expression<Func<TJoined, TKey>> joinedKeySelector,
+            Expression<Func<TEntity, bool>> expression = null,
+            Sort<TEntity, TKey> sorting = null,
+            IDbTransaction transaction = null,
+            CancellationToken cancellationToken = default(CancellationToken))
+            where TJoined : class, IEntity<TKey>, new();
 
         Task<PagedResult<TEntity, TKey>> SelectAsync(int pageNumber, int pageSize,
             IDbConnection connection,

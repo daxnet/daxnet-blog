@@ -42,6 +42,7 @@ using DaxnetBlog.Common.Storage;
 using DaxnetBlog.Domain.Model;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
@@ -128,7 +129,8 @@ namespace DaxnetBlog.WebServices.Controllers
                        NickName = nickName,
                        DateRegistered = DateTime.UtcNow,
                        EmailVerifyCode = verificationCode,
-                       IsLocked = true
+                       IsLocked = true,
+                       IsAdmin = false
                    },
                    connection,
                    new Expression<Func<Account, object>>[] { a => a.Id },
@@ -176,7 +178,8 @@ namespace DaxnetBlog.WebServices.Controllers
                 account.DateLastLogin,
                 account.EmailVerifyCode,
                 account.EmailVerifiedDate,
-                account.IsLocked
+                account.IsLocked,
+                account.IsAdmin
             });
         }
 
@@ -202,7 +205,38 @@ namespace DaxnetBlog.WebServices.Controllers
                 account.DateLastLogin,
                 account.EmailVerifyCode,
                 account.EmailVerifiedDate,
-                account.IsLocked
+                account.IsLocked,
+                account.IsAdmin
+            });
+        }
+
+        [HttpGet]
+        [Route("paginate/{pageSize}/{pageNumber}")]
+        public async Task<IActionResult> GetByPaging(int pageSize, int pageNumber)
+        {
+            var pagedModel = await this.storage.ExecuteAsync(async (connection, cancellationToken) =>
+                await accountStore.SelectAsync(pageNumber, pageSize, connection, new Sort<Account, int> { { x => x.DateRegistered, SortOrder.Descending } }, cancellationToken: cancellationToken)
+            );
+
+            return Ok(new
+            {
+                PageSize = pageSize,
+                PageNumber = pageNumber,
+                TotalRecords = pagedModel.TotalRecords,
+                TotalPages = pagedModel.TotalPages,
+                Count = pagedModel.Count,
+                Data = pagedModel.Select(x => new
+                {
+                    x.Id,
+                    x.UserName,
+                    x.NickName,
+                    x.DateRegistered,
+                    x.IsAdmin,
+                    x.IsLocked,
+                    x.EmailAddress,
+                    x.EmailVerifyCode,
+                    x.EmailVerifiedDate
+                })
             });
         }
 
@@ -242,46 +276,26 @@ namespace DaxnetBlog.WebServices.Controllers
             return Ok(account.ValidatePassword(password));
         }
 
-        //[HttpPost]
-        //[Route("verification/create")]
-        //public async Task<IActionResult> GenerateEmailVerificationCodeByUserName([FromBody] dynamic userNameModel)
-        //{
-        //    var userName = (string)userNameModel.UserName;
-        //    if (string.IsNullOrEmpty(userName))
-        //    {
-        //        throw new ServiceException(HttpStatusCode.BadRequest, $"{nameof(userName)}参数不能为空。");
-        //    }
+        [HttpPost]
+        [Route("authenticate/username/{userName}")]
+        public async Task<IActionResult> AuthenticateByUserName(string userName, [FromBody] dynamic passwordModel)
+        {
+            var password = (string)passwordModel.Password;
+            if (string.IsNullOrEmpty(password))
+            {
+                throw new ServiceException(HttpStatusCode.BadRequest, "The password argument cannot be null.");
+            }
 
-        //    var verificationCode = Utils.GetUniqueStringValue(16);
-        //    return await storage.ExecuteAsync(async (connection, transaction, cancellationToken) =>
-        //    {
-        //        var account = (await accountStore.SelectAsync(connection, 
-        //            x => x.UserName == userName, 
-        //            transaction: transaction, 
-        //            cancellationToken: cancellationToken)).FirstOrDefault();
+            var account = (await storage.ExecuteAsync(async (connection, cancellationToken) =>
+                await accountStore.SelectAsync(connection, x => x.UserName == userName, cancellationToken: cancellationToken))).FirstOrDefault();
 
-        //        if (account == null)
-        //        {
-        //            throw new ServiceException(HttpStatusCode.NotFound, $"用户{userName}不存在。");
-        //        }
+            if (account == null)
+            {
+                throw new ServiceException(HttpStatusCode.NotFound, $"No account was found with the userName of {userName}.");
+            }
 
-        //        account.EmailVerifyCode = verificationCode;
-
-        //        var rowsAffected = await accountStore.UpdateAsync(account,
-        //            connection,
-        //            expr => expr.Id == account.Id,
-        //            new Expression<Func<Account, object>>[] { x => x.EmailVerifyCode },
-        //            transaction);
-
-        //        if (rowsAffected > 0)
-        //            return Ok(new
-        //            {
-        //                UserName = userName,
-        //                VerificationCode = verificationCode
-        //            });
-        //        throw new ServiceException("生成电子邮件验证码失败。");
-        //    });
-        //}
+            return Ok(account.ValidatePassword(password));
+        }
 
         [HttpGet]
         [Route("verification/code/{userName}")]
@@ -336,6 +350,50 @@ namespace DaxnetBlog.WebServices.Controllers
                     return rowsAffected > 0;
                 }
                 return false;
+            });
+
+            return Ok(result);
+        }
+
+
+        [HttpPost]
+        [Route("update/{id}")]
+        public async Task<IActionResult> UpdateAccount(int id, [FromBody] dynamic model)
+        {
+            var nickName = (string)model.NickName;
+            var emailAddress = (string)model.EmailAddress;
+
+            var result = await storage.ExecuteAsync(async (connection, transaction, cancellationToken) =>
+            {
+                var account = (await accountStore.SelectAsync(connection,
+                    x => x.Id == id,
+                    transaction: transaction,
+                    cancellationToken: cancellationToken)).FirstOrDefault();
+                if (account == null)
+                {
+                    throw new ServiceException(HttpStatusCode.NotFound, "Account does not exist.");
+                }
+
+                var updateFields = new List<Expression<Func<Account, object>>>();
+                if (!string.IsNullOrEmpty(nickName))
+                {
+                    account.NickName = nickName;
+                    updateFields.Add(x => x.NickName);
+                }
+
+                if (!string.IsNullOrEmpty(emailAddress))
+                {
+                    account.EmailAddress = emailAddress;
+                    updateFields.Add(x => x.EmailAddress);
+                }
+
+                return updateFields.Count > 0 ?
+                    await accountStore.UpdateAsync(account,
+                        connection,
+                        x => x.Id == id,
+                        updateFields,
+                        transaction,
+                        cancellationToken) : 0;
             });
 
             return Ok(result);

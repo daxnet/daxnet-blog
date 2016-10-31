@@ -1,0 +1,167 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using System.IO
+@using DaxnetBlog.Web
+@using DaxnetBlog.Web.Security
+@using System.Text.Encodings.Web
+
+@inject SignInManager<User> SignInManager
+@{
+    var controller = ViewContext.RouteData.Values["controller"].ToString();
+    var action = ViewContext.RouteData.Values["action"].ToString();
+
+    var feature = (string)Model.Feature;
+    var key = (string)Model.Key;
+}
+@if (SignInManager.IsSignedIn(User))
+{
+    <div class="row">
+        <div class="col-md-12">
+
+            <message message-enabled="true">
+            </message>
+
+            <section>
+                <div class="form-horizontal">
+                    <input id="key" type="hidden" name="key" value="@key" />
+                    <input id="feature" type="hidden" name="feature" value="@feature" />
+                    <div class="form-group">
+                        <textarea id="comments" name="comments"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-inline">
+                            <span id="captchaArea">
+                                @await Html.PartialAsync("_CaptchaPartial")
+                            </span>
+                            <label for="captcha">请输入左侧验证码：</label>
+                            <input type="text" class="form-control" id="captcha" name="captcha" />
+                            <button class="btn btn-primary" type="button" id="submit-btn">发表评论</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+}
+else
+{
+
+    <div class="alert alert-warning">
+        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+        请<a href="@Url.Action("Login", "Account", new { returnUrl = Url.Action(action, controller, null, null, null, "gotoComments") })" class="alert-link">【点击此处】</a>登录后发表评论。
+    </div>
+}
+
+<a name="anchor_comments" id="anchor_comments"></a>
+
+<script src="~/ckeditor/ckeditor.js"></script>
+<script language="javascript" type="text/javascript">
+
+    function disableControls(editor) {
+        editor.setReadOnly(true);
+        $('#captcha').attr("disabled", "disabled");
+        $('#submit-btn').attr("disabled", "disabled");
+    };
+
+    function enableControls(editor) {
+        editor.setReadOnly(false);
+        $('#captcha').removeAttr("disabled");
+        $('#submit-btn').removeAttr("disabled");
+    };
+
+    function resetControlValues(editor) {
+        editor.setData('<p />');
+        $('#captcha').val('');
+
+    };
+
+    $(document).ready(function () {
+        // Render the comments editor (ckeditor)
+        var editor = CKEDITOR.replace('comments', {
+            customConfig: 'config.comment.js'
+        });
+
+        editor.on("instanceReady", function () {
+            if (window.location.href.indexOf('gotoComments') > -1) {
+                document.getElementById('anchor_comments').scrollIntoView(true);
+                this.focus();
+            }
+        })
+
+        // Overrides the submit behavior of the comment form
+        $('#submit-btn').click(function (e) {
+            e.preventDefault();
+
+            // Check if the comment is empty.
+            var isCommentEmpty = !$.trim(editor.getData());
+            if (isCommentEmpty) {
+                showMessage('danger', '错误', '评论内容为空，请输入评论的内容。');
+                editor.focus();
+                return;
+            }
+
+            // Check if the CAPTCHA code is empty.
+            var captchaString = $('#captcha').val();
+            var isCaptchaEmpty = !$.trim(captchaString);
+            if (isCaptchaEmpty) {
+                showMessage('danger', '错误', '请输入验证码。');
+                $('#captcha').focus();
+                return;
+            }
+
+            // Call ajax to check if the CAPTCHA code is correct.
+            var encryptedString = $('#__captcha_image').val();
+            var verify = $.ajax({
+                type: "POST",
+                url: '@Url.Action("VerifyCaptcha", "Captcha")',
+                data: { captchaString: captchaString, encryptedString: encryptedString },
+                beforeSend: function (xhr, settings) {
+                    disableControls(editor);
+                }
+            })
+            .done(function (result, status, xhr) {
+                if (!result) {
+                    showMessage('danger', '错误', '输入的验证码不正确。');
+                    $('#captcha').focus();
+                    return false;
+                } else {
+                    return true;
+                }
+            })
+            .fail(function (xhr) {
+                showMessage('danger', '错误', xhr.responseText);
+            })
+            .always(function (xhr, status) {
+                enableControls(editor);
+                updateCaptcha('@Url.Action("UpdateCaptcha", "Captcha")');
+            });
+
+            // If CAPTCHA code is correct, post the reply.
+            var final = verify.then(function (response) {
+                if (response) {
+                    var comments = editor.getData();
+                    return $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("Reply", "BlogPosts")',
+                        beforeSend: function (xhr, settings) {
+                            disableControls(editor);
+                        },
+                        data: { feature: '@feature', key: '@key', comments: comments }
+                    });
+                }
+            });
+
+            final.done(function (result, status, xhr) {
+                if (status === 'success') {
+                    showMessage('info', '成功', '评论已成功提交，请等待审核，审核通过后即会发表。感谢您的参与！');
+                    resetControlValues(editor);
+                    editor.focus();
+                }
+            }).fail(function (xhr) {
+                showMessage('danger', '错误', xhr.responseText);
+            }).always(function (xhr, status) {
+                enableControls(editor);
+                updateCaptcha('@Url.Action("UpdateCaptcha", "Captcha")');
+            });
+        });
+    });
+</script>

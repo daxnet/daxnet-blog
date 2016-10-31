@@ -23,6 +23,7 @@ namespace DaxnetBlog.Common.Storage
         private readonly Dictionary<string, object> parameterValues = new Dictionary<string, object>();
         private readonly IStoreMapping storeMapping;
         private readonly StorageDialectSettings dialectSettings;
+        private readonly bool useTableAlias;
         private bool startsWith = false;
         private bool endsWith = false;
         private bool contains = false;
@@ -34,10 +35,11 @@ namespace DaxnetBlog.Common.Storage
         /// </summary>
         /// <param name="storeMapping">The <c>Apworks.Storage.IStorageMappingResolver</c>
         /// instance which will be used for generating the mapped field names.</param>
-        public WhereClauseBuilder(IStoreMapping storeMapping, StorageDialectSettings dialectSettings)
+        public WhereClauseBuilder(IStoreMapping storeMapping, StorageDialectSettings dialectSettings, bool useTableAlias = false)
         {
             this.storeMapping = storeMapping;
             this.dialectSettings = dialectSettings;
+            this.useTableAlias = useTableAlias;
         }
         #endregion
 
@@ -47,11 +49,11 @@ namespace DaxnetBlog.Common.Storage
             sb.Append(s);
         }
 
-        private void OutMember(Expression instance, MemberInfo member)
-        {
-            string mappedFieldName = storeMapping.GetEscapedColumnName<TEntity, TKey>(this.dialectSettings, member.Name);
-            Out(mappedFieldName);
-        }
+        //private void OutMember(Expression instance, MemberInfo member)
+        //{
+        //    string mappedFieldName = storeMapping.GetEscapedColumnName<TEntity, TKey>(this.dialectSettings, member.Name);
+        //    Out(mappedFieldName);
+        //}
         #endregion
 
         #region Protected Properties
@@ -77,6 +79,10 @@ namespace DaxnetBlog.Common.Storage
         /// Gets a <c>System.String</c> value which represents the NOT EQUAL operation in the WHERE clause.
         /// </summary>
         private string NotEqual => dialectSettings.SqlNotEqualOperator;
+
+        private string Is => dialectSettings.SqlIsOperator;
+
+        private string IsNot => dialectSettings.SqlIsNotOperator;
 
         /// <summary>
         /// Gets a <c>System.String</c> value which represents the LIKE operation in the WHERE clause.
@@ -115,7 +121,15 @@ namespace DaxnetBlog.Common.Storage
                     str = "/";
                     break;
                 case ExpressionType.Equal:
-                    str = this.Equal;
+                    if (node.Right.NodeType == ExpressionType.Constant &&
+                        ((ConstantExpression)node.Right).Value == null)
+                    {
+                        str = this.Is;
+                    }
+                    else
+                    {
+                        str = this.Equal;
+                    }
                     break;
                 case ExpressionType.GreaterThan:
                     str = ">";
@@ -142,7 +156,15 @@ namespace DaxnetBlog.Common.Storage
                     str = this.Not;
                     break;
                 case ExpressionType.NotEqual:
-                    str = this.NotEqual;
+                    if (node.Right.NodeType == ExpressionType.Constant &&
+                        ((ConstantExpression)node.Right).Value == null)
+                    {
+                        str = this.IsNot;
+                    }
+                    else
+                    {
+                        str = this.NotEqual;
+                    }
                     break;
                 case ExpressionType.OrElse:
                     str = this.Or;
@@ -177,7 +199,15 @@ namespace DaxnetBlog.Common.Storage
             if (node.Member.DeclaringType == typeof(TEntity) ||
                 typeof(TEntity).GetTypeInfo().IsSubclassOf(node.Member.DeclaringType))
             {
-                string mappedFieldName = storeMapping.GetEscapedColumnName<TEntity, TKey>(this.dialectSettings, node.Member.Name);
+                var mappedFieldName = "";
+                if (this.useTableAlias)
+                {
+                    mappedFieldName = $"T_{storeMapping.GetTableName<TEntity, TKey>()}.{storeMapping.GetEscapedColumnName<TEntity, TKey>(this.dialectSettings, node.Member.Name)}";
+                }
+                else
+                {
+                    mappedFieldName = $"{storeMapping.GetEscapedTableName<TEntity, TKey>(dialectSettings)}.{storeMapping.GetEscapedColumnName<TEntity, TKey>(this.dialectSettings, node.Member.Name)}";
+                }
                 Out(mappedFieldName);
             }
             else
@@ -189,6 +219,22 @@ namespace DaxnetBlog.Common.Storage
                     object fieldValue = fi.GetValue(ce.Value);
                     Expression constantExpr = Expression.Constant(fieldValue);
                     Visit(constantExpr);
+                }
+                else if (node.Member is PropertyInfo)
+                {
+                    if (node.NodeType == ExpressionType.Constant)
+                    {
+                        ConstantExpression ce = node.Expression as ConstantExpression;
+                        PropertyInfo pi = node.Member as PropertyInfo;
+                        object fieldValue = pi.GetValue(ce.Value);
+                        Expression constantExpr = Expression.Constant(fieldValue);
+                        Visit(constantExpr);
+                    }
+                    else if (node.NodeType == ExpressionType.MemberAccess)
+                    {
+                        var memberExpression = node.Expression as MemberExpression;
+                        VisitMember(memberExpression);
+                    }
                 }
                 else
                     throw new NotSupportedException();
@@ -203,31 +249,42 @@ namespace DaxnetBlog.Common.Storage
         /// returns the original expression.</returns>
         protected override Expression VisitConstant(ConstantExpression node)
         {
-            string paramName = string.Format("{0}{1}", this.dialectSettings.ParameterChar, Utils.GetUniqueStringValue(8));
-            Out(paramName);
-            if (!parameterValues.ContainsKey(paramName))
+            if (node.Value == null)
             {
-                object v = null;
-                if (startsWith && node.Value is string)
+                Out("NULL");
+            }
+            else
+            {
+                string paramName = string.Format("{0}{1}", this.dialectSettings.ParameterChar, Utils.GetUniqueStringValue(8));
+                Out(paramName);
+                if (!parameterValues.ContainsKey(paramName))
                 {
-                    startsWith = false;
-                    v = node.Value.ToString() + LikeSymbol;
+                    object v = null;
+                    if (startsWith && node.Value is string)
+                    {
+                        startsWith = false;
+                        v = node.Value.ToString() + LikeSymbol;
+                    }
+                    else if (endsWith && node.Value is string)
+                    {
+                        endsWith = false;
+                        v = LikeSymbol + node.Value.ToString();
+                    }
+                    else if (contains && node.Value is string)
+                    {
+                        contains = false;
+                        v = LikeSymbol + node.Value.ToString() + LikeSymbol;
+                    }
+                    else if (node.Type.GetTypeInfo().IsEnum)
+                    {
+                        v = Convert.ToInt32(node.Value);
+                    }
+                    else
+                    {
+                        v = node.Value;
+                    }
+                    parameterValues.Add(paramName, v);
                 }
-                else if (endsWith && node.Value is string)
-                {
-                    endsWith = false;
-                    v = LikeSymbol + node.Value.ToString();
-                }
-                else if (contains && node.Value is string)
-                {
-                    contains = false;
-                    v = LikeSymbol + node.Value.ToString() + LikeSymbol;
-                }
-                else
-                {
-                    v = node.Value;
-                }
-                parameterValues.Add(paramName, v);
             }
             return node;
         }
@@ -568,7 +625,15 @@ namespace DaxnetBlog.Common.Storage
         /// returns the original expression.</returns>
         protected override Expression VisitUnary(UnaryExpression node)
         {
-            throw new NotSupportedException("The current method is not implemented.");
+            if (node.NodeType == ExpressionType.Convert)
+            {
+                Visit(node.Operand);
+                return node;
+            }
+            else
+            {
+                throw new NotSupportedException("The current method is not implemented.");
+            }
         }
         #endregion
 

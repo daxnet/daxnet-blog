@@ -2,8 +2,10 @@
   "version": "1.0.0-*",
 
   "dependencies": {
+    "Microsoft.AspNetCore.Mvc.ViewFeatures": "1.0.1",
     "NETStandard.Library": "1.6.0",
-    "System.Data.Common": "4.1.0"
+    "System.Data.Common": "4.1.0",
+    "System.Dynamic.Runtime": "4.0.11"
   },
 
   "frameworks": {

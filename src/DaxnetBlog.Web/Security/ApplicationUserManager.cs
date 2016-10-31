@@ -30,7 +30,20 @@ namespace DaxnetBlog.Web.Security
 
         public override async Task<bool> CheckPasswordAsync(User user, string password)
         {
-            var trueFalseResult = await (await this.httpClient.PostAsJsonAsync($"accounts/authenticate/{user.Id}", new { Password = password })).Content.ReadAsStringAsync();
+            string trueFalseResult;
+            if (user.Id > 0)
+            {
+                trueFalseResult = await (await this.httpClient.PostAsJsonAsync($"accounts/authenticate/{user.Id}", new { Password = password })).Content.ReadAsStringAsync();
+            }
+            else if (!string.IsNullOrEmpty(user.UserName))
+            {
+                trueFalseResult = await (await this.httpClient.PostAsJsonAsync($"accounts/authenticate/username/{user.UserName}", new { Password = password })).Content.ReadAsStringAsync();
+            }
+            else
+            {
+                throw new ArgumentException("Either Id or UserName is not specified.");
+            }
+
             return bool.Parse(trueFalseResult);
         }
 
@@ -81,6 +94,20 @@ namespace DaxnetBlog.Web.Security
                 result.EnsureSuccessStatusCode();
                 var verified = Convert.ToBoolean(await result.Content.ReadAsStringAsync());
                 return verified ? IdentityResult.Success : IdentityResult.Failed(new IdentityError { Description = "请检查所提供的用户信息是否正确。" });
+            }
+            catch(Exception ex)
+            {
+                return IdentityResult.Failed(new IdentityError { Description = $"错误信息：{ex.Message}。" });
+            }
+        }
+
+        public override async Task<IdentityResult> UpdateAsync(User user)
+        {
+            var result = await httpClient.PostAsJsonAsync($"accounts/update/{user.Id}", new { NickName = user.NickName, EmailAddress = user.EmailAddress });
+            try
+            {
+                result.EnsureSuccessStatusCode();
+                return IdentityResult.Success;
             }
             catch(Exception ex)
             {

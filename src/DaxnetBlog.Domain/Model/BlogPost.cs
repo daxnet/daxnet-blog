@@ -15,11 +15,15 @@ namespace DaxnetBlog.Domain.Model
 
         public int AccountId { get; set; }
 
+        public Account Account { get; set; }
+
         public int? UpVote { get; set; }
 
         public int? DownVote { get; set; }
 
         public int? Visits { get; set; }
+
+        public bool? IsDeleted { get; set; }
 
         public override string ToString() => Title;
     }

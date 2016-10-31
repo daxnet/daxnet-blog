@@ -1,0 +1,81 @@
+﻿@using DaxnetBlog.Web.Security
+@using DaxnetBlog.Web.Models
+
+@model dynamic
+
+@{
+    ViewData["Title"] = "账户管理";
+    var category = (string)Model.category;
+    var accountModel = (DaxnetBlog.Web.Security.User)Model.accountModel;
+}
+<div class="row">
+    <h1>@accountModel.UserName</h1>
+</div>
+<div class="row">
+    <hr />
+</div>
+<div class="row">
+    <div class="col-md-2">
+        <ul class="nav nav-pills nav-stacked">
+            @switch (category)
+            {
+                case "Profile":
+                    <li class="active"><a href="#">基本信息</a></li>
+                    @*<li><a href="@Url.Action("Manage","Account", new { category = "Messages" })">站内消息</a></li>*@
+                    @*<li><a href="@Url.Action("Manage","Account", new { category = "Security" })">安全设置</a></li>*@
+                    @*if (accountModel.IsAdmin.HasValue && accountModel.IsAdmin.Value)
+                    {
+                        <li><a href="@Url.Action("Manage", "Account", new { category = "Administration" })">站点管理</a></li>
+                    }*@
+                    break;
+                case "Messages":
+                    <li><a href="@Url.Action("Manage","Account", new { category = "Profile" })">基本信息</a></li>
+                    @*<li class="active"><a href="#">站内消息</a></li>*@
+                    @*<li><a href="@Url.Action("Manage","Account", new { category = "Security" })">安全设置</a></li>*@
+                    @*if (accountModel.IsAdmin.HasValue && accountModel.IsAdmin.Value)
+                    {
+                        <li><a href="@Url.Action("Manage", "Account", new { category = "Administration" })">站点管理</a></li>
+                    }*@
+                    break;
+                case "Security":
+                    <li><a href="@Url.Action("Manage","Account", new { category = "Profile" })">基本信息</a></li>
+                    @*<li><a href="@Url.Action("Manage","Account", new { category = "Messages" })">站内消息</a></li>*@
+                    @*<li class="active"><a href="#">安全设置</a></li>*@
+                    @*if (accountModel.IsAdmin.HasValue && accountModel.IsAdmin.Value)
+                    {
+                        <li><a href="@Url.Action("Manage", "Account", new { category = "Administration" })">站点管理</a></li>
+                    }*@
+                    break;
+                case "Administration":
+                    <li><a href="@Url.Action("Manage","Account", new { category = "Profile" })">基本信息</a></li>
+                    @*<li><a href="@Url.Action("Manage","Account", new { category = "Messages" })">站内消息</a></li>*@
+                    @*<li><a href="@Url.Action("Manage","Account", new { category = "Security" })">安全设置</a></li>*@
+                    @*if (accountModel.IsAdmin.HasValue && accountModel.IsAdmin.Value)
+                    {
+                        <li class="active"><a href="#">站点管理</a></li>
+                    }*@
+                    break;
+            }
+        </ul>
+    </div>
+    <div class="col-md-10">
+        @switch (category)
+        {
+            case "Profile":
+                var accountProfileViewModel = new AccountProfileViewModel
+                {
+                    UserName = accountModel.UserName,
+                    NickName = accountModel.NickName,
+                    EmailAddress = accountModel.EmailAddress,
+                    Id = accountModel.Id
+
+                };
+                await Html.RenderPartialAsync("_ManageProfilePartial", accountProfileViewModel);
+                break;
+        }
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

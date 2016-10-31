@@ -1,0 +1,59 @@
+﻿@using DaxnetBlog.Common
+@using System.Globalization
+
+@model dynamic
+@{
+    ViewData["Title"] = $"{(string)Model.title} - daxnet.me";
+    var datePublished = ((DateTime)Model.datePublished).ToLocalTime().ToString(new CultureInfo("zh-CN"));
+}
+
+<div class="jumbotron jumbotron-no-border jumbotron-article">
+    <h2>@Model.title</h2>
+    <h4>@Model.account.nickName 发布于 @datePublished</h4>
+</div>
+<div class="row">
+    <div class="col-md-10">
+        <article>
+            <content>
+                @Html.Raw(Model.content)
+            </content>
+            <div class="replies">
+                <hr />
+                <div class="replies-title">评论列表</div>
+                @if (Model.replies.Count > 0) {
+                    @await Html.PartialAsync("_RepliesPartial", (object)Model.replies);
+                }
+                else {
+                    <div class="no-replies">当前没有评论！</div>
+                }
+                @await Html.PartialAsync("_CommentsEditorPartial", new { Feature = "BlogPost", Key = (string)Model.id }.ToExpando())
+            </div>
+        </article>
+    </div>
+    <div class="col-md-2">
+        @await Html.PartialAsync("_BulletinBoardPartial")
+    </div>
+</div>
+@section scripts{
+    <link rel="stylesheet" href="~/css/SyntaxHighlighter/shCore.css" type="text/css" />
+    <link rel="stylesheet" href="~/css/SyntaxHighlighter/shCoreDefault.css" type="text/css" />
+    <script src="~/lib/SyntaxHighlighter/shCore.js"></script>
+    <script src="~/lib/SyntaxHighlighter/shLegacy.js"></script>
+    <script src="~/lib/SyntaxHighlighter/shBrushCpp.js"></script>
+    <script src="~/lib/SyntaxHighlighter/shBrushCSharp.js"></script>
+    <script src="~/lib/SyntaxHighlighter/shBrushCss.js"></script>
+    <script src="~/lib/SyntaxHighlighter/shBrushDelphi.js"></script>
+    <script src="~/lib/SyntaxHighlighter/shBrushBash.js"></script>
+    <script src="~/lib/SyntaxHighlighter/shBrushXml.js"></script>
+    <script src="~/lib/SyntaxHighlighter/shBrushSql.js"></script>
+    <script src="~/lib/SyntaxHighlighter/shBrushVb.js"></script>
+    <script src="~/lib/SyntaxHighlighter/shBrushPowerShell.js"></script>
+    <script src="~/lib/SyntaxHighlighter/shBrushPlain.js"></script>
+    <script src="~/lib/SyntaxHighlighter/shBrushJava.js"></script>
+    <script src="~/lib/SyntaxHighlighter/shBrushJScript.js"></script>
+    <script language="javascript" type="text/javascript">
+        SyntaxHighlighter.config.bloggerMode = false;
+        SyntaxHighlighter.defaults['ruler'] = true;
+        SyntaxHighlighter.all();
+    </script>
+}

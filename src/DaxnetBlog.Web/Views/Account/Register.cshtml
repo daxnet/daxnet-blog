@@ -60,13 +60,15 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <div class="col-sm-offset-2 col-sm-10" />
+                    <label class="col-md-2 control-label"></label>
+                    <div class="col-md-10" />
                     <div>
-                        <img asp-captcha="true" />
+                        @await Html.PartialAsync("_CaptchaPartial")
                     </div>
                 </div>
                 <div class="form-group">
-                    <div class="col-md-offset-2 col-md-10">
+                    <label class="col-md-2 control-label"></label>
+                    <div class="col-md-10">
                         <button type="submit" class="btn btn-primary">注册</button>
                     </div>
                 </div>

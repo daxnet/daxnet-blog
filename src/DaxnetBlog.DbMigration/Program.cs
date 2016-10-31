@@ -110,7 +110,7 @@ namespace DaxnetBlog.DbMigration
                     try
                     {
                         var c = Crypto.Create(CryptoTypes.EncTypeTripleDes);
-                        connectionString = c.Decrypt(connectionString, "DaxnetBlog");
+                        connectionString = c.Decrypt(connectionString, Crypto.GlobalKey);
                     }
                     catch
                     {

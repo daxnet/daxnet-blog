@@ -17,6 +17,8 @@ namespace DaxnetBlog.Web.Security
 
         public bool? IsLocked { get; set; }
 
+        public bool? IsAdmin { get; set; }
+
         public override string ToString() => UserName;
     }
 }

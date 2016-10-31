@@ -7,6 +7,8 @@ using System.Net.Http;
 using Microsoft.Net.Http;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using DaxnetBlog.Web.Models;
+using System.Text;
 
 namespace DaxnetBlog.Web.Controllers
 {
@@ -16,6 +18,11 @@ namespace DaxnetBlog.Web.Controllers
         private readonly IOptions<WebsiteSettings> config;
         private readonly int pageSize;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HomeController"/> class.
+        /// </summary>
+        /// <param name="httpClient">The HTTP client.</param>
+        /// <param name="config">The configuration.</param>
         public HomeController(HttpClient httpClient,
             IOptions<WebsiteSettings> config)
         {
@@ -31,13 +38,6 @@ namespace DaxnetBlog.Web.Controllers
             return View(model);
         }
 
-        public async Task<IActionResult> Post(int id)
-        {
-            var json = await (await this.httpClient.GetAsync($"blogPosts/{id}")).Content.ReadAsStringAsync();
-            dynamic model = JsonConvert.DeserializeObject(json);
-            return View(model);
-        }
-
         public IActionResult About()
         {
             ViewData["Message"] = "Your application description page.";
@@ -49,5 +49,12 @@ namespace DaxnetBlog.Web.Controllers
         {
             return View();
         }
+
+        #region Helper Actions        
+
+        
+
+        
+        #endregion
     }
 }

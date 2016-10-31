@@ -1,6 +1,5 @@
 ﻿using DaxnetBlog.Common;
 using System;
-using System.Collections.Generic;
 
 namespace DaxnetBlog.Domain.Model
 {
@@ -19,11 +18,11 @@ namespace DaxnetBlog.Domain.Model
 
         public DateTime? DateLastLogin { get; set; }
 
-        public IList<BlogPost> BlogPosts { get; set; }
-
         public string EmailVerifyCode { get; set; }
 
         public DateTime? EmailVerifiedDate { get; set; }
+
+        public bool? IsAdmin { get; set; }
 
         public bool? IsLocked { get; set; }
 

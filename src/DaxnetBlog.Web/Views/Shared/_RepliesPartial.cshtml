@@ -1,0 +1,14 @@
+﻿@using Humanizer;
+@model dynamic
+
+
+@foreach (dynamic m in Model)
+{
+    var nickName = (string)m.nickName;
+    var dateTime = ((DateTime)m.datePublished).ToLocalTime();
+    var humanizedDateTime = dateTime.Humanize(false, culture: new System.Globalization.CultureInfo("zh-CN"));
+    var title = $"{nickName} 发表于 {dateTime} ({humanizedDateTime})";
+    <static-content sc-title="@title" sc-style="default">
+        @Html.Raw((string)m.content)
+    </static-content>
+}

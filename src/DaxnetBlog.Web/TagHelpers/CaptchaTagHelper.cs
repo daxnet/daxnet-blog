@@ -2,13 +2,10 @@
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace DaxnetBlog.Web.TagHelpers
 {
@@ -28,15 +25,15 @@ namespace DaxnetBlog.Web.TagHelpers
             {
                 using (var memoryStream = new MemoryStream())
                 {
-                    using (var bitmap = new Bitmap(150, 30, PixelFormat.Format32bppArgb))
+                    using (var bitmap = new Bitmap(100, 30, PixelFormat.Format32bppArgb))
                     {
                         using (var graphics = Graphics.FromImage(bitmap))
                         {
-                            Rectangle rect = new Rectangle(0, 0, 149, 29);
+                            Rectangle rect = new Rectangle(0, 0, 99, 29);
                             graphics.FillRectangle(Brushes.White, rect);
                             Random r = new Random();
                             int startIndex = r.Next(1, 5);
-                            int length = r.Next(5, 10);
+                            int length = r.Next(6, 6);
                             string drawString = Guid.NewGuid().ToString().Replace("-", "0").Substring(startIndex, length).ToLower();
 
                             Font drawFont = new Font("Arial", 16, FontStyle.Bold);

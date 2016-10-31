@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using DaxnetBlog.Common;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +20,7 @@ namespace DaxnetBlog.Web
             : base(new HttpClientHandler(), true)
         {
             this.config = config;
-            var baseUrl = Environment.GetEnvironmentVariable("DAXNETBLOG_SVC_BASEURL");
+            var baseUrl = EnvironmentVariables.WebServiceBaseUrl;
             if (string.IsNullOrEmpty(baseUrl))
             {
                 baseUrl = config.Value.BaseUri;

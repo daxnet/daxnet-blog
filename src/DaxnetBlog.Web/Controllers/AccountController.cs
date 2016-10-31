@@ -9,6 +9,7 @@ using DaxnetBlog.Web.Security;
 using DaxnetBlog.Web.Models;
 using System.Text;
 using DaxnetBlog.Web.Services;
+using DaxnetBlog.Common;
 
 // For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -88,6 +89,13 @@ namespace DaxnetBlog.Web.Controllers
 
         [HttpGet]
         [AllowAnonymous]
+        public IActionResult PreRegister()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
         public IActionResult Register(string returnUrl = null)
         {
             ViewData["ShowMessage"] = false;
@@ -128,8 +136,8 @@ namespace DaxnetBlog.Web.Controllers
                         "站点认证信息（daxnet.me）",
                         $@"感谢您注册成为daxnet.me站点的会员，请<a href=""{callbackUrl}"">【点击此处】</a>完成账户验证。谢谢！");
                     ViewData["ShowMessage"] = true;
-                    ViewData["MessageTitle"] = "注册成功！";
-                    ViewData["MessageBody"] = @"验证码已发送至注册邮箱，请点击邮件中链接激活账户。";
+                    ViewData["MessageTitle"] = "注册成功";
+                    ViewData["MessageBody"] = @"验证码已发送至注册邮箱，请点击邮件中链接激活账户。如在一定时间内仍未收到激活链接，请发邮件至daxnet@live.com与站长联系。";
                 }
                 else
                 {
@@ -141,6 +149,27 @@ namespace DaxnetBlog.Web.Controllers
             }
 
             return View(model);
+        }
+
+        [Authorize]
+        public async Task<IActionResult> Manage(string category="Profile")
+        {
+            var accountModel = await this.userManager.FindByNameAsync(User.Identity.Name);
+            return View(new { category, accountModel }.ToExpando());
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> UpdateProfile(AccountProfileViewModel model)
+        {
+            var identityResult = await userManager.UpdateAsync(new User
+            {
+                Id = model.Id,
+                NickName = model.NickName,
+                EmailAddress = model.EmailAddress
+            });
+
+            return Ok(identityResult.Succeeded);
         }
 
         [HttpGet]
