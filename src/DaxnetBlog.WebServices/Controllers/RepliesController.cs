@@ -126,7 +126,8 @@ namespace DaxnetBlog.WebServices.Controllers
         [Route("all")]
         public async Task<IActionResult> GetAllReplies()
         {
-            return Ok(await this.storage.ExecuteAsync(async (connection, cancellationToken) => await this.replyStore.SelectAsync(connection,
+            return Ok(await this.storage.ExecuteAsync(async (connection, cancellationToken) => await this.replyStore.SelectAsync(connection, r => r.Account,
+                r=>r.AccountId, acct => acct.Id, 
                 sorting: new Sort<Reply, int> { { x => x.DatePublished, SortOrder.Descending } }, cancellationToken: cancellationToken)));
         }
 
