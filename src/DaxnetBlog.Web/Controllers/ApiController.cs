@@ -18,6 +18,7 @@ namespace DaxnetBlog.Web.Controllers
             this.httpClient = httpClient;
         }
 
+        #region Ping API
         [Route("ping")]
         [HttpGet]
         public IActionResult Ping()
@@ -26,7 +27,9 @@ namespace DaxnetBlog.Web.Controllers
                 Result = true
             });
         }
+        #endregion
 
+        #region Reply API
         [Route("replies/all")]
         [HttpGet]
         public async Task<IActionResult> GetAllReplies()
@@ -39,10 +42,11 @@ namespace DaxnetBlog.Web.Controllers
             {
                 replies.Add(new
                 {
-                    reply.id,
-                    reply.datePublished,
-                    reply.status,
-                    reply.account.userName
+                    reply.reply.id,
+                    reply.reply.datePublished,
+                    reply.reply.status,
+                    reply.reply.account.userName,
+                    reply.blogPost.title
                 });
             }
             return Ok(replies);
@@ -57,5 +61,17 @@ namespace DaxnetBlog.Web.Controllers
             dynamic model = JsonConvert.DeserializeObject(await result.Content.ReadAsStringAsync());
             return Ok(model);
         }
+
+        [Route("replies/approveOrReject/{replyId}")]
+        [HttpPost]
+        public async Task<IActionResult> ApproveReply(int replyId, [FromBody] dynamic model)
+        {
+            var operation = (string)model.Operation;
+            var result = await this.httpClient.PostAsJsonAsync($"replies/approveOrReject/{replyId}", new { Operation = operation });
+            result.EnsureSuccessStatusCode();
+            dynamic returnModel = JsonConvert.DeserializeObject(await result.Content.ReadAsStringAsync());
+            return Ok(returnModel);
+        }
+        #endregion
     }
 }
