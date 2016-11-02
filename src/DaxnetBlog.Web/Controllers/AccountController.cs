@@ -8,8 +8,8 @@ using Microsoft.AspNetCore.Identity;
 using DaxnetBlog.Web.Security;
 using DaxnetBlog.Web.Models;
 using System.Text;
-using DaxnetBlog.Web.Services;
 using DaxnetBlog.Common;
+using DaxnetBlog.Common.IntegrationServices;
 
 // For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 

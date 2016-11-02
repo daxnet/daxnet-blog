@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace DaxnetBlog.Web.Services
+namespace DaxnetBlog.Common.IntegrationServices
 {
     public interface IEmailService
     {

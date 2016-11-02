@@ -5,8 +5,9 @@ using DaxnetBlog.Common;
 using MimeKit;
 using MimeKit.Text;
 using MailKit.Net.Smtp;
+using DaxnetBlog.Common.IntegrationServices;
 
-namespace DaxnetBlog.Web.Services
+namespace DaxnetBlog.AzureServices
 {
     public class EmailService : IEmailService
     {

@@ -13,28 +13,30 @@ namespace DaxnetBlog.Web.Models
         [StringLength(16, ErrorMessage = "用户名需小于16个字符")]
         public string UserName { get; set; }
 
-        [Required]
-        [EmailAddress]
+        [Required(ErrorMessage = "电子邮件字段是必填项")]
+        [EmailAddress(ErrorMessage = "电子邮件地址格式不正确。")]
         [Display(Name = "电子邮件")]
-        [StringLength(16, ErrorMessage = "电子邮件需小于256个字符")]
+        [StringLength(256, ErrorMessage = "电子邮件需小于256个字符")]
         public string Email { get; set; }
 
         [Display(Name = "昵称", Prompt = "若为空，则使用用户名作为昵称")]
         public string NickName { get; set; }
 
-        [Required]
-        [StringLength(100, ErrorMessage = "密码至少需要{2}个字符，最多不能超过{1}个字符", MinimumLength = 6)]
+        [Required(ErrorMessage = "密码字段是必填项")]
+        [StringLength(20, ErrorMessage = "密码至少需要{2}个字符，最多不能超过{1}个字符", MinimumLength = 6)]
         [DataType(DataType.Password)]
         [Display(Name = "密码")]
         public string Password { get; set; }
 
+        [Required(ErrorMessage = "确认密码字段是必填项")]
+        [StringLength(20, ErrorMessage = "确认密码至少需要{2}个字符，最多不能超过{1}个字符", MinimumLength = 6)]
         [DataType(DataType.Password)]
         [Display(Name = "确认密码")]
         [Compare("Password", ErrorMessage = "输入的确认密码与密码不符")]
         public string ConfirmPassword { get; set; }
 
         [Required(ErrorMessage = "验证码字段是必填项")]
-        [StringLength(10)]
+        [StringLength(10, ErrorMessage = "验证码长度必须小于10个字符。")]
         [Display(Name = "验证码", Prompt = "请输入下方的验证码")]
         public string Captcha { get; set; }
     }

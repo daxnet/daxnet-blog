@@ -36,7 +36,8 @@ namespace DaxnetBlog.Web.Middlewares
                     var commaPosition = plain.IndexOf(":");
                     if (commaPosition == -1)
                     {
-                        await nextInvocation.Invoke(context);
+                        await ConstructResponse(context, HttpStatusCode.Unauthorized, "Invalid authentication token.");
+                        return;
                     }
 
                     var userName = plain.Substring(0, plain.IndexOf(":"));
@@ -44,22 +45,37 @@ namespace DaxnetBlog.Web.Middlewares
                     var password = c.Decrypt(passwordEncrypted, EnvironmentVariables.WebManagementApiEncryptionKey);
                     if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(password))
                     {
-                        await nextInvocation.Invoke(context);
+                        await ConstructResponse(context, HttpStatusCode.Unauthorized, "Unable to parse the credential from the authentication token.");
+                        return;
                     }
 
                     var authenticated = await userManager.CheckPasswordAsync(new User { UserName = userName }, password);
                     if (authenticated)
                     {
                         context.User = new ClaimsPrincipal(new GenericIdentity(userName));
+                        await nextInvocation.Invoke(context);
+                        return;
+                    }
+                    else
+                    {
+                        await ConstructResponse(context, HttpStatusCode.Unauthorized, "The provided credential was failed to be authenticated.");
+                        return;
                     }
                 }
                 else
                 {
-                    context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     context.User = null;
+                    await ConstructResponse(context, HttpStatusCode.Unauthorized, "No authentication token has been provided.");
+                    return;
                 }
             }
             await nextInvocation.Invoke(context);
+        }
+
+        private async Task ConstructResponse(HttpContext context, HttpStatusCode statusCode, string message)
+        {
+            context.Response.StatusCode = (int)statusCode;
+            await context.Response.WriteAsync(message);
         }
     }
 }
