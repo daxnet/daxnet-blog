@@ -398,5 +398,14 @@ namespace DaxnetBlog.WebServices.Controllers
 
             return Ok(result);
         }
+
+        //[HttpPost]
+        //[Route("password/change/{id}")]
+        //public async Task<IActionResult> ChangePassword(int id, [FromBody] dynamic model)
+        //{
+        //    var oldPassword = (string)model.OldPassword;
+        //    var newPassword = (string)model.NewPassword;
+
+        //}
     }
 }

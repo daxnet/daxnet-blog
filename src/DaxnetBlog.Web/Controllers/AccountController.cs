@@ -172,6 +172,16 @@ namespace DaxnetBlog.Web.Controllers
             return Ok(identityResult.Succeeded);
         }
 
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            var user = new User { Id = model.Id };
+            var identityResult = await userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
+
+            return Ok(identityResult.Succeeded);
+        }
+
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> ConfirmEmail(string userName, string code)

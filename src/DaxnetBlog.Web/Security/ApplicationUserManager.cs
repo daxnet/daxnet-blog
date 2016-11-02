@@ -115,6 +115,11 @@ namespace DaxnetBlog.Web.Security
             }
         }
 
+        public override Task<IdentityResult> ChangePasswordAsync(User user, string currentPassword, string newPassword)
+        {
+            return base.ChangePasswordAsync(user, currentPassword, newPassword);
+        }
+
         public override bool SupportsUserLockout
         {
             get
