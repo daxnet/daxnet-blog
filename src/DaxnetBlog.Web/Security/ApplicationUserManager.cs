@@ -115,6 +115,20 @@ namespace DaxnetBlog.Web.Security
             }
         }
 
+        public override async Task<IdentityResult> ChangePasswordAsync(User user, string currentPassword, string newPassword)
+        {
+            var result = await httpClient.PostAsJsonAsync($"accounts/password/change/{user.Id}", new { OldPassword = currentPassword, NewPassword = newPassword });
+            try
+            {
+                result.EnsureSuccessStatusCode();
+                return IdentityResult.Success;
+            }
+            catch (Exception ex)
+            {
+                return IdentityResult.Failed(new IdentityError { Description = $"错误信息：{ex.Message}。" });
+            }
+        }
+
         public override bool SupportsUserLockout
         {
             get

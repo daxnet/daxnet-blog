@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using DaxnetBlog.Web.Security;
 using System.Net.Http;
-using DaxnetBlog.Web.Services;
 using WilderMinds.MetaWeblog;
 using DaxnetBlog.Common.IntegrationServices;
 using DaxnetBlog.AzureServices;

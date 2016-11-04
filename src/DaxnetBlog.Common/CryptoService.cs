@@ -315,25 +315,6 @@ namespace DaxnetBlog.Common
         {
             if (encoding == null)
                 encoding = new UTF8Encoding();
-            // TODO: Need change when releasing CloudNotes
-            // System.Security.Cryptography.SHA1Cng
-            // System.Security.Cryptography.SHA1CryptoServiceProvider
-            // System.Security.Cryptography.SHA1Managed
-            // System.Security.Cryptography.HMAC
-            // System.Security.Cryptography.MACTripleDES
-            // System.Security.Cryptography.MD5Cng
-            // System.Security.Cryptography.MD5CryptoServiceProvider
-            // System.Security.Cryptography.RIPEMD160Managed
-            // System.Security.Cryptography.SHA256Cng
-            // System.Security.Cryptography.SHA256CryptoServiceProvider
-            // System.Security.Cryptography.SHA256Managed
-            // System.Security.Cryptography.SHA384Cng
-            // System.Security.Cryptography.SHA384CryptoServiceProvider
-            // System.Security.Cryptography.SHA384Managed
-            // System.Security.Cryptography.SHA512Cng
-            // System.Security.Cryptography.SHA512CryptoServiceProvider
-            // System.Security.Cryptography.SHA512Managed
-
             var provider = SHA1.Create();
             var encryptedPasswordArray = provider.ComputeHash(encoding.GetBytes(string.Concat(source, salt)));
             return Convert.ToBase64String(encryptedPasswordArray);
@@ -345,7 +326,6 @@ namespace DaxnetBlog.Common
         /// <returns></returns>
         public static Crypto CreateDefaultCrypto()
         {
-            // TODO: Need change when releasing CloudNotes
             return new Crypto(CryptoTypes.EncAes);
         }
 

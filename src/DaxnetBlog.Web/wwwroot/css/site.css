@@ -71,12 +71,6 @@ ul.article-list div.auth {
     text-shadow: black 0.3em 0.3em 0.3em;
 }
 
-.jumbotron-index h2 {
-    font-size: 20px;
-    font-family: cursive;
-    font-style: italic;
-}
-
 .jumbotron-no-border {
     margin-top: -10px;
     margin-left: -10px;

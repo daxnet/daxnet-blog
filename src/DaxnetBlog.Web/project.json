@@ -4,7 +4,6 @@
     "DaxnetBlog.AzureServices": "1.0.0-*",
     "DaxnetBlog.Common": "1.0.0-*",
     "Humanizer.Core": "2.1.0",
-    "MailKit": "1.8.1",
     "Microsoft.AspNet.WebApi.Client": "5.2.3",
     "Microsoft.AspNetCore.Diagnostics": "1.0.0",
     "Microsoft.AspNetCore.Identity": "1.0.0",

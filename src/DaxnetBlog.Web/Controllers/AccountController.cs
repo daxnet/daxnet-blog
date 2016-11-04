@@ -8,8 +8,8 @@ using Microsoft.AspNetCore.Identity;
 using DaxnetBlog.Web.Security;
 using DaxnetBlog.Web.Models;
 using System.Text;
-using DaxnetBlog.Web.Services;
 using DaxnetBlog.Common;
+using DaxnetBlog.Common.IntegrationServices;
 
 // For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -168,6 +168,16 @@ namespace DaxnetBlog.Web.Controllers
                 NickName = model.NickName,
                 EmailAddress = model.EmailAddress
             });
+
+            return Ok(identityResult.Succeeded);
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            var user = new User { Id = model.Id };
+            var identityResult = await userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
 
             return Ok(identityResult.Succeeded);
         }

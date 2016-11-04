@@ -16,6 +16,7 @@ namespace DaxnetBlog.WebServices.Controllers
         private readonly IStorage storage;
         private readonly IEntityStore<Account, int> accountStore;
         private readonly IEntityStore<Reply, int> replyStore;
+        private readonly IEntityStore<BlogPost, int> blogPostStore;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RepliesController"/> class.
@@ -25,11 +26,13 @@ namespace DaxnetBlog.WebServices.Controllers
         /// <param name="accountStore">The account store.</param>
         public RepliesController(IStorage storage,
             IEntityStore<Reply, int> replyStore,
-            IEntityStore<Account, int> accountStore)
+            IEntityStore<Account, int> accountStore,
+            IEntityStore<BlogPost, int> blogPostStore)
         {
             this.storage = storage;
             this.replyStore = replyStore;
             this.accountStore = accountStore;
+            this.blogPostStore = blogPostStore;
         }
 
         [HttpGet]
@@ -126,9 +129,93 @@ namespace DaxnetBlog.WebServices.Controllers
         [Route("all")]
         public async Task<IActionResult> GetAllReplies()
         {
-            return Ok(await this.storage.ExecuteAsync(async (connection, cancellationToken) => await this.replyStore.SelectAsync(connection,
-                sorting: new Sort<Reply, int> { { x => x.DatePublished, SortOrder.Descending } }, cancellationToken: cancellationToken)));
+            var result = await this.storage.ExecuteAsync(async (connection, transaction, cancellationToken) =>
+            {
+                var replies = await this.replyStore.SelectAsync(connection, r => r.Account,
+                    r => r.AccountId, acct => acct.Id,
+                    sorting: new Sort<Reply, int> { { x => x.DatePublished, SortOrder.Descending } }, 
+                    transaction: transaction, 
+                    cancellationToken: cancellationToken);
+
+                // TODO: Note that for now it is just a workaround for retrieving the data for another
+                // associated object on the current one. The limitation of the current entity store implementation
+                // is that if only one associated object is going to be retrieved along with the current object,
+                // the SelectAsync operation can do the join. However if multiple associated objects are going to
+                // be retrieved, the join cannot be performed. For current scenario, both account information and
+                // blog post information needs to be read along with the reply data, so, for account information,
+                // we performed the inline join, but for the blog post information, we issued another database
+                // connection.
+                var list = new List<object>();
+                foreach(var reply in replies)
+                {
+                    var blogPostId = reply.BlogPostId;
+                    var blogPost = (await this.blogPostStore.SelectAsync(connection, bp => bp.Id == blogPostId,
+                        transaction: transaction,
+                        cancellationToken: cancellationToken)).FirstOrDefault();
+                    list.Add(new
+                    {
+                        Reply = reply,
+                        BlogPost = blogPost
+                    });
+                }
+
+                return list;
+                
+            });
+
+            return Ok(result);
         }
 
+
+        [HttpPost]
+        [Route("approveOrReject/{replyId}")]
+        public async Task<IActionResult> ApproveOrReject(int replyId, [FromBody] dynamic model)
+        {
+            var operation = (string)model.Operation;
+            if (string.IsNullOrEmpty(operation))
+            {
+                throw new ServiceException(HttpStatusCode.BadRequest, "回复审批操作方式未指定，请指定Approve或者Reject操作。");
+            }
+
+            if (operation.ToUpper() != "APPROVE" &&
+                operation.ToUpper() != "REJECT")
+            {
+                throw new ServiceException(HttpStatusCode.MethodNotAllowed, "指定的审批操作方式不可用，请指定Approve或者Reject操作。");
+            }
+
+            var affectedRows = await this.storage.ExecuteAsync(async (connection, transaction, cancellationToken) =>
+            {
+                var reply = (await this.replyStore.SelectAsync(connection,
+                    r => r.Id == replyId,
+                    transaction: transaction,
+                    cancellationToken: cancellationToken)).FirstOrDefault();
+                if (reply == null)
+                {
+                    throw new ServiceException(HttpStatusCode.NotFound, $"ID为{replyId}的用户回复内容不存在。");
+                }
+
+                var updateFields = new List<Expression<Func<Reply, object>>>();
+                switch (operation.ToUpper())
+                {
+                    case "APPROVE":
+                        reply.Status = ReplyStatus.Approved;
+                        break;
+                    case "REJECT":
+                        reply.Status = ReplyStatus.Rejected;
+                        break;
+                }
+
+                return await this.replyStore.UpdateAsync(reply,
+                    connection,
+                    r => r.Id == replyId,
+                    new Expression<Func<Reply, object>>[] { r => r.Status },
+                    transaction,
+                    cancellationToken);
+            });
+
+            if (affectedRows > 0)
+                return Ok(affectedRows);
+            throw new ServiceException("用户回复审批失败。");
+        }
     }
 }
