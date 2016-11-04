@@ -399,13 +399,47 @@ namespace DaxnetBlog.WebServices.Controllers
             return Ok(result);
         }
 
-        //[HttpPost]
-        //[Route("password/change/{id}")]
-        //public async Task<IActionResult> ChangePassword(int id, [FromBody] dynamic model)
-        //{
-        //    var oldPassword = (string)model.OldPassword;
-        //    var newPassword = (string)model.NewPassword;
+        [HttpPost]
+        [Route("password/change/{id}")]
+        public async Task<IActionResult> ChangePassword(int id, [FromBody] dynamic model)
+        {
+            var oldPassword = (string)model.OldPassword;
+            var newPassword = (string)model.NewPassword;
+            if (string.IsNullOrEmpty(oldPassword))
+            {
+                throw new ServiceException(HttpStatusCode.BadRequest, "修改密码时未提供旧密码。");
+            }
 
-        //}
+            if (string.IsNullOrEmpty(newPassword))
+            {
+                throw new ServiceException(HttpStatusCode.BadRequest, "修改密码时未提供新密码。");
+            }
+
+            var affectedRows = await storage.ExecuteAsync(async (connection, transaction, cancellationToken) =>
+            {
+                var account = (await accountStore.SelectAsync(connection, acct => acct.Id == id, transaction: transaction, cancellationToken: cancellationToken)).FirstOrDefault();
+                if (account == null)
+                {
+                    throw new ServiceException(HttpStatusCode.NotFound, $"未能找到ID为{id}的用户账户。");
+                }
+
+                if (account.ValidatePassword(oldPassword))
+                {
+                    var passwordHash = Crypto.ComputeHash(newPassword, account.UserName);
+                    account.PasswordHash = passwordHash;
+
+                    return await accountStore.UpdateAsync(account, connection, acct => acct.Id == id,
+                        new Expression<Func<Account, object>>[] { acct => acct.PasswordHash }, transaction, cancellationToken);
+                }
+                else
+                {
+                    throw new ServiceException(HttpStatusCode.MethodNotAllowed, "指定的旧密码不正确。");
+                }
+            });
+
+            if (affectedRows > 0)
+                return Ok(affectedRows);
+            throw new ServiceException("密码更新失败。");
+        }
     }
 }
