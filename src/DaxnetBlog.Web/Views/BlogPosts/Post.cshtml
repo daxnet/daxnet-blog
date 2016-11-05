@@ -4,15 +4,22 @@
 @model dynamic
 @{
     ViewData["Title"] = $"{(string)Model.title} - daxnet.me";
-    var datePublished = ((DateTime)Model.datePublished).ToLocalTime().ToString(new CultureInfo("zh-CN"));
+    var datePublished = (DateTime)Model.datePublished;
+    var datePublishedStr = datePublished.ToLocalTime().ToString(new CultureInfo("zh-CN"));
 }
 
 <div class="jumbotron jumbotron-no-border jumbotron-article">
     <h2>@Model.title</h2>
-    <h4>@Model.account.nickName 发布于 @datePublished</h4>
+    <h5>@Model.account.nickName 发布于 @datePublishedStr</h5>
 </div>
 <div class="row">
     <div class="col-md-10">
+        @if(DateTime.UtcNow .Subtract(datePublished) > TimeSpan.FromDays(365))
+        {
+            <message message-enabled="true" message-title="友情提醒" message-type="WARNING">
+                本文发布于至少一年以前，文中所述的技术内容或已过时，请谨慎参考。
+            </message>
+        }
         <article>
             <content>
                 @Html.Raw(Model.content)
@@ -55,5 +62,9 @@
         SyntaxHighlighter.config.bloggerMode = false;
         SyntaxHighlighter.defaults['ruler'] = true;
         SyntaxHighlighter.all();
+        
+        $('.close').click(function () {
+            hideMessage();
+        });
     </script>
 }

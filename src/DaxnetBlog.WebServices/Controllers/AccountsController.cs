@@ -420,7 +420,7 @@ namespace DaxnetBlog.WebServices.Controllers
                 var account = (await accountStore.SelectAsync(connection, acct => acct.Id == id, transaction: transaction, cancellationToken: cancellationToken)).FirstOrDefault();
                 if (account == null)
                 {
-                    throw new ServiceException(HttpStatusCode.NotFound, $"未能找到ID为{id}的用户账户。");
+                    throw new ServiceException(HttpStatusCode.NotFound, $"未能找到ID为{id}的用户帐号。");
                 }
 
                 if (account.ValidatePassword(oldPassword))

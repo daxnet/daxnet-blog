@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using DaxnetBlog.Common;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using System;
@@ -12,6 +13,8 @@ namespace DaxnetBlog.Web.TagHelpers
     [HtmlTargetElement("img", Attributes = "asp-captcha")]
     public class CaptchaTagHelper : TagHelper
     {
+        private static readonly Crypto crypto = Crypto.Create(CryptoTypes.EncAes);
+
         [HtmlAttributeNotBound]
         [ViewContext]
         public ViewContext ViewContext { get; set; }
@@ -25,11 +28,11 @@ namespace DaxnetBlog.Web.TagHelpers
             {
                 using (var memoryStream = new MemoryStream())
                 {
-                    using (var bitmap = new Bitmap(100, 30, PixelFormat.Format32bppArgb))
+                    using (var bitmap = new Bitmap(115, 30, PixelFormat.Format32bppArgb))
                     {
                         using (var graphics = Graphics.FromImage(bitmap))
                         {
-                            Rectangle rect = new Rectangle(0, 0, 99, 29);
+                            Rectangle rect = new Rectangle(0, 0, 114, 29);
                             graphics.FillRectangle(Brushes.White, rect);
                             Random r = new Random();
                             int startIndex = r.Next(1, 5);
@@ -44,7 +47,7 @@ namespace DaxnetBlog.Web.TagHelpers
                                 graphics.DrawString(drawString, drawFont, drawBrush, drawPoint);
                             }
 
-                            var encryptedString = Convert.ToBase64String(UTF32Encoding.Unicode.GetBytes(drawString));
+                            var encryptedString = crypto.Encrypt(drawString, "*trak");
 
                             output.PostElement.AppendFormat("<input type=\"hidden\" name=\"__captcha_image\" id=\"__captcha_image\" value=\"{0}\" />", encryptedString);
                         }

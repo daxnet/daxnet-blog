@@ -18,6 +18,7 @@ namespace DaxnetBlog.Web.Controllers
     [Authorize]
     public class AccountController : Controller
     {
+        private static readonly Crypto crypto = Crypto.Create(CryptoTypes.EncAes);
         private readonly UserManager<User> userManager;
         private readonly SignInManager<User> signInManager;
         private readonly IEmailService emailService;
@@ -50,7 +51,7 @@ namespace DaxnetBlog.Web.Controllers
             if (ModelState.IsValid)
             {
                 var captchaString = this.Request.Form["__captcha_image"];
-                var encryptedString = Convert.ToBase64String(UTF32Encoding.Unicode.GetBytes(model.Captcha.ToLower()));
+                var encryptedString = crypto.Encrypt(model.Captcha.ToLower(), "*trak");
                 if (captchaString != encryptedString)
                 {
                     ModelState.AddModelError("", "验证码不正确。");
@@ -65,7 +66,7 @@ namespace DaxnetBlog.Web.Controllers
                 }
                 else if (result.IsLockedOut)
                 {
-                    ModelState.AddModelError(string.Empty, "登录失败，该账户已被锁定。");
+                    ModelState.AddModelError(string.Empty, "登录失败，该帐号已被锁定。");
                     return View(model);
                 }
                 else
@@ -112,7 +113,7 @@ namespace DaxnetBlog.Web.Controllers
             if (ModelState.IsValid)
             {
                 var captchaString = this.Request.Form["__captcha_image"];
-                var encryptedString = Convert.ToBase64String(UTF32Encoding.Unicode.GetBytes(model.Captcha.ToLower()));
+                var encryptedString = crypto.Encrypt(model.Captcha.ToLower(), "*trak");
                 if (captchaString != encryptedString)
                 {
                     ModelState.AddModelError("", "验证码不正确。");
@@ -134,10 +135,10 @@ namespace DaxnetBlog.Web.Controllers
                     var callbackUrl = Url.Action(nameof(ConfirmEmail), "Account", new { userName = Convert.ToBase64String(Encoding.ASCII.GetBytes(user.UserName)), code = verificationCode }, protocol: HttpContext.Request.Scheme);
                     await emailService.SendEmailAsync(user.NickName, user.EmailAddress,
                         "站点认证信息（daxnet.me）",
-                        $@"感谢您注册成为daxnet.me站点的会员，请<a href=""{callbackUrl}"">【点击此处】</a>完成账户验证。谢谢！");
+                        $@"感谢您注册成为daxnet.me站点的会员，请<a href=""{callbackUrl}"">【点击此处】</a>完成帐号验证。谢谢！");
                     ViewData["ShowMessage"] = true;
                     ViewData["MessageTitle"] = "注册成功";
-                    ViewData["MessageBody"] = @"验证码已发送至注册邮箱，请点击邮件中链接激活账户。如在一定时间内仍未收到激活链接，请发邮件至daxnet@live.com与站长联系。";
+                    ViewData["MessageBody"] = @"验证码已发送至注册邮箱，请点击邮件中链接激活帐号。如在一定时间内仍未收到激活链接，请发邮件至daxnet@live.com与站长联系。";
                 }
                 else
                 {

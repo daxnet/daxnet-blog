@@ -12,7 +12,7 @@
 <h2>@ViewData["Title"]</h2>
 <hr />
 <div class="row">
-    <div class="col-md-8">
+    <div class="col-md-6">
         <section>
             <form asp-controller="Account" asp-action="Login" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" class="form-horizontal">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -68,11 +68,8 @@
             </form>
         </section>
     </div>
-    <div class="col-md-4">
-        <section>
-            <h4>Logo.</h4>
-
-        </section>
+    <div class="col-md-6">
+        @*<img src="~/images/logo_ps2_286.jpg" class="img-responsive" />*@
     </div>
 </div>
 @section Scripts {

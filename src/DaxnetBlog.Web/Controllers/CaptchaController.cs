@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DaxnetBlog.Common;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,8 @@ namespace DaxnetBlog.Web.Controllers
 {
     public class CaptchaController : Controller
     {
+        private static readonly Crypto crypto = Crypto.Create(CryptoTypes.EncAes);
+
         public CaptchaController()
         {
 
@@ -33,7 +36,7 @@ namespace DaxnetBlog.Web.Controllers
         [HttpPost]
         public IActionResult VerifyCaptcha(string captchaString, string encryptedString)
         {
-            var enc = Convert.ToBase64String(UTF32Encoding.Unicode.GetBytes(captchaString));
+            var enc = crypto.Encrypt(captchaString, "*trak");
             return Ok(enc == encryptedString);
         }
     }

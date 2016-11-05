@@ -46,7 +46,7 @@ namespace DaxnetBlog.WebServices.Controllers
 
             if (accountId <= 0)
             {
-                throw new ServiceException(HttpStatusCode.BadRequest, "用户账户Id值不在有效范围。");
+                throw new ServiceException(HttpStatusCode.BadRequest, "用户帐号Id值不在有效范围。");
             }
 
             var result = await this.storage.ExecuteAsync(async (connection, transaction, cancellationToken) =>
