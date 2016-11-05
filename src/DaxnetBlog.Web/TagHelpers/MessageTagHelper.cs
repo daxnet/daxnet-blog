@@ -28,11 +28,14 @@ namespace DaxnetBlog.Web.TagHelpers
 
         public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
-            if (Enabled)
-            {
+            //if (Enabled)
+            //{
                 var tagBuilder = new TagBuilder("div");
                 tagBuilder.AddCssClass("alert");
-                tagBuilder.Attributes.Add("style", "display: none;");
+                if (!Enabled)
+                {
+                    tagBuilder.Attributes.Add("style", "display: none;");
+                }
                 tagBuilder.Attributes.Add("id", "message-alert");
                 switch(Type.ToUpper())
                 {
@@ -70,7 +73,7 @@ namespace DaxnetBlog.Web.TagHelpers
 
                 output.TagMode = TagMode.StartTagAndEndTag;
                 output.Content.AppendHtml(tagBuilder.ToHtmlString());
-            }
+            //}
         }
     }
 }
