@@ -4,7 +4,7 @@
 @model dynamic
 
 @{
-    ViewData["Title"] = "账户管理";
+    ViewData["Title"] = "帐号管理";
     var category = (string)Model.category;
     var accountModel = (DaxnetBlog.Web.Security.User)Model.accountModel;
 }
@@ -20,12 +20,12 @@
             @switch (category)
             {
                 case "Profile":
-                    <li class="active"><a href="#">基本信息</a></li>
-                    <li><a href="@Url.Action("Manage","Account", new { category = "ChangePassword" })">修改密码</a></li>
+                    <li class="active"><a href="#"><span class="glyphicon glyphicon-info-sign"></span>&nbsp;基本信息</a></li>
+                    <li><a href="@Url.Action("Manage","Account", new { category = "ChangePassword" })"><span class="glyphicon glyphicon-lock"></span>&nbsp;修改密码</a></li>
                     break;
                 case "ChangePassword":
-                    <li><a href="@Url.Action("Manage","Account", new { category = "Profile" })">基本信息</a></li>
-                    <li class="active"><a href="#">修改密码</a></li>
+                    <li><a href="@Url.Action("Manage","Account", new { category = "Profile" })"><span class="glyphicon glyphicon-info-sign"></span>&nbsp;基本信息</a></li>
+                    <li class="active"><a href="#"><span class="glyphicon glyphicon-lock"></span>&nbsp;修改密码</a></li>
                     break;
             }
         </ul>
