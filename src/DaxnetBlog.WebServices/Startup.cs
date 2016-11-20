@@ -12,6 +12,8 @@ using DaxnetBlog.Storage.SqlServer;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using DaxnetBlog.WebServices.Middlewares;
+using Serilog;
+using DaxnetBlog.Common;
 
 namespace DaxnetBlog.WebServices
 {
@@ -45,13 +47,34 @@ namespace DaxnetBlog.WebServices
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-            loggerFactory.AddDebug();
+            Log.Logger = CreateLogger();
+
+            loggerFactory.AddSerilog();
 
             app.UseMiddleware<CustomExceptionHandlingMiddleware>();
             app.UseMiddleware<CustomServiceResponseTimeMiddleware>();
 
             app.UseMvc();
+        }
+
+        private Serilog.ILogger CreateLogger()
+        {
+            var loggerConfig = new LoggerConfiguration();
+            switch (EnvironmentVariables.SeqLoggerLevel.ToUpper())
+            {
+                case "INFORMATION":
+                    loggerConfig = loggerConfig.MinimumLevel.Information();
+                    break;
+                case "WARNING":
+                    loggerConfig = loggerConfig.MinimumLevel.Warning();
+                    break;
+                case "ERROR":
+                    loggerConfig = loggerConfig.MinimumLevel.Error();
+                    break;
+            }
+            return loggerConfig.Enrich.FromLogContext()
+                .WriteTo.Seq(EnvironmentVariables.SeqLoggerUrl)
+                .CreateLogger();
         }
     }
 }

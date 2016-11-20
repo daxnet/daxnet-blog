@@ -7,6 +7,7 @@ using DaxnetBlog.Common.Storage;
 using DaxnetBlog.Domain.Model;
 using System.Net;
 using System.Linq.Expressions;
+using DaxnetBlog.WebServices.Exceptions;
 
 namespace DaxnetBlog.WebServices.Controllers
 {
@@ -44,7 +45,7 @@ namespace DaxnetBlog.WebServices.Controllers
                 var r = (await replyStore.SelectAsync(connection, x => x.Account, x => x.AccountId, acct => acct.Id, x => x.Id == id, transaction: transaction, cancellationToken: cancellationToken)).FirstOrDefault();
                 if (r == null)
                 {
-                    throw new ServiceException(HttpStatusCode.NotFound);
+                    throw new ServiceException(HttpStatusCode.NotFound, Reason.EntityNotFound, $"Id为{id}的回复内容不存在。");
                 }
                 return r;
             });
@@ -76,12 +77,12 @@ namespace DaxnetBlog.WebServices.Controllers
 
             if (string.IsNullOrEmpty(userName))
             {
-                throw new ServiceException(HttpStatusCode.BadRequest, $"{nameof(userName)}不能为空。");
+                throw new ServiceException(HttpStatusCode.BadRequest, Reason.ArgumentNull, $"{nameof(userName)}不能为空。");
             }
 
             if (string.IsNullOrEmpty(content))
             {
-                throw new ServiceException(HttpStatusCode.BadRequest, $"{nameof(content)}不能为空。");
+                throw new ServiceException(HttpStatusCode.BadRequest, Reason.ArgumentNull, $"{nameof(content)}不能为空。");
             }
 
             var replyId = await this.storage.ExecuteAsync(async (connection, transaction, cancellationToken) =>
@@ -93,7 +94,7 @@ namespace DaxnetBlog.WebServices.Controllers
 
                    if (user == null)
                    {
-                       throw new ServiceException(HttpStatusCode.NotFound, $"用户 \"{userName}\" 不存在。");
+                       throw new ServiceException(HttpStatusCode.NotFound, Reason.EntityNotFound, $"用户 \"{userName}\" 不存在。");
                    }
                    var userId = user.Id;
                    var reply = new Reply
@@ -174,13 +175,13 @@ namespace DaxnetBlog.WebServices.Controllers
             var operation = (string)model.Operation;
             if (string.IsNullOrEmpty(operation))
             {
-                throw new ServiceException(HttpStatusCode.BadRequest, "回复审批操作方式未指定，请指定Approve或者Reject操作。");
+                throw new ServiceException(HttpStatusCode.BadRequest, Reason.InvalidArgument, "回复审批操作方式未指定，请指定Approve或者Reject操作。");
             }
 
             if (operation.ToUpper() != "APPROVE" &&
                 operation.ToUpper() != "REJECT")
             {
-                throw new ServiceException(HttpStatusCode.MethodNotAllowed, "指定的审批操作方式不可用，请指定Approve或者Reject操作。");
+                throw new ServiceException(HttpStatusCode.MethodNotAllowed, Reason.InvalidArgument, "指定的审批操作方式不可用，请指定Approve或者Reject操作。");
             }
 
             var affectedRows = await this.storage.ExecuteAsync(async (connection, transaction, cancellationToken) =>
@@ -191,7 +192,7 @@ namespace DaxnetBlog.WebServices.Controllers
                     cancellationToken: cancellationToken)).FirstOrDefault();
                 if (reply == null)
                 {
-                    throw new ServiceException(HttpStatusCode.NotFound, $"ID为{replyId}的用户回复内容不存在。");
+                    throw new ServiceException(HttpStatusCode.NotFound, Reason.EntityNotFound, $"ID为{replyId}的用户回复内容不存在。");
                 }
 
                 var updateFields = new List<Expression<Func<Reply, object>>>();
@@ -215,7 +216,7 @@ namespace DaxnetBlog.WebServices.Controllers
 
             if (affectedRows > 0)
                 return Ok(affectedRows);
-            throw new ServiceException("用户回复审批失败。");
+            throw new ServiceException(Reason.UpdateFailed, "用户回复审批失败。");
         }
     }
 }

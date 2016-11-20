@@ -13,8 +13,12 @@ namespace DaxnetBlog.Common
         private const string KEY_DAXNETBLOG_AZURE_STORAGE_ACCT = @"DAXNETBLOG_AZURE_STORAGE_ACCT";
         private const string KEY_DAXNETBLOG_AZURE_STORAGE_KEY = @"DAXNETBLOG_AZURE_STORAGE_KEY";
         private const string KEY_DAXNETBLOG_MGMTAPI_ENCRYPT_KEY = @"DAXNETBLOG_MGMTAPI_ENCRYPT_KEY";
+        private const string KEY_DAXNETBLOG_SEQLOGGER_URL = @"DAXNETBLOG_SEQLOGGER_URL";
+        private const string KEY_DAXNETBLOG_SEQLOGGER_LEVEL = @"DAXNETBLOG_SEQLOGGER_LEVEL";
         
         private const string DefaultConnectionString = @"Server=localhost; Database=DaxnetBlogDB; Integrated Security=SSPI;";
+        private const string DefaultSeqLoggerUrl = @"http://localhost:5341";
+        private const string DefaultSeqLoggerLevel = @"WARNING";
 
         private static readonly Crypto crypto = Crypto.Create(CryptoTypes.EncTypeTripleDes);
 
@@ -144,6 +148,48 @@ namespace DaxnetBlog.Common
             get
             {
                 return Environment.GetEnvironmentVariable(KEY_DAXNETBLOG_MGMTAPI_ENCRYPT_KEY);
+            }
+        }
+
+        public static string SeqLoggerUrl
+        {
+            get
+            {
+                var seqLoggerUrl = string.Empty;
+                try
+                {
+                    seqLoggerUrl = Environment.GetEnvironmentVariable(KEY_DAXNETBLOG_SEQLOGGER_URL);
+                    if (string.IsNullOrEmpty(seqLoggerUrl))
+                    {
+                        seqLoggerUrl = DefaultSeqLoggerUrl;
+                    }
+                }
+                catch
+                {
+                    seqLoggerUrl = DefaultSeqLoggerUrl;
+                }
+                return seqLoggerUrl;
+            }
+        }
+
+        public static string SeqLoggerLevel
+        {
+            get
+            {
+                var seqLoggerLevel = string.Empty;
+                try
+                {
+                    seqLoggerLevel = Environment.GetEnvironmentVariable(KEY_DAXNETBLOG_SEQLOGGER_LEVEL);
+                    if (string.IsNullOrEmpty(seqLoggerLevel))
+                    {
+                        seqLoggerLevel = DefaultSeqLoggerLevel;
+                    }
+                }
+                catch
+                {
+                    seqLoggerLevel = DefaultSeqLoggerLevel;
+                }
+                return seqLoggerLevel;
             }
         }
     }

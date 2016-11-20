@@ -11,6 +11,7 @@ using DaxnetBlog.AzureServices;
 using DaxnetBlog.Common;
 using DaxnetBlog.Web.Middlewares;
 using Microsoft.AspNetCore.Authorization;
+using Serilog;
 
 namespace DaxnetBlog.Web
 {
@@ -65,8 +66,9 @@ namespace DaxnetBlog.Web
         {
             app.UseMiddleware<ApiAuthenticationMiddleware>();
 
-            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-            loggerFactory.AddDebug();
+            Log.Logger = CreateLogger();
+
+            loggerFactory.AddSerilog();
 
             if (env.IsDevelopment())
             {
@@ -90,6 +92,26 @@ namespace DaxnetBlog.Web
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
+        }
+
+        private Serilog.ILogger CreateLogger()
+        {
+            var loggerConfig = new LoggerConfiguration();
+            switch(EnvironmentVariables.SeqLoggerLevel.ToUpper())
+            {
+                case "INFORMATION":
+                    loggerConfig = loggerConfig.MinimumLevel.Information();
+                    break;
+                case "WARNING":
+                    loggerConfig = loggerConfig.MinimumLevel.Warning();
+                    break;
+                case "ERROR":
+                    loggerConfig = loggerConfig.MinimumLevel.Error();
+                    break;
+            }
+            return loggerConfig.Enrich.FromLogContext()
+                .WriteTo.Seq(EnvironmentVariables.SeqLoggerUrl)
+                .CreateLogger();
         }
     }
 }

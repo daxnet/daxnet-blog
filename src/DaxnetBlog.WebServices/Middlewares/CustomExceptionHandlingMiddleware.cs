@@ -7,18 +7,20 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using DaxnetBlog.WebServices.Exceptions;
+using Newtonsoft.Json;
 
 namespace DaxnetBlog.WebServices.Middlewares
 {
     public class CustomExceptionHandlingMiddleware
     {
         private readonly RequestDelegate nextInvocation;
-        private readonly ILoggerFactory loggerFactory;
+        private readonly ILogger<CustomExceptionHandlingMiddleware> logger;
 
-        public CustomExceptionHandlingMiddleware(RequestDelegate next, ILoggerFactory loggerFactory)
+        public CustomExceptionHandlingMiddleware(RequestDelegate next, ILogger<CustomExceptionHandlingMiddleware> logger)
         {
             nextInvocation = next;
-            this.loggerFactory = loggerFactory;
+            this.logger = logger;
         }
 
         public async Task Invoke(HttpContext context)
@@ -29,14 +31,21 @@ namespace DaxnetBlog.WebServices.Middlewares
             }
             catch (DomainException ex)
             {
+                logger.LogWarning(ex.ToString());
                 await FillResponseWithExceptionAsync(context, HttpStatusCode.InternalServerError, ex.ToString());
             }
             catch (ServiceException ex)
             {
-                await FillResponseWithExceptionAsync(context, ex.StatusCode, ex.IncludeFullStackTraceIfError ? ex.ToString() : ex.Message);
+                logger.LogWarning(ex.ToString());
+                await FillResponseWithExceptionAsync(context, ex.StatusCode, JsonConvert.SerializeObject(new
+                {
+                    Reason = ex.Reason,
+                    Message = ex.Message
+                }));
             }
             catch (Exception ex)
             {
+                logger.LogWarning(ex.ToString());
                 await FillResponseWithExceptionAsync(context, HttpStatusCode.InternalServerError, ex.ToString());
             }
         }

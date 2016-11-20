@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using DaxnetBlog.Web.Models;
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 namespace DaxnetBlog.Web.Controllers
 {
@@ -17,6 +18,7 @@ namespace DaxnetBlog.Web.Controllers
         private readonly HttpClient httpClient;
         private readonly IOptions<WebsiteSettings> config;
         private readonly int pageSize;
+        private readonly ILogger<HomeController> logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HomeController"/> class.
@@ -24,15 +26,18 @@ namespace DaxnetBlog.Web.Controllers
         /// <param name="httpClient">The HTTP client.</param>
         /// <param name="config">The configuration.</param>
         public HomeController(HttpClient httpClient,
-            IOptions<WebsiteSettings> config)
+            IOptions<WebsiteSettings> config,
+            ILogger<HomeController> logger)
         {
             this.httpClient = httpClient;
             this.config = config;
             this.pageSize = this.config.Value.BlogPostsPageSize;
+            this.logger = logger;
         }
 
         public async Task<IActionResult> Index(int page = 1)
         {
+            this.logger.LogInformation("home page requested.");
             var json = await (await this.httpClient.GetAsync($"blogPosts/paginate/{pageSize}/{page}")).Content.ReadAsStringAsync();
             dynamic model = JsonConvert.DeserializeObject(json);
             return View(model);
@@ -49,12 +54,5 @@ namespace DaxnetBlog.Web.Controllers
         {
             return View();
         }
-
-        #region Helper Actions        
-
-        
-
-        
-        #endregion
     }
 }

@@ -28,6 +28,9 @@
       "type": "platform"
     },
     "Microsoft.VisualStudio.Web.BrowserLink.Loader": "14.0.0",
+    "Serilog": "2.4.0-dev-00750",
+    "Serilog.Extensions.Logging": "1.4.0-dev-10136",
+    "Serilog.Sinks.Seq": "3.1.2-dev-00100",
     "System.Runtime.Serialization.Xml": "4.1.1",
     "WilderMinds.MetaWeblog": "1.0.2"
   },

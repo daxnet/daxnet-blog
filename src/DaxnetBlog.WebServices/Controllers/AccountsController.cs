@@ -40,6 +40,7 @@
 using DaxnetBlog.Common;
 using DaxnetBlog.Common.Storage;
 using DaxnetBlog.Domain.Model;
+using DaxnetBlog.WebServices.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -77,12 +78,12 @@ namespace DaxnetBlog.WebServices.Controllers
             var userName = (string)accountObject.UserName;
             if (string.IsNullOrEmpty(userName))
             {
-                throw new ServiceException(HttpStatusCode.BadRequest, "userName cannot be null.");
+                throw new ServiceException(HttpStatusCode.BadRequest, Reason.ArgumentNull, "参数userName不能为空。");
             }
             var password = (string)accountObject.Password;
             if (string.IsNullOrEmpty(password))
             {
-                throw new ServiceException(HttpStatusCode.BadRequest, "password cannot be null.");
+                throw new ServiceException(HttpStatusCode.BadRequest, Reason.ArgumentNull, "参数password不能为空。");
             }
 
             var passwordHash = Crypto.ComputeHash(password, userName);
@@ -90,7 +91,7 @@ namespace DaxnetBlog.WebServices.Controllers
             var email = (string)accountObject.Email;
             if (string.IsNullOrEmpty(email))
             {
-                throw new ServiceException(HttpStatusCode.BadRequest, "email cannot be null.");
+                throw new ServiceException(HttpStatusCode.BadRequest, Reason.ArgumentNull, "参数email不能为空。");
             }
             var nickName = (string)accountObject.NickName;
             if (string.IsNullOrEmpty(nickName))
@@ -106,7 +107,7 @@ namespace DaxnetBlog.WebServices.Controllers
                     cancellationToken: cancellationToken)).FirstOrDefault();
                 if (userWithName != null)
                 {
-                    throw new ServiceException(HttpStatusCode.Conflict, $"用户名 {userName} 已经存在。");
+                    throw new ServiceException(HttpStatusCode.Conflict, Reason.AlreadyExists, $"用户名 {userName} 已经存在。");
                 }
 
                 var userWithEmail = (await accountStore.SelectAsync(connection,
@@ -115,7 +116,7 @@ namespace DaxnetBlog.WebServices.Controllers
                     cancellationToken: cancellationToken)).FirstOrDefault();
                 if (userWithEmail != null)
                 {
-                    throw new ServiceException(HttpStatusCode.Conflict, $"电子邮件地址 {email} 已经存在。");
+                    throw new ServiceException(HttpStatusCode.Conflict, Reason.AlreadyExists, $"电子邮件地址 {email} 已经存在。");
                 }
 
                 var verificationCode = Utils.GetUniqueStringValue(16);
@@ -146,15 +147,22 @@ namespace DaxnetBlog.WebServices.Controllers
 
                     if (insertedAccount == null)
                     {
-                        throw new ServiceException("No account was created in the current transaction.");
+                        throw new ServiceException(Reason.CreateFailed, "未能成功创建用户帐号。");
                     }
                     return insertedAccount.Id;
                 }
                 return 0;
             });
 
-            var uri = Url.Action("GetById", new { id = result });
-            return Created(uri, result);
+            if (result > 0)
+            {
+                var uri = Url.Action("GetById", new { id = result });
+                return Created(uri, result);
+            }
+            else
+            {
+                throw new ServiceException(Reason.CreateFailed, "未能成功创建用户帐号。");
+            }
         }
 
         [HttpGet]
@@ -166,7 +174,7 @@ namespace DaxnetBlog.WebServices.Controllers
 
             if (account == null)
             {
-                throw new ServiceException(HttpStatusCode.NotFound, $"No account was found with the id of {id}.");
+                throw new ServiceException(HttpStatusCode.NotFound, Reason.EntityNotFound, $"未能找到用户ID为 {id} 的用户。");
             }
 
             return Ok(new {
@@ -192,7 +200,7 @@ namespace DaxnetBlog.WebServices.Controllers
 
             if (account == null)
             {
-                throw new ServiceException(HttpStatusCode.NotFound, $"No account was found with the userName of {name}.");
+                throw new ServiceException(HttpStatusCode.NotFound, Reason.EntityNotFound, $"未能找到用户名为 {name} 的用户。");
             }
 
             return Ok(new
@@ -241,6 +249,14 @@ namespace DaxnetBlog.WebServices.Controllers
         }
 
         [HttpGet]
+        [Route("all")]
+        public async Task<IActionResult> GetAll()
+        {
+            return Ok(await this.storage.ExecuteAsync(async (connection, cancellationToken) =>
+                await accountStore.SelectAsync(connection, sorting: new Sort<Account, int> { { acct => acct.DateRegistered, SortOrder.Descending } }, cancellationToken: cancellationToken)));
+        }
+
+        [HttpGet]
         [Route("authenticate/passwordhash/{id}")]
         public async Task<IActionResult> GetPasswordHash(int id)
         {
@@ -249,7 +265,7 @@ namespace DaxnetBlog.WebServices.Controllers
 
             if (account == null)
             {
-                throw new ServiceException(HttpStatusCode.NotFound, $"No account was found with the id of {id}.");
+                throw new ServiceException(HttpStatusCode.NotFound, Reason.EntityNotFound, $"No account was found with the id of {id}.");
             }
 
             return Ok(account.PasswordHash);
@@ -262,7 +278,7 @@ namespace DaxnetBlog.WebServices.Controllers
             var password = (string)passwordModel.Password;
             if (string.IsNullOrEmpty(password))
             {
-                throw new ServiceException(HttpStatusCode.BadRequest, "The password argument cannot be null.");
+                throw new ServiceException(HttpStatusCode.BadRequest, Reason.ArgumentNull, "The password argument cannot be null.");
             }
 
             var account = (await storage.ExecuteAsync(async (connection, cancellationToken) =>
@@ -270,7 +286,7 @@ namespace DaxnetBlog.WebServices.Controllers
 
             if (account == null)
             {
-                throw new ServiceException(HttpStatusCode.NotFound, $"No account was found with the id of {id}.");
+                throw new ServiceException(HttpStatusCode.NotFound, Reason.EntityNotFound, $"No account was found with the id of {id}.");
             }
 
             return Ok(account.ValidatePassword(password));
@@ -283,7 +299,7 @@ namespace DaxnetBlog.WebServices.Controllers
             var password = (string)passwordModel.Password;
             if (string.IsNullOrEmpty(password))
             {
-                throw new ServiceException(HttpStatusCode.BadRequest, "The password argument cannot be null.");
+                throw new ServiceException(HttpStatusCode.BadRequest, Reason.ArgumentNull, "The password argument cannot be null.");
             }
 
             var account = (await storage.ExecuteAsync(async (connection, cancellationToken) =>
@@ -291,7 +307,7 @@ namespace DaxnetBlog.WebServices.Controllers
 
             if (account == null)
             {
-                throw new ServiceException(HttpStatusCode.NotFound, $"No account was found with the userName of {userName}.");
+                throw new ServiceException(HttpStatusCode.NotFound, Reason.EntityNotFound, $"No account was found with the userName of {userName}.");
             }
 
             return Ok(account.ValidatePassword(password));
@@ -306,7 +322,7 @@ namespace DaxnetBlog.WebServices.Controllers
                 var account = (await accountStore.SelectAsync(connection, u => u.UserName == userName)).FirstOrDefault();
                 if (account == null)
                 {
-                    throw new ServiceException(HttpStatusCode.NotFound, $"用户 {userName} 不存在。");
+                    throw new ServiceException(HttpStatusCode.NotFound, Reason.EntityNotFound, $"用户 {userName} 不存在。");
                 }
                 return account.EmailVerifyCode;
             });
@@ -320,13 +336,13 @@ namespace DaxnetBlog.WebServices.Controllers
             var userName = (string)model.UserName;
             if (string.IsNullOrEmpty(userName))
             {
-                throw new ServiceException(HttpStatusCode.BadRequest, "UserId cannot be null.");
+                throw new ServiceException(HttpStatusCode.BadRequest, Reason.ArgumentNull, "UserId cannot be null.");
             }
 
             var code = (string)model.Code;
             if (string.IsNullOrEmpty(code))
             {
-                throw new ServiceException(HttpStatusCode.BadRequest, "Code cannot be null.");
+                throw new ServiceException(HttpStatusCode.BadRequest, Reason.ArgumentNull, "Code cannot be null.");
             }
 
             var result = await storage.ExecuteAsync(async (connection, transaction, cancellationToken) =>
@@ -371,7 +387,7 @@ namespace DaxnetBlog.WebServices.Controllers
                     cancellationToken: cancellationToken)).FirstOrDefault();
                 if (account == null)
                 {
-                    throw new ServiceException(HttpStatusCode.NotFound, "Account does not exist.");
+                    throw new ServiceException(HttpStatusCode.NotFound, Reason.EntityNotFound, "Account does not exist.");
                 }
 
                 var updateFields = new List<Expression<Func<Account, object>>>();
@@ -407,12 +423,12 @@ namespace DaxnetBlog.WebServices.Controllers
             var newPassword = (string)model.NewPassword;
             if (string.IsNullOrEmpty(oldPassword))
             {
-                throw new ServiceException(HttpStatusCode.BadRequest, "修改密码时未提供旧密码。");
+                throw new ServiceException(HttpStatusCode.BadRequest, Reason.ArgumentNull, "修改密码时未提供旧密码。");
             }
 
             if (string.IsNullOrEmpty(newPassword))
             {
-                throw new ServiceException(HttpStatusCode.BadRequest, "修改密码时未提供新密码。");
+                throw new ServiceException(HttpStatusCode.BadRequest, Reason.ArgumentNull, "修改密码时未提供新密码。");
             }
 
             var affectedRows = await storage.ExecuteAsync(async (connection, transaction, cancellationToken) =>
@@ -420,7 +436,7 @@ namespace DaxnetBlog.WebServices.Controllers
                 var account = (await accountStore.SelectAsync(connection, acct => acct.Id == id, transaction: transaction, cancellationToken: cancellationToken)).FirstOrDefault();
                 if (account == null)
                 {
-                    throw new ServiceException(HttpStatusCode.NotFound, $"未能找到ID为{id}的用户帐号。");
+                    throw new ServiceException(HttpStatusCode.NotFound, Reason.EntityNotFound, $"未能找到ID为{id}的用户帐号。");
                 }
 
                 if (account.ValidatePassword(oldPassword))
@@ -433,13 +449,13 @@ namespace DaxnetBlog.WebServices.Controllers
                 }
                 else
                 {
-                    throw new ServiceException(HttpStatusCode.MethodNotAllowed, "指定的旧密码不正确。");
+                    throw new ServiceException(HttpStatusCode.MethodNotAllowed, Reason.InvalidArgument, "指定的旧密码不正确。");
                 }
             });
 
             if (affectedRows > 0)
                 return Ok(affectedRows);
-            throw new ServiceException("密码更新失败。");
+            throw new ServiceException(Reason.UpdateFailed, "密码更新失败。");
         }
     }
 }
