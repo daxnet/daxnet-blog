@@ -7,6 +7,7 @@ using DaxnetBlog.Domain.Model;
 using DaxnetBlog.Common.Storage;
 using System.Net;
 using System.Linq.Expressions;
+using DaxnetBlog.WebServices.Exceptions;
 
 namespace DaxnetBlog.WebServices.Controllers
 {
@@ -36,17 +37,17 @@ namespace DaxnetBlog.WebServices.Controllers
 
             if (string.IsNullOrEmpty(title))
             {
-                throw new ServiceException(HttpStatusCode.BadRequest, "博客日志标题不能为空。");
+                throw new ServiceException(HttpStatusCode.BadRequest, Reason.ArgumentNull, "博客日志标题不能为空。");
             }
 
             if (string.IsNullOrEmpty(content))
             {
-                throw new ServiceException(HttpStatusCode.BadRequest, "博客日志内容不能为空。");
+                throw new ServiceException(HttpStatusCode.BadRequest, Reason.ArgumentNull, "博客日志内容不能为空。");
             }
 
             if (accountId <= 0)
             {
-                throw new ServiceException(HttpStatusCode.BadRequest, "用户帐号Id值不在有效范围。");
+                throw new ServiceException(HttpStatusCode.BadRequest, Reason.ArgumentNull, "用户帐号Id值不在有效范围。");
             }
 
             var result = await this.storage.ExecuteAsync(async (connection, transaction, cancellationToken) =>
@@ -98,7 +99,7 @@ namespace DaxnetBlog.WebServices.Controllers
                     cancellationToken: cancellationToken)).FirstOrDefault();
                 if (blogPost == null)
                 {
-                    throw new ServiceException(HttpStatusCode.NotFound, $"Id为{id}的博客日志不存在。");
+                    throw new ServiceException(HttpStatusCode.NotFound, Reason.EntityNotFound, $"Id为{id}的博客日志不存在。");
                 }
 
                 blogPost.IsDeleted = true;
@@ -111,7 +112,7 @@ namespace DaxnetBlog.WebServices.Controllers
 
             if (result > 0)
                 return Ok();
-            throw new ServiceException("删除博客日志失败。");
+            throw new ServiceException(Reason.DeleteFailed, "删除博客日志失败。");
         }
 
         [HttpPut]
@@ -130,7 +131,7 @@ namespace DaxnetBlog.WebServices.Controllers
                     cancellationToken: cancellationToken)).FirstOrDefault();
                 if (blogPost == null)
                 {
-                    throw new ServiceException(HttpStatusCode.NotFound, $"Id为{id}的博客日志不存在。");
+                    throw new ServiceException(HttpStatusCode.NotFound, Reason.EntityNotFound, $"Id为{id}的博客日志不存在。");
                 }
 
                 var listUpdateFields = new List<Expression<Func<BlogPost, object>>>();
@@ -159,7 +160,7 @@ namespace DaxnetBlog.WebServices.Controllers
 
             if (result > 0)
                 return Ok();
-            throw new ServiceException("更新博客日志失败。");
+            throw new ServiceException(Reason.UpdateFailed, "更新博客日志失败。");
         }
 
         [HttpGet]
@@ -207,7 +208,7 @@ namespace DaxnetBlog.WebServices.Controllers
 
                 if (blogpost == null)
                 {
-                    throw new ServiceException(HttpStatusCode.NotFound, $"The blog post of Id ${id} doesn't exist.");
+                    throw new ServiceException(HttpStatusCode.NotFound, Reason.EntityNotFound, $"Id为{id}的博客不存在。");
                 }
 
                 var replies = await replyStore.SelectAsync(connection,
