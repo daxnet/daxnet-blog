@@ -1,4 +1,4 @@
-﻿FROM microsoft/dotnet:1.0.1-runtime
+﻿FROM microsoft/dotnet:1.1.0-runtime
 RUN apt-get update && apt-get install -y libgdiplus
 RUN cd /usr/local/src
 RUN mkdir app
