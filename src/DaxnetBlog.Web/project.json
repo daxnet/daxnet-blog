@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "BundlerMinifier.Core": "2.2.306",
     "CoreCompat.System.Drawing": "1.0.0-beta006",
     "DaxnetBlog.AzureServices": "1.0.0-*",
     "DaxnetBlog.Common": "1.0.0-*",
@@ -35,6 +34,7 @@
   },
 
   "tools": {
+    "BundlerMinifier.Core": "2.2.306"
   },
 
   "frameworks": {
