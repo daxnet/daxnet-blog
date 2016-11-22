@@ -5,7 +5,7 @@
     "DaxnetBlog.Common": "1.0.0-*",
     "DaxnetBlog.Domain": "1.0.0-*",
     "Humanizer.Core": "2.1.0",
-    "NETStandard.Library": "1.6.0"
+    "NETStandard.Library": "1.6.1"
   },
 
   "frameworks": {

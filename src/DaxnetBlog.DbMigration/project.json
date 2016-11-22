@@ -6,20 +6,20 @@
   },
 
   "publishOptions": {
-    "include": ["scripts/*.sql"]
+    "include": [ "scripts/*.sql" ]
   },
 
   "dependencies": {
     "DaxnetBlog.Common": "1.0.0-*",
     "Microsoft.NETCore.App": {
       "type": "platform",
-      "version": "1.0.1"
+      "version": "1.1.0"
     },
-    "System.Data.SqlClient": "4.1.0"
+    "System.Data.SqlClient": "4.3.0"
   },
 
   "frameworks": {
-    "netcoreapp1.0": {
+    "netcoreapp1.1": {
       "imports": "dnxcore50"
     }
   }

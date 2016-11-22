@@ -17,9 +17,13 @@
   },
 
   "dependencies": {
-    "Microsoft.AspNetCore.Http.Abstractions": "1.0.0",
-    "Microsoft.Extensions.DependencyInjection.Abstractions": "1.0.0",
-    "Microsoft.Extensions.Logging.Abstractions": "1.0.0"
+    "Microsoft.AspNetCore.Http.Abstractions": "1.1.0",
+    "Microsoft.Extensions.DependencyInjection.Abstractions": "1.1.0",
+    "Microsoft.Extensions.Logging.Abstractions": "1.1.0",
+    "System.Collections": "4.3.0",
+    "System.Reflection.Extensions": "4.3.0",
+    "System.Text.RegularExpressions": "4.3.0",
+    "System.Xml.XDocument": "4.3.0"
   },
 
   //"frameworks": {
@@ -37,12 +41,7 @@
   "frameworks": {
     "netstandard1.6": {
       "imports": "dnxcore50",
-          "dependencies": {
-            "System.Collections": "4.0.11",
-            "System.Reflection.Extensions": "4.0.1",
-            "System.Xml.XDocument": "4.0.11",
-            "System.Text.RegularExpressions": "4.1.0"
-          }
+          "dependencies": {          }
     }
   }
 }
