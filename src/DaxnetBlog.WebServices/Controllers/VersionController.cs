@@ -10,16 +10,27 @@ using System.IO;
 
 namespace DaxnetBlog.WebServices.Controllers
 {
+    /// <summary>
+    /// Represents the controller which will return the version number of the current deployment.
+    /// </summary>
     [Route("api/[controller]")]
     public class VersionController : Controller
     {
         private readonly IHostingEnvironment hostingEnvironment;
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="VersionController"/> instance.
+        /// </summary>
+        /// <param name="hostingEnv"></param>
         public VersionController(IHostingEnvironment hostingEnv)
         {
             this.hostingEnvironment = hostingEnv;
         }
 
+        /// <summary>
+        /// Returns the version number of the current service deployment.
+        /// </summary>
+        /// <returns>The version number.</returns>
         [HttpGet]
         public string Get()
         {

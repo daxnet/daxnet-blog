@@ -71,6 +71,11 @@ namespace DaxnetBlog.WebServices.Controllers
             this.accountStore = accountStore;
         }
 
+        /// <summary>
+        /// Creates an account by using the given model.
+        /// </summary>
+        /// <param name="accountObject"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route("create")]
         public async Task<IActionResult> CreateAccount([FromBody] dynamic accountObject)
