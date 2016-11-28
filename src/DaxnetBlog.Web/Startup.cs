@@ -51,7 +51,8 @@ namespace DaxnetBlog.Web
                 .AddIdentity<User, Role>()
                 .AddUserStore<ApplicationUserStore>()
                 .AddRoleStore<ApplicationRoleStore>()
-                .AddUserManager<ApplicationUserManager>();
+                .AddUserManager<ApplicationUserManager>()
+                .AddSignInManager<ApplicationSignInManager>();
 
             services.AddAuthorization(options =>
             {

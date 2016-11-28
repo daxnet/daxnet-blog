@@ -71,6 +71,11 @@ namespace DaxnetBlog.WebServices.Controllers
             this.accountStore = accountStore;
         }
 
+        /// <summary>
+        /// Creates an account by using the given model.
+        /// </summary>
+        /// <param name="accountObject"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route("create")]
         public async Task<IActionResult> CreateAccount([FromBody] dynamic accountObject)
@@ -271,6 +276,17 @@ namespace DaxnetBlog.WebServices.Controllers
             return Ok(account.PasswordHash);
         }
 
+        /// <summary>
+        /// Authenticates the user with the specified identifier, by using the provided password.
+        /// </summary>
+        /// <param name="id">The identifier of the user to be authenticated.</param>
+        /// <param name="passwordModel">The password model.</param>
+        /// <returns></returns>
+        /// <exception cref="ServiceException">
+        /// The password argument cannot be null.
+        /// or
+        /// No account was found with the id of {id}.
+        /// </exception>
         [HttpPost]
         [Route("authenticate/{id}")]
         public async Task<IActionResult> Authenticate(int id, [FromBody] dynamic passwordModel)
@@ -311,6 +327,53 @@ namespace DaxnetBlog.WebServices.Controllers
             }
 
             return Ok(account.ValidatePassword(password));
+        }
+
+        /// <summary>
+        /// Registers the login information for the account authentication.
+        /// </summary>
+        /// <param name="model">The model which contains the account name.</param>
+        /// <returns>
+        /// HTTP 200: Update succeeded.
+        /// HTTP 400: The name of the account has not been specified in the request body.
+        /// HTTP 404: The account with the specified name does not exist.
+        /// HTTP 500: Update failed.
+        /// </returns>
+        [HttpPost]
+        [Route("authenticate/login")]
+        public async Task<IActionResult> RegisterForLogin([FromBody] dynamic model)
+        {
+            var userName = (string)model.UserName;
+            if (string.IsNullOrEmpty(userName))
+            {
+                throw new ServiceException(HttpStatusCode.BadRequest, Reason.ArgumentNull, "请求数据中未指定用户ID值。");
+            }
+
+            var rowsAffected = await this.storage.ExecuteAsync(async (connection, transaction, cancellationToken) =>
+            {
+                var account = (await this.accountStore.SelectAsync(connection, 
+                    acct => acct.UserName == userName, 
+                    transaction: transaction, 
+                    cancellationToken: cancellationToken)).FirstOrDefault();
+
+                if (account == null)
+                {
+                    throw new ServiceException(HttpStatusCode.NotFound, Reason.EntityNotFound, $"未能找到帐号名称为{userName}的用户帐号。");
+                }
+
+                account.DateLastLogin = DateTime.UtcNow;
+                return await this.accountStore.UpdateAsync(account,
+                    connection,
+                    acct => acct.UserName == userName,
+                    new Expression<Func<Account, object>>[] { acct => acct.DateLastLogin },
+                    transaction, cancellationToken);
+            });
+
+            if (rowsAffected > 0)
+            {
+                return Ok();
+            }
+            throw new ServiceException(Reason.UpdateFailed, $"未能为用户帐号{userName}成功更新最近登录日期（DateLastLogin）。");
         }
 
         [HttpGet]

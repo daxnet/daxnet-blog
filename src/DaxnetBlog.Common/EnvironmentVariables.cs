@@ -15,6 +15,7 @@ namespace DaxnetBlog.Common
         private const string KEY_DAXNETBLOG_MGMTAPI_ENCRYPT_KEY = @"DAXNETBLOG_MGMTAPI_ENCRYPT_KEY";
         private const string KEY_DAXNETBLOG_SEQLOGGER_URL = @"DAXNETBLOG_SEQLOGGER_URL";
         private const string KEY_DAXNETBLOG_SEQLOGGER_LEVEL = @"DAXNETBLOG_SEQLOGGER_LEVEL";
+        private const string KEY_DAXNETBLOG_SSL_CERT_PASS = @"DAXNETBLOG_SSL_CERT_PASS";
         
         private const string DefaultConnectionString = @"Server=localhost; Database=DaxnetBlogDB; Integrated Security=SSPI;";
         private const string DefaultSeqLoggerUrl = @"http://localhost:5341";
@@ -190,6 +191,14 @@ namespace DaxnetBlog.Common
                     seqLoggerLevel = DefaultSeqLoggerLevel;
                 }
                 return seqLoggerLevel;
+            }
+        }
+
+        public static string SslCertificatePassword
+        {
+            get
+            {
+                return Environment.GetEnvironmentVariable(KEY_DAXNETBLOG_SSL_CERT_PASS);
             }
         }
     }
