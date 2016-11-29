@@ -7,22 +7,46 @@ using System.Net.Http;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Authorization;
 using System.Net;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using DaxnetBlog.Common;
 
 namespace DaxnetBlog.Web.Controllers
 {
     public class BlogPostsController : Controller
     {
         private readonly HttpClient httpClient;
+        private readonly ILogger<BlogPostsController> logger;
 
-        public BlogPostsController(HttpClient httpClient)
+        public BlogPostsController(HttpClient httpClient,
+            ILogger<BlogPostsController> logger)
         {
             this.httpClient = httpClient;
+            this.logger = logger;
         }
 
         public async Task<IActionResult> Post(int id)
         {
             var json = await(await this.httpClient.GetAsync($"blogPosts/{id}")).Content.ReadAsStringAsync();
             dynamic model = JsonConvert.DeserializeObject(json);
+
+            if (!Request.Cookies.ContainsKey("X-DXBLOG-POSTIDS"))
+            {
+                try
+                {
+                    Response.Cookies.Append("X-DXBLOG-POSTIDS", id.ToString(), new CookieOptions { Path = Request.Path, Expires = DateTimeOffset.Now.AddDays(1) });
+                    var visits = (int?)model.visits;
+                    var updatedVisits = visits != null && visits.HasValue ? visits.Value + 1 : 1;
+                    var updateResult = await this.httpClient.PutAsJsonAsync($"blogPosts/update/{id}", new { Visits = updatedVisits });
+                    updateResult.EnsureSuccessStatusCode();
+                    model.visits = updatedVisits;
+                }
+                catch(Exception ex)
+                {
+                    logger.LogWarning("无法更新博客文章的访问量。", ex.ToString());
+                }
+            }
+
             return View(model);
         }
 
