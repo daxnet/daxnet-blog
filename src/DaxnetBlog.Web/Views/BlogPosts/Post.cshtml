@@ -5,12 +5,13 @@
 @{
     ViewData["Title"] = $"{(string)Model.title} - daxnet.me";
     var datePublished = (DateTime)Model.datePublished;
-    var datePublishedStr = datePublished.ToLocalTime().ToString(new CultureInfo("zh-CN"));
+    var datePublishedStr = datePublished.ToLocalTime().ToString("yyyy年MM月dd日 HH:mm:ss");
+    var visits = (int)Model.visits;
 }
 
 <div class="jumbotron jumbotron-no-border jumbotron-article">
     <h2>@Model.title</h2>
-    <h5>@Model.account.nickName 发布于 @datePublishedStr</h5>
+    <h5>@Model.account.nickName 发布于 @datePublishedStr&nbsp;&nbsp;阅读量：@visits 次</h5>
 </div>
 <div class="row">
     <div class="col-md-10">

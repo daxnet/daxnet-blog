@@ -11,6 +11,10 @@ using DaxnetBlog.WebServices.Exceptions;
 
 namespace DaxnetBlog.WebServices.Controllers
 {
+    /// <summary>
+    /// Represents the RESTful API controller that provides blog post features.
+    /// </summary>
+    /// <seealso cref="Microsoft.AspNetCore.Mvc.Controller" />
     [Route("api/[controller]")]
     public class BlogPostsController : Controller
     {
@@ -115,6 +119,15 @@ namespace DaxnetBlog.WebServices.Controllers
             throw new ServiceException(Reason.DeleteFailed, "删除博客日志失败。");
         }
 
+        /// <summary>
+        /// Updates the blog post which has the specified identifier.
+        /// </summary>
+        /// <param name="id">The identifier of the blog post to be updated.</param>
+        /// <param name="model">The model which contains the updating information.</param>
+        /// <returns>
+        /// HTTP 200: Update successful.
+        /// </returns>
+        /// <exception cref="ServiceException">Failed to update the blog post.</exception>
         [HttpPut]
         [Route("update/{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] dynamic model)
@@ -122,6 +135,7 @@ namespace DaxnetBlog.WebServices.Controllers
             var title = (string)model.Title;
             var content = (string)model.Content;
             var datePublished = (DateTime?)model.DatePublished;
+            var visits = (int?)model.Visits;
 
             var result = await this.storage.ExecuteAsync(async (connection, transaction, cancellationToken) =>
             {
@@ -151,6 +165,12 @@ namespace DaxnetBlog.WebServices.Controllers
                 {
                     blogPost.DatePublished = datePublished.Value;
                     listUpdateFields.Add(x => x.DatePublished);
+                }
+
+                if (visits != null && visits.HasValue && visits != int.MinValue)
+                {
+                    blogPost.Visits = visits.Value;
+                    listUpdateFields.Add(x => x.Visits);
                 }
 
                 return await this.blogPostStore.UpdateAsync(blogPost, connection,
@@ -227,6 +247,7 @@ namespace DaxnetBlog.WebServices.Controllers
                 Title = result.Item1.Title,
                 Content = result.Item1.Content,
                 DatePublished = result.Item1.DatePublished,
+                Visits = result.Item1.Visits,
                 Replies = result.Item2.Select(x=> new {
                     x.Id,
                     x.DatePublished,
