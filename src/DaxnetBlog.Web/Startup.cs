@@ -81,6 +81,7 @@ namespace DaxnetBlog.Web
             else
             {
                 app.UseExceptionHandler("/Home/Error");
+                app.UseMiddleware<EnsureHttpsMiddleware>();
             }
 
             app.UseMetaWeblog("/api/metaweblog");
