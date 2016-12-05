@@ -41,9 +41,11 @@ namespace WilderMinds.MetaWeblog
                 // occurred in the Windows Live Writer client.
                 await Task.Delay(500);
             }
-
-            // Continue On
-            await _next.Invoke(context);
+            else
+            {
+                // Continue On
+                await _next.Invoke(context);
+            }
         }
     }
 }
