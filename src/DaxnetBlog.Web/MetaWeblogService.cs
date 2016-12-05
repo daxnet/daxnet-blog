@@ -1,6 +1,7 @@
 ﻿using DaxnetBlog.Common.IntegrationServices;
 using DaxnetBlog.Web.Security;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -18,14 +19,17 @@ namespace DaxnetBlog.Web
         private readonly HttpClient httpClient;
         private readonly UserManager<User> userManager;
         private readonly IMediaObjectStorageService storageService;
+        private readonly ILogger<MetaWeblogService> logger;
 
         public MetaWeblogService(HttpClient httpClient,
             UserManager<User> userManager,
-            IMediaObjectStorageService storageService)
+            IMediaObjectStorageService storageService,
+            ILogger<MetaWeblogService> logger)
         {
             this.httpClient = httpClient;
             this.userManager = userManager;
             this.storageService = storageService;
+            this.logger = logger;
         }
 
         public int AddCategory(string key, string username, string password, NewCategory category)
@@ -196,19 +200,26 @@ namespace DaxnetBlog.Web
         public MediaObjectInfo NewMediaObject(string blogid, string username, string password, MediaObject mediaObject)
         {
             User user;
-            if (Validate(username, password, out user))
+            try
             {
-                var fileName = mediaObject.name.Replace("Windows-Live-Writer/", "");
-                foreach(var ch in Path.GetInvalidFileNameChars())
+                if (Validate(username, password, out user))
                 {
-                    fileName = fileName.Replace(ch, '_');
-                }
+                    var fileName = mediaObject.name.Replace("Windows-Live-Writer/", "");
+                    foreach (var ch in Path.GetInvalidFileNameChars())
+                    {
+                        fileName = fileName.Replace(ch, '_');
+                    }
 
-                var urlString = this.storageService.SaveAsync(Container, fileName, mediaObject.bits).Result;
-                return new MediaObjectInfo
-                {
-                    url = urlString
-                };
+                    var urlString = this.storageService.SaveAsync(Container, fileName, mediaObject.bits).Result;
+                    return new MediaObjectInfo
+                    {
+                        url = urlString
+                    };
+                }
+            }
+            catch(Exception ex)
+            {
+                logger.LogWarning(ex.ToString());
             }
             return null;
         }
