@@ -60,6 +60,8 @@ namespace DaxnetBlog.Web
             });
 
             services.AddTransient<IAuthorizationHandler, PermissionKeyAuthorizationHandler>();
+
+            services.AddRouting(options => options.LowercaseUrls = true);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -79,6 +81,7 @@ namespace DaxnetBlog.Web
             else
             {
                 app.UseExceptionHandler("/Home/Error");
+                // app.UseMiddleware<EnsureHttpsMiddleware>();
             }
 
             app.UseMetaWeblog("/api/metaweblog");
