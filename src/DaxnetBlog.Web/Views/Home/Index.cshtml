@@ -25,7 +25,7 @@
                     <li>
                         <h4>@Html.ActionLink(title, "Post", "BlogPosts", new { id = m.id })</h4>
                         <div class="summary">@content.Summary(config.Value.TruncateSummaryLength)</div>
-                        <div class="pull-right auth">@datePublished</div>
+                        <div class="pull-right auth">@datePublished.ToLocalTime().ToString("yyyy年MM月dd日 HH:mm:ss")</div>
                     </li>
                 }
             </ul>
