@@ -8,6 +8,8 @@ using DaxnetBlog.Common.Storage;
 using System.Net;
 using System.Linq.Expressions;
 using DaxnetBlog.WebServices.Exceptions;
+using DaxnetBlog.Common.IntegrationServices;
+using DaxnetBlog.WebServices.Caching;
 
 namespace DaxnetBlog.WebServices.Controllers
 {
@@ -19,14 +21,17 @@ namespace DaxnetBlog.WebServices.Controllers
     public class BlogPostsController : Controller
     {
         private readonly IStorage storage;
+        private readonly ICachingService cachingService;
         private readonly IEntityStore<BlogPost, int> blogPostStore;
         private readonly IEntityStore<Reply, int> replyStore;
 
         public BlogPostsController(IStorage storage, 
+            ICachingService cachingService,
             IEntityStore<BlogPost, int> blogPostStore,
             IEntityStore<Reply, int> replyStore)
         {
             this.storage = storage;
+            this.cachingService = cachingService;
             this.blogPostStore = blogPostStore;
             this.replyStore = replyStore;
         }
@@ -85,6 +90,7 @@ namespace DaxnetBlog.WebServices.Controllers
 
             if (result != 0)
             {
+                this.cachingService.DeleteByPrefix(CachingKeys.BLOGPOSTS_GETBYPAGING_KEY);
                 return Created(Url.Action("GetById", new { id = result }), result);
             }
 
@@ -115,7 +121,16 @@ namespace DaxnetBlog.WebServices.Controllers
             });
 
             if (result > 0)
+            {
+                // Removes the specific post from the cache
+                var cachingKey = new CachingKey(CachingKeys.BLOGPOSTS_POST_KEY, id);
+                this.cachingService.Delete(cachingKey);
+
+                // Removes all the posts with paging information, from the cache
+                this.cachingService.DeleteByPrefix(CachingKeys.BLOGPOSTS_GETBYPAGING_KEY);
                 return Ok();
+            }
+
             throw new ServiceException(Reason.DeleteFailed, "删除博客日志失败。");
         }
 
@@ -179,27 +194,46 @@ namespace DaxnetBlog.WebServices.Controllers
             });
 
             if (result > 0)
+            {
+                // Removes the specific post from the cache
+                var cachingKey = new CachingKey(CachingKeys.BLOGPOSTS_POST_KEY, id);
+                this.cachingService.Delete(cachingKey);
+
                 return Ok();
+            }
             throw new ServiceException(Reason.UpdateFailed, "更新博客日志失败。");
         }
 
+        /// <summary>
+        /// Gets the paged result of the blog posts.
+        /// </summary>
+        /// <param name="pageSize">Size of the page.</param>
+        /// <param name="pageNumber">The page number.</param>
+        /// <returns></returns>
         [HttpGet]
         [Route("paginate/{pageSize}/{pageNumber}")]
         public async Task<IActionResult> GetByPaging(int pageSize, int pageNumber)
         {
+            var cachingKey = new CachingKey(CachingKeys.BLOGPOSTS_GETBYPAGING_KEY, pageSize, pageNumber);
+            var cachedResult = this.cachingService.Get(cachingKey);
+            if (cachedResult != null)
+            {
+                return Ok(cachedResult);
+            }
+
             var pagedModel = await this.storage.ExecuteAsync(async (connection, cancellationToken) =>
                 await blogPostStore.SelectAsync(pageNumber, pageSize, connection, new Sort<BlogPost, int> { { x=>x.DatePublished, SortOrder.Descending } },
                     expr => expr.IsDeleted == null || expr.IsDeleted.Value == false)
             );
 
-            return Ok(new
+            var result = new
             {
                 PageSize = pageSize,
                 PageNumber = pageNumber,
                 TotalRecords = pagedModel.TotalRecords,
                 TotalPages = pagedModel.TotalPages,
                 Count = pagedModel.Count,
-                Data = pagedModel.Select(x=>new
+                Data = pagedModel.Select(x => new
                 {
                     Id = x.Id,
                     AccountId = x.AccountId,
@@ -210,13 +244,24 @@ namespace DaxnetBlog.WebServices.Controllers
                     DownVote = x.DownVote.HasValue ? x.DownVote.Value : 0,
                     Visits = x.Visits.HasValue ? x.Visits.Value : 0
                 })
-            });
+            };
+
+            this.cachingService.Put(cachingKey, result);
+
+            return Ok(result);
         }
 
         [HttpGet]
         [Route("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
+            var key = new CachingKey(CachingKeys.BLOGPOSTS_POST_KEY, id);
+            var cachedObject = this.cachingService.Get(key);
+            if (cachedObject != null)
+            {
+                return Ok(cachedObject);
+            }
+
             var result = await this.storage.ExecuteAsync(async (connection, transaction, cancellationToken) =>
             {
                 var blogpost = (await blogPostStore.SelectAsync(connection, p => p.Account, 
@@ -241,14 +286,15 @@ namespace DaxnetBlog.WebServices.Controllers
                 return new Tuple<BlogPost, IEnumerable<Reply>>(blogpost, replies);
             });
 
-            return Ok(new
+            var ret = new
             {
                 Id = id,
                 Title = result.Item1.Title,
                 Content = result.Item1.Content,
                 DatePublished = result.Item1.DatePublished,
                 Visits = result.Item1.Visits,
-                Replies = result.Item2.Select(x=> new {
+                Replies = result.Item2.Select(x => new
+                {
                     x.Id,
                     x.DatePublished,
                     x.Content,
@@ -262,7 +308,11 @@ namespace DaxnetBlog.WebServices.Controllers
                     result.Item1.Account.UserName,
                     result.Item1.Account.NickName
                 }
-            });
+            };
+
+            this.cachingService.Put(key, ret);
+
+            return Ok(ret);
         }
     }
 }

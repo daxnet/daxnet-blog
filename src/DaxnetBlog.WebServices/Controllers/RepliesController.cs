@@ -8,6 +8,8 @@ using DaxnetBlog.Domain.Model;
 using System.Net;
 using System.Linq.Expressions;
 using DaxnetBlog.WebServices.Exceptions;
+using DaxnetBlog.Common.IntegrationServices;
+using DaxnetBlog.WebServices.Caching;
 
 namespace DaxnetBlog.WebServices.Controllers
 {
@@ -15,6 +17,7 @@ namespace DaxnetBlog.WebServices.Controllers
     public class RepliesController : Controller
     {
         private readonly IStorage storage;
+        private readonly ICachingService cachingService;
         private readonly IEntityStore<Account, int> accountStore;
         private readonly IEntityStore<Reply, int> replyStore;
         private readonly IEntityStore<BlogPost, int> blogPostStore;
@@ -26,11 +29,13 @@ namespace DaxnetBlog.WebServices.Controllers
         /// <param name="replyStore">The reply store.</param>
         /// <param name="accountStore">The account store.</param>
         public RepliesController(IStorage storage,
+            ICachingService cachingService,
             IEntityStore<Reply, int> replyStore,
             IEntityStore<Account, int> accountStore,
             IEntityStore<BlogPost, int> blogPostStore)
         {
             this.storage = storage;
+            this.cachingService = cachingService;
             this.replyStore = replyStore;
             this.accountStore = accountStore;
             this.blogPostStore = blogPostStore;
@@ -122,8 +127,16 @@ namespace DaxnetBlog.WebServices.Controllers
                    }
                    return 0;
                });
-            var uri = Url.Action("GetById", new { id = replyId });
-            return Created(uri, replyId);
+
+            if (replyId > 0)
+            {
+                var key = new CachingKey(CachingKeys.BLOGPOSTS_POST_KEY, blogPostId);
+                this.cachingService.Delete(key);
+
+                var uri = Url.Action("GetById", new { id = replyId });
+                return Created(uri, replyId);
+            }
+            throw new ServiceException(Reason.CreateFailed, "创建回复失败。");
         }
 
         [HttpGet]
@@ -184,6 +197,7 @@ namespace DaxnetBlog.WebServices.Controllers
                 throw new ServiceException(HttpStatusCode.MethodNotAllowed, Reason.InvalidArgument, "指定的审批操作方式不可用，请指定Approve或者Reject操作。");
             }
 
+            var blogPostId = -1;
             var affectedRows = await this.storage.ExecuteAsync(async (connection, transaction, cancellationToken) =>
             {
                 var reply = (await this.replyStore.SelectAsync(connection,
@@ -194,7 +208,7 @@ namespace DaxnetBlog.WebServices.Controllers
                 {
                     throw new ServiceException(HttpStatusCode.NotFound, Reason.EntityNotFound, $"ID为{replyId}的用户回复内容不存在。");
                 }
-
+                blogPostId = reply.BlogPostId;
                 var updateFields = new List<Expression<Func<Reply, object>>>();
                 switch (operation.ToUpper())
                 {
@@ -215,7 +229,16 @@ namespace DaxnetBlog.WebServices.Controllers
             });
 
             if (affectedRows > 0)
+            {
+                if (blogPostId >=0)
+                {
+                    var key = new CachingKey(CachingKeys.BLOGPOSTS_POST_KEY, blogPostId);
+                    this.cachingService.Delete(key);
+                }
+
                 return Ok(affectedRows);
+            }
+
             throw new ServiceException(Reason.UpdateFailed, "用户回复审批失败。");
         }
     }
