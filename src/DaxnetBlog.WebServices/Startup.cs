@@ -16,6 +16,7 @@ using Serilog;
 using DaxnetBlog.Common;
 using System.IO;
 using Microsoft.Extensions.PlatformAbstractions;
+using DaxnetBlog.WebServices.Caching;
 
 namespace DaxnetBlog.WebServices
 {
@@ -42,6 +43,7 @@ namespace DaxnetBlog.WebServices
         {
             // Add framework services.
             services.AddMvc();
+            services.AddCaching<MemoryCachingService>();
 
             services.AddSwaggerGen();
             services.ConfigureSwaggerGen(options =>
