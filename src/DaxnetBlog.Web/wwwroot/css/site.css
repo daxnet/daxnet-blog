@@ -167,6 +167,12 @@ article .replies .panel-default .panel-heading {
     color: gray;
 }
 
+/* Archive List */
+#blogPostsArchiveList li{
+    list-style-image: url("../images/text.png");
+
+}
+
 /* Set widths on the form inputs since otherwise they're 100% wide */
 input,
 select,

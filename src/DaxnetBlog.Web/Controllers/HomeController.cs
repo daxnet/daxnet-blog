@@ -35,10 +35,15 @@ namespace DaxnetBlog.Web.Controllers
             this.logger = logger;
         }
 
-        public async Task<IActionResult> Index(int page = 1)
+        public async Task<IActionResult> Index(int page = 1, int year = -1, int month = -1)
         {
             this.logger.LogInformation("home page requested.");
-            var json = await (await this.httpClient.GetAsync($"blogPosts/paginate/{pageSize}/{page}")).Content.ReadAsStringAsync();
+            var json = string.Empty;
+            if (year == -1 && month == -1)
+            {
+                json = await (await this.httpClient.GetAsync($"blogPosts/paginate/{pageSize}/{page}")).Content.ReadAsStringAsync();
+            }
+            
             dynamic model = JsonConvert.DeserializeObject(json);
             return View(model);
         }

@@ -1,5 +1,6 @@
 ﻿@using Microsoft.Extensions.Options
 @using Humanizer
+@using DaxnetBlog.Web.TagHelpers
 
 @{
     ViewData["Title"] = "首页";
@@ -40,7 +41,16 @@
         }
     </div>
     <div class="col-md-2">
-        @await Html.PartialAsync("_BulletinBoardPartial")
+        <div class="row">
+            <div class="col-md-12">
+                @await Html.PartialAsync("_BulletinBoardPartial")
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+               <blog-archive-list sc-title="博客归档" sc-style="default"></blog-archive-list> 
+            </div>
+        </div>
     </div>
 </div>
 

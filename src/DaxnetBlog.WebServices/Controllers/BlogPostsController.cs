@@ -333,8 +333,27 @@ namespace DaxnetBlog.WebServices.Controllers
                 var allDates = result.Select(post => post.DatePublished);
                 var query = from date in allDates
                             orderby date descending
-                            select date.ToString("yyyy年MM月");
-                archiveList = query.Distinct();
+                            select new { Year = date.Year, Month = date.Month };
+
+                var dict = new Dictionary<string, Tuple<int, int, int>>();
+                foreach(var item in query)
+                {
+                    var k = string.Format("{0:D4}年{1:D2}月", item.Year, item.Month);
+                    if (dict.ContainsKey(k))
+                    {
+                        dict[k] = new Tuple<int, int, int>(item.Year, item.Month, dict[k].Item3 + 1);
+                    }
+                    else
+                    {
+                        dict.Add(k, new Tuple<int, int, int>(item.Year, item.Month, 1));
+                    }
+                }
+                var lst = new List<object>();
+                foreach (var kvp in dict)
+                {
+                    lst.Add(new { Text = kvp.Key, Year = kvp.Value.Item1, Month = kvp.Value.Item2, Count = kvp.Value.Item3 });
+                }
+                archiveList = lst;
                 this.cachingService.Put(key, archiveList);
             }
 
