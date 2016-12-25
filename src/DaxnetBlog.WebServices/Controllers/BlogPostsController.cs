@@ -91,6 +91,8 @@ namespace DaxnetBlog.WebServices.Controllers
             if (result != 0)
             {
                 this.cachingService.DeleteByPrefix(CachingKeys.BLOGPOSTS_GETBYPAGING_KEY);
+                var archiveListCachingKey = new CachingKey(CachingKeys.BLOGPOSTS_GETARCHIVELIST_KEY);
+                this.cachingService.Delete(archiveListCachingKey);
                 return Created(Url.Action("GetById", new { id = result }), result);
             }
 
@@ -123,8 +125,10 @@ namespace DaxnetBlog.WebServices.Controllers
             if (result > 0)
             {
                 // Removes the specific post from the cache
-                var cachingKey = new CachingKey(CachingKeys.BLOGPOSTS_POST_KEY, id);
-                this.cachingService.Delete(cachingKey);
+                var blogPostCachingKey = new CachingKey(CachingKeys.BLOGPOSTS_POST_KEY, id);
+                this.cachingService.Delete(blogPostCachingKey);
+                var archiveListCachingKey = new CachingKey(CachingKeys.BLOGPOSTS_GETARCHIVELIST_KEY);
+                this.cachingService.Delete(archiveListCachingKey);
 
                 // Removes all the posts with paging information, from the cache
                 this.cachingService.DeleteByPrefix(CachingKeys.BLOGPOSTS_GETBYPAGING_KEY);
@@ -313,6 +317,28 @@ namespace DaxnetBlog.WebServices.Controllers
             this.cachingService.Put(key, ret);
 
             return Ok(ret);
+        }
+
+        [HttpGet]
+        [Route("archive/list")]
+        public async Task<IActionResult> GetArchiveList()
+        {
+            var key = new CachingKey(CachingKeys.BLOGPOSTS_GETARCHIVELIST_KEY);
+            var archiveList = this.cachingService.Get(key);
+            if (archiveList == null)
+            {
+                var result = await this.storage.ExecuteAsync(async (connection, cancellationToken) =>
+                    await this.blogPostStore.SelectAsync(connection, cancellationToken: cancellationToken));
+
+                var allDates = result.Select(post => post.DatePublished);
+                var query = from date in allDates
+                            orderby date descending
+                            select date.ToString("yyyy年MM月");
+                archiveList = query.Distinct();
+                this.cachingService.Put(key, archiveList);
+            }
+
+            return Ok(archiveList);
         }
     }
 }
