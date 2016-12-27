@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http;
-using Microsoft.Net.Http;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using DaxnetBlog.Web.Models;
-using System.Text;
 using Microsoft.Extensions.Logging;
 
 namespace DaxnetBlog.Web.Controllers
@@ -35,15 +29,10 @@ namespace DaxnetBlog.Web.Controllers
             this.logger = logger;
         }
 
-        public async Task<IActionResult> Index(int page = 1, int year = -1, int month = -1)
+        public async Task<IActionResult> Index(int page = 1)
         {
             this.logger.LogInformation("home page requested.");
-            var json = string.Empty;
-            if (year == -1 && month == -1)
-            {
-                json = await (await this.httpClient.GetAsync($"blogPosts/paginate/{pageSize}/{page}")).Content.ReadAsStringAsync();
-            }
-            
+            var json = await (await this.httpClient.GetAsync($"blogPosts/paginate/{pageSize}/{page}")).Content.ReadAsStringAsync();
             dynamic model = JsonConvert.DeserializeObject(json);
             return View(model);
         }

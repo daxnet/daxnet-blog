@@ -20,6 +20,9 @@
     <div class="col-md-10">
         @if (Model.data.Count > 0)
         {
+            <p class="archive-title">
+                @string.Format("{0}年{1}月博客归档", ViewData["Year"], ViewData["Month"])
+            </p>
             <ul class="article-list">
                 @foreach (dynamic m in Model.data)
                 {
@@ -33,14 +36,17 @@
                     </li>
                 }
             </ul>
-            <pager pager-total-pages="@totalPages"
-                   pager-current-page="@pageNumber"
-                   asp-controller="home"
-                   asp-action="index" />
-        } else
+            @if (totalPages > 1)
+            {
+                <pager pager-total-pages="@totalPages"
+                       pager-current-page="@pageNumber"
+                       asp-controller="blogposts"
+                       asp-action="archive" />
+            }
+        }
+        else
         {
-            <div class="no-content text-center">目前本站还没有任何可以显示的文章</div>
-
+            <div class="no-content text-center">没有任何可以显示的文章</div>
         }
     </div>
     <div class="col-md-2">
@@ -51,9 +57,8 @@
         </div>
         <div class="row">
             <div class="col-md-12">
-               <blog-archive-list bal-title="博客归档" bal-style="default"></blog-archive-list> 
+                <blog-archive-list bal-title="博客归档" bal-style="default"></blog-archive-list>
             </div>
         </div>
     </div>
 </div>
-

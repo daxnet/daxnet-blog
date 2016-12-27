@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
+using Microsoft.AspNetCore.Routing;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -14,20 +17,43 @@ namespace DaxnetBlog.Web.TagHelpers
     {
         private readonly HttpClient httpClient;
 
-        public BlogArchiveListTagHelper(HttpClient httpClient)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BlogArchiveListTagHelper"/> class.
+        /// </summary>
+        /// <param name="httpClient">The HTTP client.</param>
+        /// <param name="urlHelperFactory">The URL helper factory.</param>
+        public BlogArchiveListTagHelper(HttpClient httpClient,
+            IUrlHelperFactory urlHelperFactory)
         {
             this.httpClient = httpClient;
+            this.UrlHelperFactory = urlHelperFactory;
+            //this.ShowIcon = false;
+            //this.Icon = string.Empty;
         }
 
-        [HtmlAttributeName("sc-title")]
+        [HtmlAttributeNotBound]
+        [ViewContext]
+        public ViewContext ViewContext { get; set; }
+
+        private IUrlHelperFactory UrlHelperFactory { get; }
+
+        [HtmlAttributeName("bal-title")]
         public string Title { get; set; }
 
-        [HtmlAttributeName("sc-style")]
+        [HtmlAttributeName("bal-style")]
         public string Style { get; set; }
+
+        [HtmlAttributeName("bal-show-icon")]
+        public bool ShowIcon { get; set; }
+
+        [HtmlAttributeName("bal-icon")]
+        public string Icon { get; set; }
 
         public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
             dynamic items = null;
+            var urlHelper = this.UrlHelperFactory.GetUrlHelper(this.ViewContext);
+
             try
             {
                 var result = await this.httpClient.GetAsync("blogPosts/archive/list");
@@ -45,12 +71,22 @@ namespace DaxnetBlog.Web.TagHelpers
 
             var headerTagBuilder = new TagBuilder("div");
             headerTagBuilder.AddCssClass("panel-heading");
+            if (ShowIcon)
+            {
+                var iconSpan = new TagBuilder("span");
+                iconSpan.AddCssClass("glyphicon");
+                iconSpan.AddCssClass($"glyphicon-{Icon}");
+                headerTagBuilder.InnerHtml.AppendHtml(iconSpan.ToHtmlString());
+            }
+
+            headerTagBuilder.InnerHtml.AppendHtml("&nbsp;");
             headerTagBuilder.InnerHtml.Append(this.Title);
 
             var bodyContent = (await output.GetChildContentAsync()).GetContent();
             var bodyTagBuilder = new TagBuilder("div");
             bodyTagBuilder.Attributes.Add("id", "blogPostsArchiveList");
             bodyTagBuilder.AddCssClass("panel-body");
+
             //bodyTagBuilder.InnerHtml.AppendHtml(this.htmlHelper.Raw(bodyContent).ToString());
             if (items != null && items.Count > 0)
             {
@@ -59,7 +95,10 @@ namespace DaxnetBlog.Web.TagHelpers
                 {
                     var liTag = new TagBuilder("li");
                     var aTag = new TagBuilder("a");
-                    aTag.Attributes.Add("href", $"blogPosts/{item.year}/{item.month}");
+                    var routeValues = new RouteValueDictionary();
+                    routeValues.Add("year", item.year);
+                    routeValues.Add("month", item.month);
+                    aTag.Attributes.Add("href", urlHelper.Action(new UrlActionContext { Action = "archive", Controller = "blogPosts", Values = routeValues }));
                     aTag.InnerHtml.Append((string)item.text);
                     var spanTag = new TagBuilder("span");
                     spanTag.AddCssClass("badge");

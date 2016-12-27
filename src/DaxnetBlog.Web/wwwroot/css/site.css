@@ -36,6 +36,12 @@ footer {
     color: lightgray;
 }
 
+.archive-title {
+    font-family: SimHei;
+    font-size: xx-large;
+    color: gray;
+}
+
 .syntaxhighlighter table .container:before {
     display: none !important;
 }

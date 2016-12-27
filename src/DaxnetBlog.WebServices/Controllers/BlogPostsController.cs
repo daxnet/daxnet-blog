@@ -359,5 +359,48 @@ namespace DaxnetBlog.WebServices.Controllers
 
             return Ok(archiveList);
         }
+
+        [HttpGet]
+        [Route("archive/{year}/{month}/{pageSize}/{pageNumber}")]
+        public async Task<IActionResult> GetArchivedPostsForMonth(int year, int month, int pageSize, int pageNumber)
+        {
+            var startDate = new DateTime(year, month, 1).ToUniversalTime();
+            var endDate = DateTime.MinValue;
+            if (month ==12)
+            {
+                endDate = new DateTime(year, 12, 31).ToUniversalTime();
+            }
+            else
+            {
+                endDate = new DateTime(year, month + 1, 1).AddDays(-1).ToUniversalTime();
+            }
+
+            var pagedModel = await this.storage.ExecuteAsync(async (connection, cancellationToken) =>
+                await blogPostStore.SelectAsync(pageNumber, pageSize, connection, new Sort<BlogPost, int> { { x => x.DatePublished, SortOrder.Descending } },
+                    expr => (expr.IsDeleted == null || expr.IsDeleted.Value == false) && expr.DatePublished >= startDate && expr.DatePublished <= endDate)
+            );
+
+            var result = new
+            {
+                PageSize = pageSize,
+                PageNumber = pageNumber,
+                TotalRecords = pagedModel.TotalRecords,
+                TotalPages = pagedModel.TotalPages,
+                Count = pagedModel.Count,
+                Data = pagedModel.Select(x => new
+                {
+                    Id = x.Id,
+                    AccountId = x.AccountId,
+                    Title = x.Title,
+                    Content = x.Content,
+                    DatePublished = x.DatePublished,
+                    UpVote = x.UpVote.HasValue ? x.UpVote.Value : 0,
+                    DownVote = x.DownVote.HasValue ? x.DownVote.Value : 0,
+                    Visits = x.Visits.HasValue ? x.Visits.Value : 0
+                })
+            };
+
+            return Ok(result);
+        }
     }
 }

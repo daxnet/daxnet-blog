@@ -10,19 +10,25 @@ using System.Net;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using DaxnetBlog.Common;
+using Microsoft.Extensions.Options;
 
 namespace DaxnetBlog.Web.Controllers
 {
     public class BlogPostsController : Controller
     {
         private readonly HttpClient httpClient;
+        private readonly IOptions<WebsiteSettings> config;
         private readonly ILogger<BlogPostsController> logger;
+        private readonly int pageSize;
 
         public BlogPostsController(HttpClient httpClient,
+            IOptions<WebsiteSettings> config,
             ILogger<BlogPostsController> logger)
         {
             this.httpClient = httpClient;
             this.logger = logger;
+            this.config = config;
+            this.pageSize = this.config.Value.BlogPostsPageSize;
         }
 
         public async Task<IActionResult> Post(int id)
@@ -71,6 +77,17 @@ namespace DaxnetBlog.Web.Controllers
 
             var responseText = await result.Content.ReadAsStringAsync();
             return StatusCode((int)HttpStatusCode.InternalServerError, responseText);
+        }
+
+        [HttpGet]
+        [Route("blogposts/archive/{year}/{month}")]
+        public async Task<IActionResult> Archive(int year, int month, int page = 1)
+        {
+            var json = await(await this.httpClient.GetAsync($"blogPosts/archive/{year}/{month}/{pageSize}/{page}")).Content.ReadAsStringAsync();
+            dynamic model = JsonConvert.DeserializeObject(json);
+            ViewData["Year"] = year;
+            ViewData["Month"] = month;
+            return View(model);
         }
     }
 }
