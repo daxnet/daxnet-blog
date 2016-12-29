@@ -174,9 +174,12 @@ article .replies .panel-default .panel-heading {
 }
 
 /* Archive List */
-#blogPostsArchiveList li{
-    list-style-image: url("../images/text.png");
+#blogPostsArchiveList ul {
+    padding-left: 10px;
+}
 
+#blogPostsArchiveList li {
+    list-style-type: none;
 }
 
 /* Set widths on the form inputs since otherwise they're 100% wide */
