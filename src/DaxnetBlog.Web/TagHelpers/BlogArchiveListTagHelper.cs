@@ -97,7 +97,7 @@ namespace DaxnetBlog.Web.TagHelpers
                     var aTag = new TagBuilder("a");
                     var imgTag = new TagBuilder("img");
 
-                    imgTag.Attributes.Add("src", urlHelper.Content("images/text.png"));
+                    imgTag.Attributes.Add("src", urlHelper.Content("~/images/text.png"));
                     var routeValues = new RouteValueDictionary();
                     routeValues.Add("year", item.year);
                     routeValues.Add("month", item.month);
@@ -108,6 +108,7 @@ namespace DaxnetBlog.Web.TagHelpers
                     spanTag.InnerHtml.Append(((int)item.count).ToString());
 
                     liTag.InnerHtml.AppendHtml(imgTag.ToHtmlString());
+                    liTag.InnerHtml.Append(" ");
                     liTag.InnerHtml.AppendHtml(aTag.ToHtmlString());
                     liTag.InnerHtml.Append(" ");
                     liTag.InnerHtml.AppendHtml(spanTag.ToHtmlString());

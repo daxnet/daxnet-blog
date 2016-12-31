@@ -14,7 +14,7 @@
             <li>
                 <button type="submit" class="btn btn-link navbar-btn navbar-link">退出</button>
             </li>
-            <li><a href="#" style="padding-top: 14px;"><img src="~/images/rss.png" /></a></li>
+            <li><a href="@Url.Action("Rss", "BlogPosts")" title="RSS" style="padding-top: 14px;"><img src="~/images/rss.png" /></a></li>
         </ul>
     </form>
 }
@@ -24,6 +24,6 @@ else
         
         <li><a asp-area="" asp-controller="Account" asp-action="PreRegister">注册</a></li>
         <li><a asp-area="" asp-controller="Account" asp-action="Login">登录</a></li>
-        <li><a href="#" style="padding-top: 14px;"><img src="~/images/rss.png"/></a></li>
+        <li><a href="@Url.Action("Rss", "BlogPosts")" title="RSS" style="padding-top: 14px;"><img src="~/images/rss.png"/></a></li>
     </ul>
 }

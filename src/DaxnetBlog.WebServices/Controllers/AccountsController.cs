@@ -74,7 +74,7 @@ namespace DaxnetBlog.WebServices.Controllers
         /// <summary>
         /// Creates an account by using the given model.
         /// </summary>
-        /// <param name="accountObject"></param>
+        /// <param name="accountObject">The data object which contains the account information.</param>
         /// <returns></returns>
         [HttpPost]
         [Route("create")]
