@@ -109,6 +109,14 @@ ul.article-list div.auth {
     padding-bottom: 12px;
 }*/
 
+article {
+    padding: 8px;
+    border-color: rgb(245,245,245);
+    border-width: 1px;
+    border-style: solid;
+    background-color: rgb(251,251,251);
+}
+
 article p {
     font-family: "Microsoft YaHei", "微软雅黑", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     font-size: 16px !important;
