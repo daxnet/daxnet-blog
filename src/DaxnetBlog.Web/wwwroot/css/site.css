@@ -2,6 +2,7 @@
     padding-top: 50px;
     padding-bottom: 20px;
     font-family: 'Microsoft YaHei', 'Microsoft YaHei UI', 'Segoe UI';
+    counter-reset: h1;
 }
 
 footer {
@@ -102,26 +103,20 @@ ul.article-list div.auth {
     padding-top: 15px;
 }
 
-/*article header {
-    font-family: "Microsoft YaHei", "微软雅黑", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    font-size: 26px !important;
-    text-align: center;
-    padding-bottom: 12px;
-}*/
-
 article {
     padding: 8px;
     border-color: rgb(245,245,245);
     border-width: 1px;
     border-style: solid;
     background-color: rgb(251,251,251);
+    border-radius: 8px;
 }
 
 article p {
     font-family: "Microsoft YaHei", "微软雅黑", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     font-size: 16px !important;
     text-indent: 32px;
-    padding-bottom: 2pt;
+    padding-bottom: 3pt;
 }
 
 article a {
@@ -133,16 +128,16 @@ article h1 {
     font-size: 28px !important;
     color: #365F91;
     font-family: "Microsoft YaHei", "微软雅黑", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    /*font-weight: bold;*/
     padding-top: 6pt;
+    counter-reset: h2;
 }
 
 article h2 {
     font-size: 24px !important;
     color: #4F81BD;
     font-family: "Microsoft YaHei", "微软雅黑", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    /*font-weight: bold;*/
     padding-top: 6pt;
+    counter-reset: h3;
 }
 
 article h3 {
@@ -151,6 +146,7 @@ article h3 {
     font-family: "Microsoft YaHei", "微软雅黑", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     font-weight: bold;
     padding-top: 6pt;
+    counter-reset: h4;
 }
 
 article h4 {
@@ -160,7 +156,17 @@ article h4 {
     padding-top: 6pt;
     font-weight: bold;
     font-style: italic;
+    counter-reset: h5;
 }
+
+article h1:before {counter-increment: h1; content: counter(h1, cjk-ideographic) "、"}
+article h2:before {counter-increment: h2; content: counter(h1) "." counter(h2) ". "}
+article h3:before {counter-increment: h3; content: counter(h1) "." counter(h2) "." counter(h3) ". "}
+article h4:before {counter-increment: h4; content: counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) ". "}
+article h5:before {counter-increment: h5; content: counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) ". "}
+article h6:before {counter-increment: h6; content: counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) "." counter(h6) ". "}
+
+article h1.nocount:before, article h2.nocount:before, article h3.nocount:before, article h4.nocount:before, article h5.nocount:before, article h6.nocount:before { content: ""; counter-increment: none } 
 
 article .replies .replies-title {
     font-size: 24px;
